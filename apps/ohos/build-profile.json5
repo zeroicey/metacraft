@@ -1,0 +1,56 @@
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\zeroicey\\.ohos\\config\\default_ohos_8fxUIwBgPfZtWCQXUIkNLHviOeIrqMGAJQEI1kcl5pA=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001B2CAAB14A6BCCCC25BF236D24E4B950E0A06CD5EBF995E5F58EFAD14F04BEF5379D1A7F90C41B8A",
+          "profile": "C:\\Users\\zeroicey\\.ohos\\config\\default_ohos_8fxUIwBgPfZtWCQXUIkNLHviOeIrqMGAJQEI1kcl5pA=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\zeroicey\\.ohos\\config\\default_ohos_8fxUIwBgPfZtWCQXUIkNLHviOeIrqMGAJQEI1kcl5pA=.p12",
+          "storePassword": "0000001B956E162C468EB40835EB48583E7B61F8830B0510B4BABFCBA6DD8DC52DB4EEF7F53AC6644B7A3C"
+        }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default",
+        "targetSdkVersion": "6.0.1(21)",
+        "compatibleSdkVersion": "6.0.1(21)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
+        }
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug",
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
+}
