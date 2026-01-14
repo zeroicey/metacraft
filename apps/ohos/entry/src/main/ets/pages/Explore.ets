@@ -1,0 +1,14 @@
+@Entry
+@Component
+struct ExplorePage {
+  build() {
+    Column() {
+      Text('ExplorePage 占位页')
+        .fontSize(20)
+        .fontWeight(FontWeight.Bold)
+        .margin(16)
+    }
+    .width('100%')
+    .height('100%')
+  }
+}

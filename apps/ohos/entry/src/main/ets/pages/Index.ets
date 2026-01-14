@@ -1,74 +1,140 @@
+import { Sidebar } from '../components/Sidebar';
+import { LandingStage } from '../components/LandingStage';
+import { InceptionStage } from '../components/InceptionStage';
+import { BlueprintStage } from '../components/BlueprintStage';
+import { WorkspaceStage } from '../components/WorkspaceStage';
+
+enum CreationStage {
+  Landing,
+  Inception,
+  Blueprint,
+  Workspace
+}
+
 @Entry
-@Component
+@ComponentV2
 struct Index {
-  @State message: string = 'Hello World';
+  topRectHeight: number = 0;
+  bottomRectHeight: number = 0;
+  @Local creationStage: CreationStage = CreationStage.Landing;
+  @Local appName: string = '';
+  @Local appDesc: string = '';
+  @Local planText: string = '';
+  @Local showSideBar: boolean = false;
+
+  aboutToAppear(): void {
+    this.topRectHeight = AppStorage.get<number>('topRectHeight') ?? 0;
+    this.bottomRectHeight = AppStorage.get<number>('bottomRectHeight') ?? 0;
+  }
+
+  @Builder
+  buildTopBar() {
+    Row() {
+      Button() {
+        SymbolGlyph($r('sys.symbol.open_sidebar'))
+          .fontWeight(FontWeight.Normal)
+          .fontSize(22)
+          .fontColor([$r('sys.color.ohos_id_color_titlebar_icon')])
+          .hitTestBehavior(HitTestMode.None)
+      }
+      .backgroundColor(Color.Transparent)
+      .height(40)
+      .width(40)
+      .onClick(() => {
+        this.showSideBar = true;
+      })
+
+      Text('元创')
+        .fontSize(18)
+        .fontWeight(FontWeight.Medium)
+        .margin({ left: 8 })
+
+      Blank().layoutWeight(1)
+    }
+    .width('100%')
+    .padding({
+      top: this.getUIContext().px2vp(this.topRectHeight),
+    })}
+
+  @Builder
+  buildContent() {
+    Column() {
+      this.buildTopBar();
+
+      if (this.creationStage === CreationStage.Landing) {
+        LandingStage({
+          onStart: () => {
+            this.creationStage = CreationStage.Inception;
+          },
+          onSelectInspiration: (name: string, desc: string) => {
+            this.appName = name;
+            this.appDesc = desc;
+            this.creationStage = CreationStage.Inception;
+          }
+        })
+      } else if (this.creationStage === CreationStage.Inception) {
+        InceptionStage({
+          appName: this.appName,
+          appDesc: this.appDesc,
+          onAppNameChange: (value: string) => {
+            this.appName = value;
+          },
+          onAppDescChange: (value: string) => {
+            this.appDesc = value;
+          },
+          onNext: () => {
+            this.planText = this.buildMockPlan();
+            this.creationStage = CreationStage.Blueprint;
+          }
+        })
+      } else if (this.creationStage === CreationStage.Blueprint) {
+        BlueprintStage({
+          appName: this.appName,
+          planText: this.planText,
+          onPlanTextChange: (value: string) => {
+            this.planText = value;
+          },
+          onBack: () => {
+            this.creationStage = CreationStage.Inception;
+          },
+          onBuild: () => {
+            this.creationStage = CreationStage.Workspace;
+          }
+        })
+      } else if (this.creationStage === CreationStage.Workspace) {
+        WorkspaceStage({
+          appName: this.appName,
+          onRunPreview: () => {
+            this.getUIContext().getRouter().pushUrl({ url: 'pages/Preview' });
+          }
+        })
+      }
+    }
+    .width('100%')
+    .height('100%')
+    .padding(16)
+  }
 
   build() {
-    Column() {
-      // 顶部导航栏
-      Row() {
-        Button('...')
-          .width(40)
-          .height(40)
-          .backgroundColor(Color.Transparent)
-          .fontSize(24)
-          .fontColor('#333333')
-
-        Text('元创')
-          .fontSize(24)
-          .fontWeight(FontWeight.Bold)
-          .layoutWeight(1)
-          .textAlign(TextAlign.Center)
-
-        Button()
-          .width(40)
-          .height(40)
-          .backgroundColor('#87CEEB')
-      }
-      .height(60)
-      .width('100%')
-      .justifyContent(FlexAlign.SpaceBetween)
-      .padding({ left: 12, right: 12 })
-
-      // 中间内容区域
-      Row() {
-        Text(this.message)
-          .id('HelloWorld')
-          .fontSize($r('app.float.page_text_font_size'))
-          .fontWeight(FontWeight.Bold)
-          .onClick(() => {
-            this.message = 'Welcome';
-          })
-      }
-      .flexGrow(1)
-      .width('100%')
-      .justifyContent(FlexAlign.Center)
-
-      // 浮动输入框
-      Row() {
-        TextInput({ placeholder: '请输入内容' })
-          .layoutWeight(1)
-          .height(48)
-          .backgroundColor(Color.White)
-          .border({ width: 1, color: '#e0e0e0' })
-          .borderRadius(24)
-          .padding({ left: 16, right: 16 })
-
-        Button('发送')
-          .width(70)
-          .height(48)
-          .backgroundColor('#87CEEB')
-          .borderRadius(24)
-          .fontSize(16)
-          .fontColor(Color.White)
-          .margin({ left: 8 })
-      }
-      .width('90%')
-      .position({ x: '5%', y: '90%' })
-      .zIndex(999)
+    Stack() {
+      Sidebar({
+        isShowSidebar: this.showSideBar,
+        topRectHeight: this.getUIContext().px2vp(this.topRectHeight),
+        onSideBarChange: (isShow: boolean) => {
+          this.showSideBar = isShow;
+        },
+        contentBuilder: () => {
+          this.buildContent();
+        }
+      })
     }
-    .height('100%')
     .width('100%')
-    .backgroundColor('#f5f5f5')
+    .height('100%')
+  }
+
+  buildMockPlan(): string {
+    const name = this.appName || '我的应用';
+    const desc = this.appDesc || '这是一个由 MetaCraft 生成的应用。';
+    return `1. 首页：展示 ${name} 的核心功能和快速入口。\n2. 功能模块：根据描述「${desc}」拆解为若干子功能。\n3. UI 风格：扁平化设计，主色调为蓝色，可在生成后继续微调。`;
   }
 }

@@ -7,11 +7,11 @@
         "material": {
           "certpath": "C:\\Users\\zeroicey\\.ohos\\config\\default_ohos_8fxUIwBgPfZtWCQXUIkNLHviOeIrqMGAJQEI1kcl5pA=.cer",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001B2CAAB14A6BCCCC25BF236D24E4B950E0A06CD5EBF995E5F58EFAD14F04BEF5379D1A7F90C41B8A",
+          "keyPassword": "0000001AAA0C2B9CE8CE8B63A3B93EAB54A9C5AA7F57D33FA5C8EF2CE06D4C9F582E0E90377D80A6F894",
           "profile": "C:\\Users\\zeroicey\\.ohos\\config\\default_ohos_8fxUIwBgPfZtWCQXUIkNLHviOeIrqMGAJQEI1kcl5pA=.p7b",
           "signAlg": "SHA256withECDSA",
           "storeFile": "C:\\Users\\zeroicey\\.ohos\\config\\default_ohos_8fxUIwBgPfZtWCQXUIkNLHviOeIrqMGAJQEI1kcl5pA=.p12",
-          "storePassword": "0000001B956E162C468EB40835EB48583E7B61F8830B0510B4BABFCBA6DD8DC52DB4EEF7F53AC6644B7A3C"
+          "storePassword": "0000001A17150E55BFFCFC5D9CFAF0E737BF4EBD32A0C08B7484C66DAB29BFE585A47C13316761DB7CD6"
         }
       }
     ],
