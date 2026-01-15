@@ -198,6 +198,12 @@ export struct Sidebar {
           }
         }
         .layoutWeight(1)
+        .onClick(() => {
+          this.onSideBarChange(false);
+          setTimeout(() => {
+            this.getUIContext().getRouter().pushUrl({ url: 'pages/Profile' });
+          }, 200);
+        })
 
         Button() {
           SymbolGlyph($r('sys.symbol.gearshape'))
@@ -208,6 +214,12 @@ export struct Sidebar {
         .backgroundColor(Color.Transparent)
         .height(32)
         .width(32)
+        .onClick(() => {
+          this.onSideBarChange(false);
+          setTimeout(() => {
+            this.getUIContext().getRouter().pushUrl({ url: 'pages/Settings' });
+          }, 200);
+        })
       }
       .padding({ left: 16, right: 16, bottom: 24 })
     }
@@ -243,6 +255,23 @@ export struct Sidebar {
     .padding({ top: 8, bottom: 8 })
     .onClick(() => {
       this.onSideBarChange(false);
+      
+      // 根据标签跳转到对应页面
+      let targetUrl = '';
+      if (label === '我的元应用') {
+        targetUrl = 'pages/MyApps';
+      } else if (label === '我的收藏') {
+        targetUrl = 'pages/MyFavorites';
+      } else if (label === '元数据中心') {
+        targetUrl = 'pages/DataCenter';
+      }
+      
+      if (targetUrl) {
+        // 延迟跳转，确保侧边栏动画完成
+        setTimeout(() => {
+          this.getUIContext().getRouter().pushUrl({ url: targetUrl });
+        }, 200);
+      }
     })
   }
 

@@ -1,6 +1,6 @@
 @Entry
 @ComponentV2
-struct SettingsPage {
+struct DataCenter {
   topRectHeight: number = 0;
 
   aboutToAppear(): void {
@@ -24,7 +24,7 @@ struct SettingsPage {
           this.getUIContext().getRouter().back();
         })
 
-        Text('设置')
+        Text('元数据中心')
           .fontSize(18)
           .fontWeight(FontWeight.Medium)
           .margin({ left: 8 })
@@ -41,17 +41,12 @@ struct SettingsPage {
 
       // 占位内容
       Column() {
-        SymbolGlyph($r('sys.symbol.gearshape'))
-          .fontSize(60)
-          .fontColor(['#666666'])
-          .margin({ bottom: 16 })
-
-        Text('设置')
+        Text('元数据中心')
           .fontSize(24)
           .fontWeight(FontWeight.Bold)
-          .margin({ bottom: 8 })
+          .margin({ bottom: 16 })
 
-        Text('这里将展示应用设置选项')
+        Text('这里将展示应用数据、统计和分析')
           .fontSize(14)
           .fontColor('#888888')
       }

@@ -44,16 +44,31 @@ struct Index {
         this.showSideBar = true;
       })
 
+      Blank().layoutWeight(1)
+
       Text('元创')
         .fontSize(18)
         .fontWeight(FontWeight.Medium)
-        .margin({ left: 8 })
+        .fontStyle(FontStyle.Italic)
 
       Blank().layoutWeight(1)
+
+      Button() {
+        SymbolGlyph($r('sys.symbol.plus_circle'))
+          .fontWeight(FontWeight.Normal)
+          .fontSize(22)
+          .fontColor([$r('sys.color.ohos_id_color_titlebar_icon')])
+      }
+      .backgroundColor(Color.Transparent)
+      .height(40)
+      .width(40)
     }
     .width('100%')
     .padding({
       top: this.getUIContext().px2vp(this.topRectHeight),
+      left: 16,
+      right: 16,
+      bottom: 8
     })}
 
   @Builder
@@ -61,58 +76,66 @@ struct Index {
     Column() {
       this.buildTopBar();
 
-      if (this.creationStage === CreationStage.Landing) {
-        LandingStage({
-          onStart: () => {
-            this.creationStage = CreationStage.Inception;
-          },
-          onSelectInspiration: (name: string, desc: string) => {
-            this.appName = name;
-            this.appDesc = desc;
-            this.creationStage = CreationStage.Inception;
+      // 可滚动的内容区域
+      Scroll() {
+        Column() {
+          if (this.creationStage === CreationStage.Landing) {
+            LandingStage({
+              onStart: () => {
+                this.creationStage = CreationStage.Inception;
+              },
+              onSelectInspiration: (name: string, desc: string) => {
+                this.appName = name;
+                this.appDesc = desc;
+                this.creationStage = CreationStage.Inception;
+              }
+            })
+          } else if (this.creationStage === CreationStage.Inception) {
+            InceptionStage({
+              appName: this.appName,
+              appDesc: this.appDesc,
+              onAppNameChange: (value: string) => {
+                this.appName = value;
+              },
+              onAppDescChange: (value: string) => {
+                this.appDesc = value;
+              },
+              onNext: () => {
+                this.planText = this.buildMockPlan();
+                this.creationStage = CreationStage.Blueprint;
+              }
+            })
+          } else if (this.creationStage === CreationStage.Blueprint) {
+            BlueprintStage({
+              appName: this.appName,
+              planText: this.planText,
+              onPlanTextChange: (value: string) => {
+                this.planText = value;
+              },
+              onBack: () => {
+                this.creationStage = CreationStage.Inception;
+              },
+              onBuild: () => {
+                this.creationStage = CreationStage.Workspace;
+              }
+            })
+          } else if (this.creationStage === CreationStage.Workspace) {
+            WorkspaceStage({
+              appName: this.appName,
+              onRunPreview: () => {
+                this.getUIContext().getRouter().pushUrl({ url: 'pages/Preview' });
+              }
+            })
           }
-        })
-      } else if (this.creationStage === CreationStage.Inception) {
-        InceptionStage({
-          appName: this.appName,
-          appDesc: this.appDesc,
-          onAppNameChange: (value: string) => {
-            this.appName = value;
-          },
-          onAppDescChange: (value: string) => {
-            this.appDesc = value;
-          },
-          onNext: () => {
-            this.planText = this.buildMockPlan();
-            this.creationStage = CreationStage.Blueprint;
-          }
-        })
-      } else if (this.creationStage === CreationStage.Blueprint) {
-        BlueprintStage({
-          appName: this.appName,
-          planText: this.planText,
-          onPlanTextChange: (value: string) => {
-            this.planText = value;
-          },
-          onBack: () => {
-            this.creationStage = CreationStage.Inception;
-          },
-          onBuild: () => {
-            this.creationStage = CreationStage.Workspace;
-          }
-        })
-      } else if (this.creationStage === CreationStage.Workspace) {
-        WorkspaceStage({
-          appName: this.appName,
-          onRunPreview: () => {
-            this.getUIContext().getRouter().pushUrl({ url: 'pages/Preview' });
-          }
-        })
+        }
+        .width('100%')
+        .padding({ left: 16, right: 16, bottom: 16 })
       }
+      .layoutWeight(1)
+      .edgeEffect(EdgeEffect.Spring)
     }
     .width('100%')
     .height('100%')
-    .padding(16)
   }
 
   build() {
