@@ -1,4 +1,4 @@
-package cc.serenique.api.security;
+package com.metacraft.api.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

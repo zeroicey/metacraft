@@ -1,10 +1,11 @@
-package cc.serenique.api.modules.user.controller;
+package com.metacraft.api.modules.user.controller;
 
-import cc.serenique.api.modules.user.dto.UserUpdateDTO;
-import cc.serenique.api.modules.user.service.UserService;
-import cc.serenique.api.modules.user.vo.UserVO;
-import cc.serenique.api.response.ApiResponse;
-import cc.serenique.api.response.Response;
+
+import com.metacraft.api.modules.user.dto.UserUpdateDTO;
+import com.metacraft.api.modules.user.service.UserService;
+import com.metacraft.api.modules.user.vo.UserVO;
+import com.metacraft.api.response.ApiResponse;
+import com.metacraft.api.response.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

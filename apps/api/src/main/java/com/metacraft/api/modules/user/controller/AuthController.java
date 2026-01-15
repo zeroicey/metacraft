@@ -1,16 +1,20 @@
-package cc.serenique.api.modules.user.controller;
+package com.metacraft.api.modules.user.controller;
 
-import cc.serenique.api.modules.user.dto.UserLoginDTO;
-import cc.serenique.api.modules.user.dto.UserRegisterDTO;
-import cc.serenique.api.modules.user.service.UserService;
-import cc.serenique.api.modules.user.vo.AuthTokenVO;
-import cc.serenique.api.response.ApiResponse;
-import cc.serenique.api.response.Response;
+
+import com.metacraft.api.modules.user.dto.UserLoginDTO;
+import com.metacraft.api.modules.user.dto.UserRegisterDTO;
+import com.metacraft.api.modules.user.service.UserService;
+import com.metacraft.api.modules.user.vo.AuthTokenVO;
+import com.metacraft.api.response.ApiResponse;
+import com.metacraft.api.response.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
@@ -24,7 +28,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    @Operation(summary = "用户注册", description = "创建唯一用户账号（仅支持单用户）")
+    @Operation(summary = "用户注册", description = "创建新用户账号")
     public ResponseEntity<ApiResponse<AuthTokenVO>> register(@Valid @RequestBody UserRegisterDTO dto) {
         return Response.success("User registered successfully")
                 .data(userService.register(dto))

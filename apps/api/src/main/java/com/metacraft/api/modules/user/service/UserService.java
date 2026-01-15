@@ -1,14 +1,14 @@
-package cc.serenique.api.modules.user.service;
+package com.metacraft.api.modules.user.service;
 
-import cc.serenique.api.modules.user.converter.UserConverter;
-import cc.serenique.api.modules.user.dto.UserLoginDTO;
-import cc.serenique.api.modules.user.dto.UserRegisterDTO;
-import cc.serenique.api.modules.user.dto.UserUpdateDTO;
-import cc.serenique.api.modules.user.entity.User;
-import cc.serenique.api.modules.user.repository.UserRepository;
-import cc.serenique.api.modules.user.vo.AuthTokenVO;
-import cc.serenique.api.modules.user.vo.UserVO;
-import cc.serenique.api.security.JwtTokenProvider;
+import com.metacraft.api.modules.user.converter.UserConverter;
+import com.metacraft.api.modules.user.dto.UserLoginDTO;
+import com.metacraft.api.modules.user.dto.UserRegisterDTO;
+import com.metacraft.api.modules.user.dto.UserUpdateDTO;
+import com.metacraft.api.modules.user.entity.User;
+import com.metacraft.api.modules.user.repository.UserRepository;
+import com.metacraft.api.modules.user.vo.AuthTokenVO;
+import com.metacraft.api.modules.user.vo.UserVO;
+import com.metacraft.api.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,15 +36,10 @@ public class UserService {
             throw new RuntimeException("用户已存在");
         }
 
-        if (userRepository.count() > 0) {
-            throw new RuntimeException("系统仅支持单用户，已存在用户");
-        }
-
         User user = new User();
         user.setEmail(dto.getEmail());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setName(dto.getName());
-        user.setBirthday(dto.getBirthday());
         user.setAvatarBase64(dto.getAvatarBase64() != null ? dto.getAvatarBase64() : "");
         user.setBio(dto.getBio() != null ? dto.getBio() : "");
 
@@ -86,10 +81,6 @@ public class UserService {
 
         if (dto.getName() != null) {
             user.setName(dto.getName());
-        }
-
-        if (dto.getBirthday() != null) {
-            user.setBirthday(dto.getBirthday());
         }
 
         if (dto.getAvatarBase64() != null) {

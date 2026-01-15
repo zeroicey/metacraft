@@ -1,4 +1,4 @@
-package cc.serenique.api.modules.user.vo;
+package com.metacraft.api.modules.user.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

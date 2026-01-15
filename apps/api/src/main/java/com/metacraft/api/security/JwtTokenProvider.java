@@ -1,4 +1,4 @@
-package cc.serenique.api.security;
+package com.metacraft.api.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;

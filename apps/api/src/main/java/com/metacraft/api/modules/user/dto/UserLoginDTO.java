@@ -1,4 +1,4 @@
-package cc.serenique.api.modules.user.dto;
+package com.metacraft.api.modules.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

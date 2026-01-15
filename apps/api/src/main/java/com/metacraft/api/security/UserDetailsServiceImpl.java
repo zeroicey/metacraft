@@ -1,7 +1,7 @@
-package cc.serenique.api.security;
+package com.metacraft.api.security;
 
-import cc.serenique.api.modules.user.entity.User;
-import cc.serenique.api.modules.user.repository.UserRepository;
+import com.metacraft.api.modules.user.entity.User;
+import com.metacraft.api.modules.user.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

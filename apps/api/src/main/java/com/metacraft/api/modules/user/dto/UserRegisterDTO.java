@@ -1,4 +1,4 @@
-package cc.serenique.api.modules.user.dto;
+package com.metacraft.api.modules.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -6,8 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -22,9 +20,6 @@ public class UserRegisterDTO {
 
     @NotBlank(message = "姓名不能为空")
     private String name;
-
-    @NotNull(message = "生日不能为空")
-    private LocalDate birthday;
 
     private String avatarBase64;
 

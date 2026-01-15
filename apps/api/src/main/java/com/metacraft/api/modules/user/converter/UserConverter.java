@@ -1,7 +1,8 @@
-package cc.serenique.api.modules.user.converter;
+package com.metacraft.api.modules.user.converter;
 
-import cc.serenique.api.modules.user.entity.User;
-import cc.serenique.api.modules.user.vo.UserVO;
+
+import com.metacraft.api.modules.user.entity.User;
+import com.metacraft.api.modules.user.vo.UserVO;
 
 public final class UserConverter {
     private UserConverter() {}
@@ -11,7 +12,6 @@ public final class UserConverter {
         vo.setId(user.getId());
         vo.setEmail(user.getEmail());
         vo.setName(user.getName());
-        vo.setBirthday(user.getBirthday());
         vo.setAvatarBase64(user.getAvatarBase64());
         vo.setBio(user.getBio());
         vo.setCreatedAt(user.getCreatedAt());

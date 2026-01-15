@@ -1,4 +1,4 @@
-package cc.serenique.api.modules.user.entity;
+package com.metacraft.api.modules.user.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -6,7 +6,6 @@ import lombok.Setter;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 @Getter
@@ -15,8 +14,9 @@ import java.time.OffsetDateTime;
 @Table(name = "users")
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
-    private Short id = 1;
+    private Long id;
 
     @Column(nullable = false, unique = true, columnDefinition = "TEXT")
     private String email;
@@ -26,9 +26,6 @@ public class User {
 
     @Column(name = "password_hash", nullable = false, columnDefinition = "TEXT")
     private String passwordHash;
-
-    @Column(nullable = false)
-    private LocalDate birthday;
 
     @Column(name = "avatar_base64", nullable = false, columnDefinition = "TEXT")
     private String avatarBase64;

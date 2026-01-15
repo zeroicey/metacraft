@@ -1,11 +1,8 @@
-package cc.serenique.api.modules.user.dto;
+package com.metacraft.api.modules.user.dto;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Past;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -14,9 +11,6 @@ public class UserUpdateDTO {
     private String email;
 
     private String name;
-
-    @Past(message = "birthday must be in the past")
-    private LocalDate birthday;
 
     private String avatarBase64;
 
