@@ -48,7 +48,7 @@ public class OpenApiConfig {
     public GroupedOpenApi authApi() {
         return GroupedOpenApi.builder()
                 .group("auth")
-                .pathsToMatch("/auth/**")
+                .pathsToMatch("/api/auth/**")
                 .build();
     }
 
@@ -56,7 +56,7 @@ public class OpenApiConfig {
     public GroupedOpenApi userApi() {
         return GroupedOpenApi.builder()
                 .group("user")
-                .pathsToMatch("/user/**")
+                .pathsToMatch("/api/user/**")
                 .build();
     }
 
@@ -64,7 +64,7 @@ public class OpenApiConfig {
     public GroupedOpenApi aiApi() {
         return GroupedOpenApi.builder()
                 .group("ai")
-                .pathsToMatch("/ai/**")
+                .pathsToMatch("/api/ai/**")
                 .build();
     }
 
