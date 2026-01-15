@@ -62,7 +62,7 @@ export struct LandingStage {
           .width('100%')
           .textAlign(TextAlign.Start)
       }
-      .width('100%')
+      .width('90%')
       .alignItems(HorizontalAlign.Start)
       
       // 灵感胶囊 - 流式错落布局

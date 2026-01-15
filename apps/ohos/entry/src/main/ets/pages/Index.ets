@@ -54,7 +54,7 @@ struct Index {
       Blank().layoutWeight(1)
 
       Button() {
-        SymbolGlyph($r('sys.symbol.plus_circle'))
+        SymbolGlyph($r('sys.symbol.dot_grid_1x2'))
           .fontWeight(FontWeight.Normal)
           .fontSize(22)
           .fontColor([$r('sys.color.ohos_id_color_titlebar_icon')])
