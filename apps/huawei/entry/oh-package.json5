@@ -5,6 +5,9 @@
   "main": "",
   "author": "",
   "license": "",
-  "dependencies": {}
+  "dependencies": {
+    "collect_personal_info": "file:../ohos_agcit/agcit_huawei_common_collect_personal_info/collect_personal_info",
+    "app_setting": "file:../ohos_agcit/agcit_huawei_common_app_setting/app_setting"
+  }
 }
 

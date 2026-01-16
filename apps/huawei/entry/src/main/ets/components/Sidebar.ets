@@ -217,7 +217,7 @@ export struct Sidebar {
         .onClick(() => {
           this.onSideBarChange(false);
           setTimeout(() => {
-            this.getUIContext().getRouter().pushUrl({ url: 'pages/Settings' });
+            this.getUIContext().getRouter().pushUrl({ url: 'pages/Setting' });
           }, 200);
         })
       }

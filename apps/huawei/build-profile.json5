@@ -59,6 +59,10 @@
     {
       "name": "collect_personal_info",
       "srcPath": "./ohos_agcit/agcit_huawei_common_collect_personal_info/collect_personal_info"
+    },
+    {
+      "name": "app_setting",
+      "srcPath": "./ohos_agcit/agcit_huawei_common_app_setting/app_setting"
     }
   ]
 }
