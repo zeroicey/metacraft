@@ -1,5 +1,6 @@
 /node_modules
 /oh_modules
+/ohos_agcit
 /local.properties
 /.idea
 **/build
