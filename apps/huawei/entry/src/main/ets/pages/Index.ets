@@ -3,8 +3,7 @@ import { LandingStage } from '../components/LandingStage';
 import { InceptionStage } from '../components/InceptionStage';
 import { BlueprintStage } from '../components/BlueprintStage';
 import { WorkspaceStage } from '../components/WorkspaceStage';
-import { LoginManager } from '../components/LoginManager';
-import { LoginChannelType } from 'aggregated_login';
+import { BottomSheetMenu } from '../components/BottomSheetMenu';
 
 enum CreationStage {
   Landing,
@@ -23,12 +22,6 @@ struct Index {
   @Local appDesc: string = '';
   @Local planText: string = '';
   @Local showSideBar: boolean = false;
-
-  // 登录成功回调
-  handleLoginSuccess(loginType: LoginChannelType) {
-    console.info('登录成功,登录类型:', loginType);
-    // 这里可以处理登录后的业务逻辑,比如获取用户信息、跳转页面等
-  }
 
   aboutToAppear(): void {
     this.topRectHeight = AppStorage.get<number>('topRectHeight') ?? 0;
@@ -61,9 +54,9 @@ struct Index {
 
       Blank().layoutWeight(1)
 
-      LoginManager({
-        onLoginSuccess: (loginType: LoginChannelType) => {
-          this.handleLoginSuccess(loginType);
+      BottomSheetMenu({
+        onMenuItemClick: (menuId: string) => {
+          this.handleMenuClick(menuId);
         }
       })
     }
@@ -163,5 +156,21 @@ struct Index {
     const name = this.appName || '我的应用';
     const desc = this.appDesc || '这是一个由 MetaCraft 生成的应用。';
     return `1. 首页:展示 ${name} 的核心功能和快速入口。\n2. 功能模块:根据描述「${desc}」拆解为若干子功能。\n3. UI 风格:扁平化设计,主色调为蓝色,可在生成后继续微调。`;
+  }
+
+  // 菜单项点击处理
+  handleMenuClick(menuId: string) {
+    console.info('点击了菜单项:', menuId);
+    switch (menuId) {
+      case 'profile':
+        // 跳转到个人中心
+        break;
+      case 'settings':
+        // 跳转到设置页面
+        break;
+      case 'about':
+        // 显示关于信息
+        break;
+    }
   }
 }

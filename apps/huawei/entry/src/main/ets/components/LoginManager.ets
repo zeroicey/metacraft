@@ -15,6 +15,36 @@ import { BusinessError } from '@kit.BasicServicesKit';
 /**
  * 登录管理器组件
  * 提供半模态登录功能,仅支持华为账号一键登录
+ * 
+ * @使用示例:
+ * ```typescript
+ * import { LoginManager } from '../components/LoginManager';
+ * import { LoginChannelType } from 'aggregated_login';
+ * 
+ * // 在你的页面中使用:
+ * LoginManager({
+ *   onLoginSuccess: (loginType: LoginChannelType) => {
+ *     console.info('登录成功,登录类型:', loginType);
+ *     // 这里处理登录后的业务逻辑
+ *     // 比如:
+ *     // 1. 调用后端接口验证 unionID
+ *     // 2. 获取用户信息
+ *     // 3. 跳转到主页
+ *   }
+ * })
+ * ```
+ * 
+ * @登录流程:
+ * 1. 用户点击登录按钮
+ * 2. 弹出华为账号一键登录半模态
+ * 3. 用户选择华为账号并授权
+ * 4. 登录成功后回调 onLoginSuccess,传入 LoginChannelType.HUAWEI
+ * 5. 在回调中可以获取 unionID 和 authorizationCode(查看控制台日志)
+ * 
+ * @配置需求:
+ * 1. 在 module.json5 中配置有效的 client_id
+ * 2. 配置应用签名指纹
+ * 3. 在华为开发者联盟申请账号服务权限
  */
 @ComponentV2
 export struct LoginManager {
