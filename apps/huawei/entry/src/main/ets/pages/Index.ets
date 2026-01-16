@@ -1,15 +1,10 @@
 import { Sidebar } from '../components/Sidebar';
-import { LandingStage } from '../components/LandingStage';
-import { InceptionStage } from '../components/InceptionStage';
-import { BlueprintStage } from '../components/BlueprintStage';
-import { WorkspaceStage } from '../components/WorkspaceStage';
 import { BottomSheetMenu } from '../components/BottomSheetMenu';
 
-enum CreationStage {
-  Landing,
-  Inception,
-  Blueprint,
-  Workspace
+interface Message {
+  id: number;
+  text: string;
+  isUser: boolean;
 }
 
 @Entry
@@ -17,10 +12,15 @@ enum CreationStage {
 struct Index {
   topRectHeight: number = 0;
   bottomRectHeight: number = 0;
-  @Local creationStage: CreationStage = CreationStage.Landing;
-  @Local appName: string = '';
-  @Local appDesc: string = '';
-  @Local planText: string = '';
+  @Local messages: Message[] = [
+    { id: 1, text: '你好！我是元创AI助手，很高兴为你服务。我可以帮你创建各种元应用，你有什么想法吗？', isUser: false },
+    { id: 2, text: '我想做一个番茄钟应用', isUser: true },
+    { id: 3, text: '很好的想法！番茄钟是一个很实用的生产力工具。让我来帮你规划一下：\n\n1. 核心功能：25分钟工作计时和5分钟休息提醒\n2. 可以添加任务列表，记录每个任务完成的番茄钟数量\n3. 统计功能，展示每天/每周的专注时长\n4. 自定义时长设置\n\n你觉得这个方案怎么样？需要调整什么吗？', isUser: false },
+    { id: 4, text: '听起来不错，能加上白噪音功能吗？', isUser: true },
+    { id: 5, text: '当然可以！我会在应用中集成白噪音功能，提供多种环境音供你选择，比如雨声、咖啡厅、森林等，帮助你更好地专注。现在开始为你生成这个应用吧！', isUser: false }
+  ];
+  @Local inputText: string = '';
+
   @Local showSideBar: boolean = false;
 
   aboutToAppear(): void {
@@ -66,70 +66,113 @@ struct Index {
       left: 16,
       right: 16,
       bottom: 8
-    })}
-
+    })
+  }
+  
+  @Builder
+  buildMessageItem(message: Message) {
+    if (message.isUser) {
+      // 用户消息 - 右侧气泡
+      Row() {
+        Column() {
+          Text(message.text)
+            .fontSize(15)
+            .fontColor('#FFFFFF')
+            .padding({ top: 10, bottom: 10, left: 14, right: 14 })
+            .backgroundColor('#007AFF')
+            .borderRadius(16)
+            .maxLines(999)
+        }
+        .alignItems(HorizontalAlign.End)
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.End)
+      .margin({ bottom: 16 })
+    } else {
+      // AI消息 - 左侧无气泡
+      Row() {
+        Text(message.text)
+          .fontSize(15)
+          .fontColor('#333333')
+          .lineHeight(22)
+          .maxLines(999)
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.Start)
+      .margin({ bottom: 16 })
+    }
+  }
+  
   @Builder
   buildContent() {
     Column() {
       this.buildTopBar();
 
-      // 可滚动的内容区域
+      // 消息列表区域
       Scroll() {
         Column() {
-          if (this.creationStage === CreationStage.Landing) {
-            LandingStage({
-              onStart: () => {
-                this.creationStage = CreationStage.Inception;
-              },
-              onSelectInspiration: (name: string, desc: string) => {
-                this.appName = name;
-                this.appDesc = desc;
-                this.creationStage = CreationStage.Inception;
-              }
-            })
-          } else if (this.creationStage === CreationStage.Inception) {
-            InceptionStage({
-              appName: this.appName,
-              appDesc: this.appDesc,
-              onAppNameChange: (value: string) => {
-                this.appName = value;
-              },
-              onAppDescChange: (value: string) => {
-                this.appDesc = value;
-              },
-              onNext: () => {
-                this.planText = this.buildMockPlan();
-                this.creationStage = CreationStage.Blueprint;
-              }
-            })
-          } else if (this.creationStage === CreationStage.Blueprint) {
-            BlueprintStage({
-              appName: this.appName,
-              planText: this.planText,
-              onPlanTextChange: (value: string) => {
-                this.planText = value;
-              },
-              onBack: () => {
-                this.creationStage = CreationStage.Inception;
-              },
-              onBuild: () => {
-                this.creationStage = CreationStage.Workspace;
-              }
-            })
-          } else if (this.creationStage === CreationStage.Workspace) {
-            WorkspaceStage({
-              appName: this.appName,
-              onRunPreview: () => {
-                this.getUIContext().getRouter().pushUrl({ url: 'pages/Preview' });
-              }
-            })
-          }
+          ForEach(this.messages, (message: Message) => {
+            this.buildMessageItem(message);
+          })
         }
         .width('100%')
-        .padding({ left: 16, right: 16, bottom: 16 })
+        .padding({ left: 16, right: 16, top: 16, bottom: 16 })
       }
       .layoutWeight(1)
       .edgeEffect(EdgeEffect.Spring)
+      .align(Alignment.Top)
+
+      // 底部输入区域
+      Column() {
+        // 输入框和发送按钮
+        Row() {
+          TextInput({ placeholder: '输入你的想法...', text: this.inputText })
+            .layoutWeight(1)
+            .height(40)
+            .backgroundColor('#F5F5F5')
+            .borderRadius(10)
+            .padding({ left: 16, right: 16 })
+            .onChange((value: string) => {
+              this.inputText = value;
+            })
+
+          Button('发送')
+            .height(40)
+            .backgroundColor($r('sys.color.ohos_id_color_emphasize'))
+            .borderRadius(10)
+            .margin({ left: 8 })
+            .enabled(this.inputText.trim().length > 0)
+            .onClick(() => {
+              if (this.inputText.trim().length > 0) {
+                // 添加用户消息
+                this.messages.push({
+                  id: this.messages.length + 1,
+                  text: this.inputText,
+                  isUser: true
+                });
+                this.inputText = '';
+                // TODO: 后续接入真实AI响应
+              }
+            })
+        }
+        .width('100%')
+
+        // AI生成提示文字
+        Text('内容由AI生成')
+          .fontSize(12)
+          .fontColor('#999999')
+          .width('100%')
+          .textAlign(TextAlign.Center)
+          .margin({ top: 8 })
+      }
+      .width('100%')
+      .padding({ 
+        left: 16, 
+        right: 16, 
+        bottom: this.getUIContext().px2vp(this.bottomRectHeight) + 5,
+        top: 8 
+      })
+      .backgroundColor(Color.White)
     }
     .width('100%')
     .height('100%')
@@ -150,12 +193,6 @@ struct Index {
     }
     .width('100%')
     .height('100%')
-  }
-
-  buildMockPlan(): string {
-    const name = this.appName || '我的应用';
-    const desc = this.appDesc || '这是一个由 MetaCraft 生成的应用。';
-    return `1. 首页:展示 ${name} 的核心功能和快速入口。\n2. 功能模块:根据描述「${desc}」拆解为若干子功能。\n3. UI 风格:扁平化设计,主色调为蓝色,可在生成后继续微调。`;
   }
 
   // 菜单项点击处理

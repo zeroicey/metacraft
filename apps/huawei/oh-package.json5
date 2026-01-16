@@ -4,10 +4,12 @@
   "dependencies": {
     "aggregated_login": "file:./ohos_agcit/agcit_huawei_common_login/aggregated_login",
     "collect_personal_info": "file:./ohos_agcit/agcit_huawei_common_collect_personal_info/collect_personal_info",
-    "app_setting": "file:./ohos_agcit/agcit_huawei_common_app_setting/app_setting"
+    "app_setting": "file:./ohos_agcit/agcit_huawei_common_app_setting/app_setting",
+    "@luvi/lv-markdown-in": "^3.2.5"
   },
   "devDependencies": {
     "@ohos/hypium": "1.0.24",
     "@ohos/hamock": "1.0.0"
-  }
+  },
+  "dynamicDependencies": {}
 }

@@ -1,3 +1,55 @@
+/**
+ * Stage组件使用方法备份（暂不使用，仅供参考）
+ *
+ * 1. LandingStage 落地页
+ *    LandingStage({
+ *      onStart: () => {
+ *        // 点击开始创建按钮
+ *      },
+ *      onSelectInspiration: (name: string, desc: string) => {
+ *        // 选择灵感胶囊
+ *      }
+ *    })
+ *
+ * 2. InceptionStage 初始阶段（命名和描述）
+ *    InceptionStage({
+ *      appName: this.appName,
+ *      appDesc: this.appDesc,
+ *      onAppNameChange: (value: string) => {
+ *        this.appName = value;
+ *      },
+ *      onAppDescChange: (value: string) => {
+ *        this.appDesc = value;
+ *      },
+ *      onNext: () => {
+ *        // 下一步
+ *      }
+ *    })
+ *
+ * 3. BlueprintStage 蓝图阶段（规划确认）
+ *    BlueprintStage({
+ *      appName: this.appName,
+ *      planText: this.planText,
+ *      onPlanTextChange: (value: string) => {
+ *        this.planText = value;
+ *      },
+ *      onBack: () => {
+ *        // 返回上一步
+ *      },
+ *      onBuild: () => {
+ *        // 立即生成
+ *      }
+ *    })
+ *
+ * 4. WorkspaceStage 工作区阶段（预览和运行）
+ *    WorkspaceStage({
+ *      appName: this.appName,
+ *      onRunPreview: () => {
+ *        // 运行预览
+ *      }
+ *    })
+ */
+
 @ComponentV2
 export struct LandingStage {
   @Event onStart: () => void;
