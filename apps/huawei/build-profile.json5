@@ -55,6 +55,10 @@
     {
       "name": "aggregated_login",
       "srcPath": "./ohos_agcit/agcit_huawei_common_login/aggregated_login"
+    },
+    {
+      "name": "collect_personal_info",
+      "srcPath": "./ohos_agcit/agcit_huawei_common_collect_personal_info/collect_personal_info"
     }
   ]
 }
