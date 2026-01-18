@@ -1,16 +1,14 @@
 import {
-  Channel,
   LoginController,
   LoginChannelType,
   ApiController,
   LoginInfoOptions,
   LoginParams,
   LoginSheetUtils,
-  LoginType,
   LoginFailError
 } from 'aggregated_login';
 import { PromptAction } from '@kit.ArkUI';
-import { BusinessError } from '@kit.BasicServicesKit';
+import { authApi } from '../api/auth';
 
 /**
  * 登录管理器组件
@@ -83,36 +81,26 @@ export struct LoginManager {
     // 不使用验证码
   }
 
-  // 登录失败处理
-  private handleLoginFail = (loginChannelType: LoginChannelType, error: LoginFailError) => {
-    console.error('===== 华为账号登录失败 =====');
-    console.error('登录渠道:', loginChannelType);
-    console.error('错误信息:', JSON.stringify(error));
-    console.error('========================');
+  // 登录失败处理 - 直接调用后端API登录
+  private handleLoginFail = async (loginChannelType: LoginChannelType, error: LoginFailError) => {
+    console.info('[LoginManager] ===== 华为账号登录失败，尝试后端登录 =====');
+    console.info('[LoginManager] 登录渠道:', loginChannelType);
+    console.info('[LoginManager] 错误信息:', JSON.stringify(error));
     
     if (loginChannelType === LoginChannelType.HUAWEI) {
-      const businessError = error as BusinessError;
-      const errorMsg = ERROR_MSG_MAP[businessError.code] ?? '未知错误。';
+      // 华为登录失败，直接调用后端API登录
+      const result = await authApi.login();
       
-      console.error('错误码:', businessError.code);
-      console.error('错误描述:', errorMsg);
-      
-      this.promptAction.showDialog({
-        title: '温馨提示',
-        message: errorMsg + '是否先模拟登录成功?',
-        buttons: [
-          { text: '取消', color: '#000000' },
-          { text: '确认', color: '#000000' },
-        ]
-      }, (err: BusinessError, data) => {
-        if (data.index === 1) {
-          console.info('用户选择模拟登录成功');
-          this.promptAction.showToast({ message: '华为一键登录成功' });
-          this.controller.clearLoginInfo();
-          LoginSheetUtils.close();
-          this.onLoginSuccess(LoginChannelType.HUAWEI);
-        }
-      });
+      if (result.success) {
+        console.info('[LoginManager] 后端登录成功');
+        this.promptAction.showToast({ message: '登录成功' });
+        this.controller.clearLoginInfo();
+        LoginSheetUtils.close();
+        this.onLoginSuccess(LoginChannelType.HUAWEI);
+      } else {
+        console.error('[LoginManager] 后端登录失败:', result.error);
+        this.promptAction.showToast({ message: '登录失败：' + (result.error || '未知错误') });
+      }
       return;
     }
   }

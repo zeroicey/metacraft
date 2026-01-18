@@ -2,17 +2,18 @@ import { rcp } from '@kit.RemoteCommunicationKit';
 import { AuthInterceptor, ResponseInterceptor } from './Interceptors';
 import { BusinessError } from '@kit.BasicServicesKit';
 
-// 定义通用的响应结构（根据后端实际返回定义）
+// 后端统一响应结构
 export interface ApiResponse<T> {
-  code: number;
   message: string;
-  data: T;
+  status: number;
+  data: T | null;
+  error: string | null;
 }
 
 export class HttpManager {
   private static instance: HttpManager;
   private session: rcp.Session;
-  private readonly baseUrl: string = 'https://api.example.com'; // 替换为你的 Base URL
+  private readonly baseUrl: string = 'http://192.168.1.118:8080';
 
   private constructor() {
     // 1. 配置 Session [4]
