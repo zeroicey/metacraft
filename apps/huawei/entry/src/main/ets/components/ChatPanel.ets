@@ -146,6 +146,13 @@ export struct ChatPanel {
     Column() {
       Scroll(this.scroller) {
         Column() {
+          Text('内容由AI生成')
+            .fontSize(12)
+            .fontColor('#999999')
+            .width('100%')
+            .textAlign(TextAlign.Center)
+            .margin({ bottom: 16 })
+
           ForEach(this.messages, (m: ChatMessage) => {
             MessageItem({ message: m })
           }, (m: ChatMessage) => m.id.toString())
@@ -176,13 +183,6 @@ export struct ChatPanel {
             .onClick(() => { this.send(); })
         }
         .width('100%')
-
-        Text('内容由AI生成')
-          .fontSize(12)
-          .fontColor('#999999')
-          .width('100%')
-          .textAlign(TextAlign.Center)
-          .margin({ top: 8 })
       }
       .width('100%')
       .padding({ left: 16, right: 16, bottom: (this.bottomPadding ?? 8) + 5, top: this.topPadding ?? 8 })

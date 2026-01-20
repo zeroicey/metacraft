@@ -35,8 +35,6 @@ public class AiAgentController {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    
-
     @PostMapping(value = "/intent")
     @Operation(summary = "判断用户意图", description = "返回 chat 或 gen，非流式")
     public ResponseEntity<ApiResponse<AgentIntentResponseVO>> classifyIntent(
