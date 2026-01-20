@@ -6,6 +6,7 @@ import ai.z.openapi.service.image.ImageResponse;
 import ai.z.openapi.service.model.SensitiveWordCheckRequest;
 import com.metacraft.api.modules.ai.dto.GenerateLogoRequestDTO;
 import com.metacraft.api.modules.ai.vo.GenerateLogoResponseVO;
+import com.metacraft.api.modules.ai.prompt.ImagePrompts;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,8 +32,7 @@ public class AiImageService {
      * 生成 App Logo
      */
     public GenerateLogoResponseVO generateLogo(GenerateLogoRequestDTO request) {
-        // 构建提示词
-        String prompt = buildLogoPrompt(request.getName(), request.getDescription());
+        String prompt = ImagePrompts.buildLogoPrompt(request.getName(), request.getDescription());
 
         // 创建图片生成请求
         CreateImageRequest imageRequest = CreateImageRequest.builder()
@@ -55,18 +55,5 @@ public class AiImageService {
         return new GenerateLogoResponseVO(imageUrl, null);
     }
 
-    /**
-     * 构建 Logo 生成提示词
-     */
-    private String buildLogoPrompt(String appName, String appDescription) {
-        return String.format(
-                "Create a modern, professional app logo for '%s'. " +
-                "The app is described as: %s. " +
-                "The logo should be simple, memorable, and suitable for mobile app icons. " +
-                "Use a clean design with appropriate colors that reflect the app's purpose. " +
-                "The logo should work well at small sizes and be visually distinctive.",
-                appName,
-                appDescription
-        );
-    }
+    
 }

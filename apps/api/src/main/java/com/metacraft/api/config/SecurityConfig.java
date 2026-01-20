@@ -31,7 +31,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                         .requestMatchers("/api/health").permitAll()
-                        .requestMatchers("/api/ai/chat/**").permitAll() // SSE 流式响应放行,避免 Security 异常
+                        .requestMatchers("/api/ai/**").permitAll() // 手动进行验证,避免 Security 异常
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/api/v3/api-docs/**")
                         .permitAll()
                         .anyRequest().authenticated())

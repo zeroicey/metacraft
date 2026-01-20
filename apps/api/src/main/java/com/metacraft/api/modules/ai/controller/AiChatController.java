@@ -6,6 +6,7 @@ import com.metacraft.api.modules.ai.vo.ChatResponseVO;
 import com.metacraft.api.response.ApiResponse;
 import com.metacraft.api.response.Response;
 import com.metacraft.api.security.JwtTokenProvider;
+import com.metacraft.api.security.AuthUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -34,17 +35,8 @@ public class AiChatController {
             @Valid @RequestBody ChatRequestDTO request,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         
-        // 手动验证 JWT token
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Response.error("未提供有效的认证令牌").build());
-        }
-        
-        String token = authHeader.substring(7);
-        if (!jwtTokenProvider.validateToken(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Response.error("认证令牌无效或已过期").build());
-        }
+        ResponseEntity<ApiResponse<?>> err = AuthUtils.validateAuthorization(authHeader, jwtTokenProvider);
+        if (err != null) return err;
         
         // 根据 stream 参数决定使用流式还是非流式
         if (Boolean.TRUE.equals(request.getStream())) {

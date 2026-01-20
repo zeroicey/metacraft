@@ -20,6 +20,14 @@ export interface AiChatValidationResult {
   error?: string;
 }
 
+export class AiChatRequestModel implements AiChatRequest {
+  message: string;
+  
+  constructor(message: string) {
+    this.message = message;
+  }
+}
+
 export class AiChatModel {
   static validateRequest(req: AiChatRequest): AiChatValidationResult {
     if (!req || typeof req.message !== 'string') {
