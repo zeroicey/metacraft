@@ -181,8 +181,7 @@ struct Index {
       this.buildTopBar();
 
       ChatPanel({
-        bottomPadding: this.getUIContext().px2vp(this.bottomRectHeight) + 5,
-        topPadding: this.getUIContext().px2vp(this.topRectHeight)
+        bottomPadding: this.getUIContext().px2vp(this.bottomRectHeight) + 5
       })
         .width('100%')
         .layoutWeight(1)

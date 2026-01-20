@@ -1,6 +1,6 @@
 import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { window } from '@kit.ArkUI';
+import { window, KeyboardAvoidMode } from '@kit.ArkUI';
 import { tokenService } from '../model/auth';
 
 const DOMAIN = 0x0000;
@@ -35,6 +35,15 @@ export default class EntryAbility extends UIAbility {
       hilog.info(DOMAIN, 'testTag', 'Succeeded in loading the content.');
 
       let windowClass: window.Window = windowStage.getMainWindowSync(); // 获取应用主窗口
+      
+      // 设置键盘避让模式为 RESIZE
+      try {
+        windowClass.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
+        hilog.info(DOMAIN, 'testTag', 'Succeeded in setting keyboard avoid mode to RESIZE.');
+      } catch (err) {
+        hilog.error(DOMAIN, 'testTag', 'Failed to set keyboard avoid mode. Cause: %{public}s', JSON.stringify(err));
+      }
+
       // 1. 设置窗口全屏
       let isLayoutFullScreen = true;
       windowClass.setWindowLayoutFullScreen(isLayoutFullScreen).then(() => {
