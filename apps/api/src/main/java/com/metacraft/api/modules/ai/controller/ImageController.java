@@ -1,7 +1,7 @@
 package com.metacraft.api.modules.ai.controller;
 
 import com.metacraft.api.modules.ai.dto.GenerateLogoRequestDTO;
-import com.metacraft.api.modules.ai.service.AiImageService;
+import com.metacraft.api.modules.ai.service.ImageService;
 import com.metacraft.api.modules.ai.vo.GenerateLogoResponseVO;
 import com.metacraft.api.response.ApiResponse;
 import com.metacraft.api.response.Response;
@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/ai/image")
 @Tag(name = "AI 图片生成", description = "AI 图片生成相关接口")
-public class AiImageController {
+public class ImageController {
 
-    private final AiImageService aiImageService;
+    private final ImageService aiImageService;
 
-    public AiImageController(AiImageService aiImageService) {
+    public ImageController(ImageService aiImageService) {
         this.aiImageService = aiImageService;
     }
 

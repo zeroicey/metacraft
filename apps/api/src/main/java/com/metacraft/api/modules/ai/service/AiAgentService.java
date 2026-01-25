@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 @Service
-public class AiAgentService {
+public class AgentService {
 
     @Value("${zhipuai.api-key}")
     private String apiKey;

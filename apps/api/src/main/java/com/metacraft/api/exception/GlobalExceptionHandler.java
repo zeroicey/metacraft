@@ -43,6 +43,11 @@ public class GlobalExceptionHandler {
         return Response.error("Method not allowed").status(HttpStatus.METHOD_NOT_ALLOWED.value()).error(Map.of("method", ex.getMethod())).build();
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnauthorizedException(UnauthorizedException ex) {
+        return Response.error(ex.getMessage()).status(HttpStatus.UNAUTHORIZED.value()).build();
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<Void>> handleRuntimeException(RuntimeException ex) {
         return Response.error(ex.getMessage()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).build();
