@@ -4,7 +4,7 @@ import com.metacraft.api.modules.user.converter.UserConverter;
 import com.metacraft.api.modules.user.dto.UserLoginDTO;
 import com.metacraft.api.modules.user.dto.UserRegisterDTO;
 import com.metacraft.api.modules.user.dto.UserUpdateDTO;
-import com.metacraft.api.modules.user.entity.User;
+import com.metacraft.api.modules.user.entity.UserEntity;
 import com.metacraft.api.modules.user.repository.UserRepository;
 import com.metacraft.api.modules.user.vo.AuthTokenVO;
 import com.metacraft.api.modules.user.vo.UserVO;
@@ -36,7 +36,7 @@ public class UserService {
             throw new RuntimeException("用户已存在");
         }
 
-        User user = new User();
+        UserEntity user = new UserEntity();
         user.setEmail(dto.getEmail());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setName(dto.getName());
@@ -50,7 +50,7 @@ public class UserService {
     }
 
     public AuthTokenVO login(UserLoginDTO dto) {
-        User user = userRepository.findByEmail(dto.getEmail())
+        UserEntity user = userRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
 
         if (!passwordEncoder.matches(dto.getPassword(), user.getPasswordHash())) {
@@ -62,14 +62,14 @@ public class UserService {
     }
 
     public UserVO getCurrentUser(String email) {
-        User user = userRepository.findByEmail(email)
+        UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
         return UserConverter.toVO(user);
     }
 
     @Transactional
     public UserVO updateUser(String email, UserUpdateDTO dto) {
-        User user = userRepository.findByEmail(email)
+        UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
 
         if (dto.getEmail() != null && !dto.getEmail().equals(user.getEmail())) {
@@ -100,7 +100,7 @@ public class UserService {
             throw new RuntimeException("修改密码需要同时提供当前密码和新密码");
         }
 
-        User updatedUser = userRepository.save(user);
+        UserEntity updatedUser = userRepository.save(user);
         return UserConverter.toVO(updatedUser);
     }
 }
