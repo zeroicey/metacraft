@@ -1,6 +1,6 @@
 package com.metacraft.api.modules.ai.entity;
 
-import com.metacraft.api.modules.user.entity.User;
+import com.metacraft.api.modules.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

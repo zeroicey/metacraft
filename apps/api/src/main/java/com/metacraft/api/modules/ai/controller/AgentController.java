@@ -4,7 +4,6 @@ import com.metacraft.api.modules.ai.dto.AgentRequestDTO;
 import com.metacraft.api.modules.ai.dto.AgentIntentRequestDTO;
 import com.metacraft.api.modules.ai.service.AgentService;
 import com.metacraft.api.modules.ai.vo.AgentIntentResponseVO;
-import com.metacraft.api.modules.ai.vo.PlanResponseVO;
 import com.metacraft.api.response.ApiResponse;
 import com.metacraft.api.response.Response;
 import com.metacraft.api.security.JwtTokenProvider;
@@ -55,15 +54,12 @@ public class AgentController {
     }
 
     @PostMapping(value = "/plan")
-    @Operation(summary = "智能体规划", description = "返回规划文本，非流式")
-    public ResponseEntity<ApiResponse<PlanResponseVO>> plan(
+    @Operation(summary = "智能体规划", description = "SSE 流式规划")
+    public Object plan(
             @Valid @RequestBody AgentRequestDTO request,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         AuthUtils.validateAuthorization(authHeader, jwtTokenProvider);
-        PlanResponseVO vo = aiAgentService.plan(request);
-        return Response.success("Plan completed")
-                .data(vo)
-                .build();
+        return aiAgentService.planStream(request);
     }
 
     @PostMapping(value = "/gen")
