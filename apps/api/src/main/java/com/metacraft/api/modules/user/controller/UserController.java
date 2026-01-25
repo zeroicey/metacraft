@@ -6,12 +6,12 @@ import com.metacraft.api.modules.user.service.UserService;
 import com.metacraft.api.modules.user.vo.UserVO;
 import com.metacraft.api.response.ApiResponse;
 import com.metacraft.api.response.Response;
+import com.metacraft.api.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,16 +26,16 @@ public class UserController {
 
     @GetMapping
     @Operation(summary = "Get user information", description = "Retrieves the current user information.")
-    public ResponseEntity<ApiResponse<UserVO>> getUser(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<ApiResponse<UserVO>> getUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return Response.success("User information retrieved successfully")
-                .data(userService.getCurrentUser(userDetails.getUsername()))
+                .data(userService.getUserById(userDetails.getId()))
                 .build();
     }
 
     @PatchMapping
     @Operation(summary = "Update user information", description = "Partially updates the user profile.")
     public ResponseEntity<ApiResponse<UserVO>> updateUser(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody UserUpdateDTO updateDTO) {
         return Response.success("User information updated successfully")
                 .data(userService.updateUser(userDetails.getUsername(), updateDTO))

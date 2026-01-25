@@ -23,10 +23,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPasswordHash(),
-                new ArrayList<>()
-        );
+        return CustomUserDetails.create(user);
+    }
+
+    public UserDetails loadUserById(Long id) {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
+
+        return CustomUserDetails.create(user);
     }
 }

@@ -18,27 +18,30 @@ public class JwtTokenProvider {
     @Value("${jwt.expiration}")
     private Long expiration;
 
-    public String generateToken(String email) {
+    public String generateToken(Long userId) {
         return JWT.create()
-                .withSubject(email)
+                .withSubject(String.valueOf(userId))
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + expiration))
                 .sign(Algorithm.HMAC256(secret));
     }
 
-    public String getEmailFromToken(String token) {
+    public Long getUserIdFromToken(String token) {
         DecodedJWT jwt = JWT.require(Algorithm.HMAC256(secret))
                 .build()
                 .verify(token);
-        return jwt.getSubject();
+        return Long.parseLong(jwt.getSubject());
     }
 
     public boolean validateToken(String token) {
         try {
-            JWT.require(Algorithm.HMAC256(secret))
+            DecodedJWT jwt = JWT.require(Algorithm.HMAC256(secret))
                     .build()
                     .verify(token);
-            return true;
+            
+            // 验证 Subject 是否为有效的 UserId (数字)
+            String subject = jwt.getSubject();
+            return subject != null && subject.matches("^\\d+$");
         } catch (JWTVerificationException e) {
             return false;
         }

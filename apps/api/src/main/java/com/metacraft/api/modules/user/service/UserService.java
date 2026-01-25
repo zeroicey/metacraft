@@ -45,7 +45,7 @@ public class UserService {
 
         userRepository.save(user);
 
-        String token = jwtTokenProvider.generateToken(user.getEmail());
+        String token = jwtTokenProvider.generateToken(user.getId());
         return new AuthTokenVO(token, jwtExpiration / 1000);
     }
 
@@ -57,8 +57,14 @@ public class UserService {
             throw new RuntimeException("密码错误");
         }
 
-        String token = jwtTokenProvider.generateToken(user.getEmail());
+        String token = jwtTokenProvider.generateToken(user.getId());
         return new AuthTokenVO(token, jwtExpiration / 1000);
+    }
+
+    public UserVO getUserById(Long id) {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("用户不存在"));
+        return UserConverter.toVO(user);
     }
 
     public UserVO getCurrentUser(String email) {
