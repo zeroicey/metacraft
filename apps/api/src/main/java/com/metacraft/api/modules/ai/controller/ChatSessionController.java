@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/ai/sessions")
-@Tag(name = "AI Chat Sessions", description = "Operations for managing chat sessions")
+@Tag(name = "AI 聊天会话", description = "聊天会话管理相关接口")
 @RequiredArgsConstructor
 public class ChatSessionController {
 
@@ -29,7 +29,7 @@ public class ChatSessionController {
     private final ChatMessageService chatMessageService;
 
     @PostMapping
-    @Operation(summary = "Create a new chat session")
+    @Operation(summary = "创建新的聊天会话")
     public ResponseEntity<ApiResponse<ChatSessionVO>> createSession(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody ChatSessionCreateDTO dto) {
@@ -39,7 +39,7 @@ public class ChatSessionController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all chat sessions for the current user")
+    @Operation(summary = "获取当前用户的所有聊天会话")
     public ResponseEntity<ApiResponse<List<ChatSessionVO>>> getUserSessions(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return Response.success("Sessions retrieved successfully")
@@ -48,7 +48,7 @@ public class ChatSessionController {
     }
 
     @GetMapping("/{sessionId}")
-    @Operation(summary = "Get a chat session by ID")
+    @Operation(summary = "根据 ID 获取聊天会话")
     public ResponseEntity<ApiResponse<ChatSessionVO>> getSession(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable String sessionId) {
@@ -58,7 +58,7 @@ public class ChatSessionController {
     }
 
     @PatchMapping("/{sessionId}")
-    @Operation(summary = "Update a chat session")
+    @Operation(summary = "更新聊天会话")
     public ResponseEntity<ApiResponse<ChatSessionVO>> updateSession(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable String sessionId,
@@ -69,7 +69,7 @@ public class ChatSessionController {
     }
 
     @DeleteMapping("/{sessionId}")
-    @Operation(summary = "Delete a chat session")
+    @Operation(summary = "删除聊天会话")
     public ResponseEntity<ApiResponse<Void>> deleteSession(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable String sessionId) {
@@ -78,7 +78,7 @@ public class ChatSessionController {
     }
 
     @GetMapping("/{sessionId}/messages")
-    @Operation(summary = "Get all messages for a chat session")
+    @Operation(summary = "获取聊天会话的所有消息")
     public ResponseEntity<ApiResponse<List<ChatMessageVO>>> getSessionMessages(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable String sessionId) {

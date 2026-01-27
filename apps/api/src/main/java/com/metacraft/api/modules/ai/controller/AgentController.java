@@ -50,7 +50,9 @@ public class AgentController {
             @Valid @RequestBody AgentRequestDTO request,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         AuthUtils.validateAuthorization(authHeader, jwtTokenProvider);
-        return aiAgentService.chatStream(request);
+        String token = authHeader.substring(7);
+        Long userId = jwtTokenProvider.getUserIdFromToken(token);
+        return aiAgentService.chatStream(request, userId);
     }
 
     @PostMapping(value = "/plan")
@@ -59,7 +61,9 @@ public class AgentController {
             @Valid @RequestBody AgentRequestDTO request,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         AuthUtils.validateAuthorization(authHeader, jwtTokenProvider);
-        return aiAgentService.planStream(request);
+        String token = authHeader.substring(7);
+        Long userId = jwtTokenProvider.getUserIdFromToken(token);
+        return aiAgentService.planStream(request, userId);
     }
 
     @PostMapping(value = "/gen")
@@ -68,6 +72,8 @@ public class AgentController {
             @Valid @RequestBody AgentRequestDTO request,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         AuthUtils.validateAuthorization(authHeader, jwtTokenProvider);
-        return aiAgentService.genStream(request);
+        String token = authHeader.substring(7);
+        Long userId = jwtTokenProvider.getUserIdFromToken(token);
+        return aiAgentService.genStream(request, userId);
     }
 }

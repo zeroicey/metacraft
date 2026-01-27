@@ -115,7 +115,9 @@ public class AgentService {
         return emitter;
     }
 
-    public SseEmitter chatStream(AgentRequestDTO request) {
+    public SseEmitter chatStream(AgentRequestDTO request, Long userId) {
+        String sessionId = initSessionAndSaveUserMessage(request, userId);
+
         String fullSystemPrompt = AgentPrompts.SYSTEM + "\n\n" + AgentPrompts.CHAT;
 
         ChatMessage systemMessage = ChatMessage.builder()
@@ -128,6 +130,9 @@ public class AgentService {
                 .content(request.getMessage())
                 .build();
 
+        // TODO: 如果需要上下文，这里应该查询 chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId)
+        // 并构建历史消息列表。目前仅保存，暂不回填历史记录（根据用户需求）。
+
         ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
                 .model(chatModel)
                 .messages(Arrays.asList(systemMessage, userMessage))
@@ -136,10 +141,15 @@ public class AgentService {
                 .maxTokens(4096)
                 .build();
 
-        return executeStream(params, null, null);
+        String finalSessionId = sessionId;
+        return executeStream(params, null, (fullContent) -> {
+            saveAssistantMessage(userId, finalSessionId, fullContent);
+        });
     }
 
-    public SseEmitter genStream(AgentRequestDTO request) {
+    public SseEmitter genStream(AgentRequestDTO request, Long userId) {
+        String sessionId = initSessionAndSaveUserMessage(request, userId);
+
         String fullSystemPrompt = AgentPrompts.SYSTEM + "\n\n" + AgentPrompts.GEN;
 
         ChatMessage systemMessage = ChatMessage.builder()
@@ -160,10 +170,15 @@ public class AgentService {
                 .maxTokens(4096)
                 .build();
 
-        return executeStream(params, null, null);
+        String finalSessionId = sessionId;
+        return executeStream(params, null, (fullContent) -> {
+            saveAssistantMessage(userId, finalSessionId, fullContent);
+        });
     }
 
-    public SseEmitter planStream(AgentRequestDTO request) {
+    public SseEmitter planStream(AgentRequestDTO request, Long userId) {
+        String sessionId = initSessionAndSaveUserMessage(request, userId);
+
         String fullSystemPrompt = AgentPrompts.SYSTEM + "\n\n" + AgentPrompts.PLAN;
 
         ChatMessage systemMessage = ChatMessage.builder()
@@ -184,7 +199,10 @@ public class AgentService {
                 .maxTokens(2048)
                 .build();
 
-        return executeStream(params, null, null);
+        String finalSessionId = sessionId;
+        return executeStream(params, null, (fullContent) -> {
+            saveAssistantMessage(userId, finalSessionId, fullContent);
+        });
     }
 
     public AgentIntentResponseVO classifyIntent(AgentIntentRequestDTO request) {
@@ -221,5 +239,32 @@ public class AgentService {
 
         String model = response.getData().getModel();
         return new AgentIntentResponseVO(text, model);
+    }
+
+    private String initSessionAndSaveUserMessage(AgentRequestDTO request, Long userId) {
+        String sessionId = request.getSessionId();
+        if (sessionId == null || sessionId.isEmpty()) {
+            sessionId = java.util.UUID.randomUUID().toString();
+        }
+
+        // 保存用户消息
+        ChatMessageEntity userEntity = ChatMessageEntity.builder()
+                .userId(userId)
+                .sessionId(sessionId)
+                .role(ChatMessageRole.USER.value())
+                .content(request.getMessage())
+                .build();
+        chatMessageRepository.save(userEntity);
+        return sessionId;
+    }
+
+    private void saveAssistantMessage(Long userId, String sessionId, String content) {
+        ChatMessageEntity botEntity = ChatMessageEntity.builder()
+                .userId(userId)
+                .sessionId(sessionId)
+                .role(ChatMessageRole.ASSISTANT.value())
+                .content(content)
+                .build();
+        chatMessageRepository.save(botEntity);
     }
 }

@@ -16,14 +16,14 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/ai/messages")
-@Tag(name = "AI Chat Messages", description = "Operations for managing chat messages (manual CRUD)")
+@Tag(name = "AI 聊天消息", description = "聊天消息管理相关接口（手动 CRUD）")
 @RequiredArgsConstructor
 public class ChatMessageController {
 
     private final ChatMessageService chatMessageService;
 
     @PostMapping
-    @Operation(summary = "Manually add a message to a session")
+    @Operation(summary = "手动向会话添加消息")
     public ResponseEntity<ApiResponse<ChatMessageVO>> createMessage(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody ChatMessageCreateDTO dto) {
@@ -33,7 +33,7 @@ public class ChatMessageController {
     }
 
     @DeleteMapping("/{messageId}")
-    @Operation(summary = "Delete a specific message")
+    @Operation(summary = "删除特定消息")
     public ResponseEntity<ApiResponse<Void>> deleteMessage(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long messageId) {
