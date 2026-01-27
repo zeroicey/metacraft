@@ -1,11 +1,13 @@
 import { ApiResponse } from '../utils/http/HttpManager';
 export interface AiChatRequest {
   message: string;
+  sessionId?: string;
 }
 
 export interface AiChatDTO {
   message: string;
   stream: boolean;
+  sessionId?: string;
 }
 
 export interface AiChatReply {
@@ -22,9 +24,11 @@ export interface AiChatValidationResult {
 
 export class AiChatRequestModel implements AiChatRequest {
   message: string;
+  sessionId?: string;
   
-  constructor(message: string) {
+  constructor(message: string, sessionId?: string) {
     this.message = message;
+    this.sessionId = sessionId;
   }
 }
 
@@ -47,6 +51,7 @@ export class AiChatModel {
     return {
       message: req.message.trim(),
       stream: false,
+      sessionId: req.sessionId
     };
   }
 

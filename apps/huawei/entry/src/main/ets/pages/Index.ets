@@ -6,6 +6,7 @@ import { authApi } from '../api/auth';
 import { aiChatApi } from '../api/aiChat';
 import { ChatPanel } from '../components/ChatPanel';
 import { PromptAction } from '@kit.ArkUI';
+import { chatSessionApi } from '../api/chatSession';
 
 interface Message {
   id: number;
@@ -22,6 +23,7 @@ struct Index {
   @Local inputText: string = '';
 
   @Local showSideBar: boolean = false;
+  @Local currentSessionId: string = '';
   
   private loginController: LoginController = new LoginController();
   private promptAction?: PromptAction;
@@ -41,17 +43,27 @@ struct Index {
       console.info('[Index] 未检测到token，弹出登录弹窗');
       setTimeout(() => {
         this.openLoginSheet();
-      }, 100);
+      }, 500);
     } else {
       console.info('[Index] 已检测到token，跳过登录');
+      this.initSessions();
     }
+  }
 
-    
+  async initSessions() {
+    const result = await chatSessionApi.getUserSessions();
+    if (result.success && result.data && result.data.length > 0) {
+      // 默认选中第一个（通常是最新的）
+      this.currentSessionId = result.data[0].sessionId;
+    } else {
+      console.info('[Index] No existing sessions');
+    }
   }
   
   // 登录成功处理
   private handleLoginSuccess = (loginType: LoginChannelType): void => {
     console.info('[Index] 登录成功，登录类型:', loginType);
+    this.initSessions();
   }
   
   // 华为登录成功回调 - 实际上不会调用，因为会走失败流程
@@ -181,7 +193,8 @@ struct Index {
       this.buildTopBar();
 
       ChatPanel({
-        bottomPadding: this.getUIContext().px2vp(this.bottomRectHeight) + 5
+        bottomPadding: this.getUIContext().px2vp(this.bottomRectHeight) + 5,
+        sessionId: this.currentSessionId
       })
         .width('100%')
         .layoutWeight(1)
@@ -194,12 +207,16 @@ struct Index {
     Stack() {
       Sidebar({
         isShowSidebar: this.showSideBar,
-        topRectHeight: this.getUIContext().px2vp(this.topRectHeight),
         onSideBarChange: (isShow: boolean) => {
           this.showSideBar = isShow;
         },
+        topRectHeight: this.getUIContext().px2vp(this.topRectHeight),
+        selectedSessionId: this.currentSessionId,
+        onSessionChange: (sessionId: string) => {
+          this.currentSessionId = sessionId;
+        },
         contentBuilder: () => {
-          this.buildContent();
+          this.buildContent()
         }
       })
     }

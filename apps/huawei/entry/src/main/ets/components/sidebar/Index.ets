@@ -7,11 +7,12 @@ export struct Sidebar {
   @Param @Require isShowSidebar: boolean;
   @Param onSideBarChange: (isShow: boolean) => void = () => {};
   @Param topRectHeight: number = 0;
+  @Param selectedSessionId: string = '';
+  @Event onSessionChange: (sessionId: string) => void = () => {};
 
   @Local isSideBarContainerMask: boolean = false;
   @Local isAutoHide: boolean = false;
   @Local selectedApp: string = '云养猫互动应用开发'; // 当前选中的应用
-  @Local selectedSessionId: string = ''; // 当前选中的会话ID
 
   @Builder
   SideBarPanelBuilder() {
@@ -86,7 +87,7 @@ export struct Sidebar {
           SessionList({
             selectedSessionId: this.selectedSessionId,
             onSessionClick: (sessionId: string) => {
-              this.selectedSessionId = sessionId;
+              this.onSessionChange(sessionId);
               // TODO: 触发主页面切换到对应会话
               this.onSideBarChange(false);
             }

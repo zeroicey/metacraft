@@ -156,6 +156,10 @@ class AiChatApi {
 
     const token = await tokenService.getToken();
     const dto = AiChatModel.toDTO(req);
+    // Explicitly ensure sessionId is passed if available
+    if (req.sessionId) {
+      dto.sessionId = req.sessionId;
+    }
     
     // Using the specific agent chat endpoint for streaming
     const url = 'http://192.168.1.118:8080/api/ai/agent/chat';
