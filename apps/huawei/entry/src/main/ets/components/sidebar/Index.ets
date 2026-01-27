@@ -1,5 +1,6 @@
 // components/Sidebar.ets
 import { HdsSideBar } from '@kit.UIDesignKit';
+import { SessionList } from './SessionList';
 
 @ComponentV2
 export struct Sidebar {
@@ -10,6 +11,7 @@ export struct Sidebar {
   @Local isSideBarContainerMask: boolean = false;
   @Local isAutoHide: boolean = false;
   @Local selectedApp: string = '云养猫互动应用开发'; // 当前选中的应用
+  @Local selectedSessionId: string = ''; // 当前选中的会话ID
 
   @Builder
   SideBarPanelBuilder() {
@@ -79,109 +81,23 @@ export struct Sidebar {
         .margin({ left: 16, right: 16 })
 
       // History 最近运行
-      Column({ space: 16 }) {
-        // 今天
-        Column({ space: 4 }) {
-          Text('今天')
-            .fontSize(12)
-            .fontColor('#999999')
-            .margin({ bottom: 4 })
-            .width('100%')
-            .textAlign(TextAlign.Start)
-
-          Column({ space: 4 }) {
-            ForEach(['云养猫互动应用开发', '像素画生成器开发'], (item: string) => {
-              Row({ space: 12 }) {
-                Text(item)
-                  .fontSize(14)
-                  .fontWeight(this.selectedApp === item ? FontWeight.Bold : FontWeight.Medium)
-                  .fontColor(this.selectedApp === item ? '#000000' : '#333333')
-                  .layoutWeight(1)
-                  .maxLines(1)
-              }
-              .width('100%')
-              .padding({ top: 8, bottom: 8, left: 12, right: 12 })
-              .backgroundColor(this.selectedApp === item ? '#F2F2F2' : Color.Transparent)
-              .borderRadius(10)
-              .onClick(() => {
-                this.selectedApp = item;
-                // TODO: 点击打开对应应用的对话
-                this.onSideBarChange(false);
-              })
-            }, (item: string) => item)
-          }
-          .width('100%')
+      Scroll() {
+        Column() {
+          SessionList({
+            selectedSessionId: this.selectedSessionId,
+            onSessionClick: (sessionId: string) => {
+              this.selectedSessionId = sessionId;
+              // TODO: 触发主页面切换到对应会话
+              this.onSideBarChange(false);
+            }
+          })
         }
-
-        // 昨天
-        Column({ space: 4 }) {
-          Text('昨天')
-            .fontSize(12)
-            .fontColor('#999999')
-            .margin({ bottom: 4 })
-            .width('100%')
-            .textAlign(TextAlign.Start)
-
-          Column({ space: 4 }) {
-            ForEach(['制作浪漫烟花互动应用', '智能日程助手开发'], (item: string) => {
-              Row({ space: 12 }) {
-                Text(item)
-                  .fontSize(14)
-                  .fontWeight(this.selectedApp === item ? FontWeight.Bold : FontWeight.Medium)
-                  .fontColor(this.selectedApp === item ? '#000000' : '#333333')
-                  .layoutWeight(1)
-                  .maxLines(1)
-              }
-              .width('100%')
-              .padding({ top: 8, bottom: 8, left: 12, right: 12 })
-              .backgroundColor(this.selectedApp === item ? '#F2F2F2' : Color.Transparent)
-              .borderRadius(10)
-              .onClick(() => {
-                this.selectedApp = item;
-                // TODO: 点击打开对应应用的对话
-                this.onSideBarChange(false);
-              })
-            }, (item: string) => item)
-          }
-          .width('100%')
-        }
-
-        // 30天内
-        Column({ space: 4 }) {
-          Text('30天内')
-            .fontSize(12)
-            .fontColor('#999999')
-            .margin({ bottom: 4 })
-            .width('100%')
-            .textAlign(TextAlign.Start)
-
-          Column({ space: 4 }) {
-            ForEach(['待办事项管理器开发', '天气预报小组件', '阅读笔记应用'], (item: string) => {
-              Row({ space: 12 }) {
-                Text(item)
-                  .fontSize(14)
-                  .fontWeight(this.selectedApp === item ? FontWeight.Bold : FontWeight.Medium)
-                  .fontColor(this.selectedApp === item ? '#000000' : '#333333')
-                  .layoutWeight(1)
-                  .maxLines(1)
-              }
-              .width('100%')
-              .padding({ top: 8, bottom: 8, left: 12, right: 12 })
-              .backgroundColor(this.selectedApp === item ? '#F2F2F2' : Color.Transparent)
-              .borderRadius(10)
-              .onClick(() => {
-                this.selectedApp = item;
-                // TODO: 点击打开对应应用的对话
-                this.onSideBarChange(false);
-              })
-            }, (item: string) => item)
-          }
-          .width('100%')
-        }
+        .padding({ left: 16, right: 16, top: 16, bottom: 16 })
       }
-      .padding({ left: 16, right: 16, top: 16, bottom: 16 })
-
-      Blank().layoutWeight(1)
+      .scrollBar(BarState.Auto)
+      .edgeEffect(EdgeEffect.Spring)
+      .layoutWeight(1) // 让列表占据剩余空间，但保留底部 Footer
+      .align(Alignment.TopStart)
 
       // Footer: 用户头像 + 昵称 + 设置入口
       Row({ space: 12 }) {

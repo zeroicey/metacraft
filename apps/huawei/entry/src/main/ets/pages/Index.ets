@@ -1,4 +1,4 @@
-import { Sidebar } from '../components/Sidebar';
+import { Sidebar } from '../components/sidebar/Index';
 import { BottomSheetMenu } from '../components/BottomSheetMenu';
 import { setOnUnauthorizedCallback } from '../utils/http/Interceptors';
 import { LoginSheetUtils, LoginInfoOptions, LoginController, ApiController, LoginParams, LoginChannelType, LoginFailError } from 'aggregated_login';

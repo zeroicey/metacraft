@@ -61,10 +61,26 @@ public class OpenApiConfig {
     }
 
     @Bean
-    public GroupedOpenApi aiApi() {
+    public GroupedOpenApi aiAgentApi() {
         return GroupedOpenApi.builder()
-                .group("ai")
-                .pathsToMatch("/api/ai/**")
+                .group("AI Agent")
+                .pathsToMatch("/api/ai/agent/**")
+                .build();
+    }
+
+     @Bean
+    public GroupedOpenApi aiSessionApi() {
+        return GroupedOpenApi.builder()
+                .group("AI Session")
+                .pathsToMatch("/api/ai/sessions/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi aiMessageApi() {
+        return GroupedOpenApi.builder()
+                .group("AI Message")
+                .pathsToMatch("/api/ai/messages/**")
                 .build();
     }
 
