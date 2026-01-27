@@ -99,6 +99,22 @@ export class HttpManager {
   }
 
   /**
+   * 发起 PATCH 请求
+   */
+  public async patch<T>(url: string, data?: object): Promise<T> {
+    try {
+      const content: rcp.RequestContent = data ? data : {};
+      // 使用 fetch 发送 PATCH 请求
+      const req = new rcp.Request(url, 'PATCH');
+      req.content = content;
+      const response = await this.session.fetch(req);
+      return this.handleResponse<T>(response);
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  /**
    * 发起 DELETE 请求 [11]
    */
   public async delete<T>(url: string): Promise<T> {
@@ -114,7 +130,7 @@ export class HttpManager {
 
   // 处理响应数据转换
   private handleResponse<T>(response: rcp.Response): T {
-    if (response.statusCode !== 200) {
+    if (response.statusCode < 200 || response.statusCode >= 300) {
       throw new Error(`Request failed with status ${response.statusCode}`);
     }
     // 假设返回的是 JSON
