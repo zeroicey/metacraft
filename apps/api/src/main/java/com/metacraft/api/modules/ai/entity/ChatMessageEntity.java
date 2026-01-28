@@ -31,7 +31,7 @@ public class ChatMessageEntity {
     @Column(nullable = false)
     private String role; // "user" 或 "assistant"
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @Column(length = 50, nullable = false)

@@ -69,11 +69,23 @@ public class AgentMessageService {
 
     @Transactional
     public void handleGenCompletion(Long userId, String sessionId, String userPrompt, String fullContent) {
+        // Clean up markdown code blocks
+        String cleanContent = fullContent;
+        if (cleanContent.startsWith("```html")) {
+            cleanContent = cleanContent.substring(7);
+        } else if (cleanContent.startsWith("```")) {
+            cleanContent = cleanContent.substring(3);
+        }
+        if (cleanContent.endsWith("```")) {
+            cleanContent = cleanContent.substring(0, cleanContent.length() - 3);
+        }
+        cleanContent = cleanContent.trim();
+
         // 1. Get ChatSession
         ChatSessionEntity session = chatSessionRepository.findBySessionId(sessionId).orElse(null);
         if (session == null) {
             log.warn("Session not found for completion: {}", sessionId);
-            saveAssistantMessage(userId, sessionId, fullContent);
+            saveAssistantMessage(userId, sessionId, cleanContent);
             return;
         }
 
@@ -91,9 +103,9 @@ public class AgentMessageService {
         }
 
         // 3. Create Version
-        AppVersionEntity version = appService.createVersion(appId, fullContent, userPrompt);
+        AppVersionEntity version = appService.createVersion(appId, cleanContent, userPrompt);
 
-        // 4. Save Message with relation
-        saveAssistantMessage(userId, sessionId, fullContent, appId, version.getId());
+        // 4. Save Message with relation (content is null for app generation)
+        saveAssistantMessage(userId, sessionId, null, appId, version.getId());
     }
 }

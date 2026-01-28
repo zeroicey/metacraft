@@ -3,7 +3,7 @@ CREATE TABLE chat_messages (
     user_id BIGINT NOT NULL,
     session_id VARCHAR(64) NOT NULL,
     role VARCHAR(20) NOT NULL,
-    content TEXT NOT NULL,
+    content TEXT, -- 允许为空，如果是 app 类型则内容存储在文件系统
     type VARCHAR(50) NOT NULL DEFAULT 'text', -- 'text' 或 'app'
     related_app_id BIGINT,      -- 关联的应用ID (方便快速跳转应用详情)
     related_version_id BIGINT,  -- 关联的具体版本ID (核心：用于历史回溯)
