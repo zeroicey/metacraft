@@ -5,8 +5,10 @@ import ai.z.openapi.service.model.*;
 import com.metacraft.api.modules.ai.dto.AgentIntentRequestDTO;
 import com.metacraft.api.modules.ai.dto.AgentRequestDTO;
 import com.metacraft.api.modules.ai.entity.ChatMessageEntity;
+import com.metacraft.api.modules.ai.entity.ChatSessionEntity;
 import com.metacraft.api.modules.ai.prompt.AgentPrompts;
 import com.metacraft.api.modules.ai.repository.ChatMessageRepository;
+import com.metacraft.api.modules.ai.repository.ChatSessionRepository;
 import com.metacraft.api.modules.ai.vo.AgentIntentResponseVO;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +40,11 @@ public class AgentService {
     private ZhipuAiClient client;
 
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatSessionRepository chatSessionRepository;
 
-    public AgentService(ChatMessageRepository chatMessageRepository) {
+    public AgentService(ChatMessageRepository chatMessageRepository, ChatSessionRepository chatSessionRepository) {
         this.chatMessageRepository = chatMessageRepository;
+        this.chatSessionRepository = chatSessionRepository;
     }
 
     @PostConstruct
@@ -58,12 +62,12 @@ public class AgentService {
      * @param onRealTimeChunk 实时回调(可选)
      * @param onComplete      完成回调(可选)
      */
-    private SseEmitter executeStream(
+    private void executeStream(
+            SseEmitter emitter,
             ChatCompletionCreateParams params,
             java.util.function.Consumer<String> onRealTimeChunk,
             java.util.function.Consumer<String> onComplete
     ) {
-        SseEmitter emitter = new SseEmitter(0L);
         StringBuilder accumulator = new StringBuilder();
 
         client.chat().createChatCompletion(params).getFlowable()
@@ -111,11 +115,10 @@ public class AgentService {
                             }
                         }
                 );
-
-        return emitter;
     }
 
     public SseEmitter chatStream(AgentRequestDTO request, Long userId) {
+        SseEmitter emitter = new SseEmitter(0L);
         String sessionId = initSessionAndSaveUserMessage(request, userId);
 
         String fullSystemPrompt = AgentPrompts.SYSTEM + "\n\n" + AgentPrompts.CHAT;
@@ -141,13 +144,14 @@ public class AgentService {
                 .maxTokens(4096)
                 .build();
 
-        String finalSessionId = sessionId;
-        return executeStream(params, null, (fullContent) -> {
-            saveAssistantMessage(userId, finalSessionId, fullContent);
+        executeStream(emitter, params, null, (fullContent) -> {
+            saveAssistantMessage(userId, sessionId, fullContent);
         });
+        return emitter;
     }
 
     public SseEmitter genStream(AgentRequestDTO request, Long userId) {
+        SseEmitter emitter = new SseEmitter(0L);
         String sessionId = initSessionAndSaveUserMessage(request, userId);
 
         String fullSystemPrompt = AgentPrompts.SYSTEM + "\n\n" + AgentPrompts.GEN;
@@ -170,13 +174,14 @@ public class AgentService {
                 .maxTokens(4096)
                 .build();
 
-        String finalSessionId = sessionId;
-        return executeStream(params, null, (fullContent) -> {
-            saveAssistantMessage(userId, finalSessionId, fullContent);
+        executeStream(emitter, params, null, (fullContent) -> {
+            saveAssistantMessage(userId, sessionId, fullContent);
         });
+        return emitter;
     }
 
     public SseEmitter planStream(AgentRequestDTO request, Long userId) {
+        SseEmitter emitter = new SseEmitter(0L);
         String sessionId = initSessionAndSaveUserMessage(request, userId);
 
         String fullSystemPrompt = AgentPrompts.SYSTEM + "\n\n" + AgentPrompts.PLAN;
@@ -200,9 +205,71 @@ public class AgentService {
                 .build();
 
         String finalSessionId = sessionId;
-        return executeStream(params, null, (fullContent) -> {
+        executeStream(emitter, params, null, (fullContent) -> {
             saveAssistantMessage(userId, finalSessionId, fullContent);
         });
+        return emitter;
+    }
+
+    public SseEmitter unifiedStream(AgentRequestDTO request, Long userId) {
+        SseEmitter emitter = new SseEmitter(0L);
+        
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                // 1. 初始化会话并保存用户消息
+                String sessionId = initSessionAndSaveUserMessage(request, userId);
+                
+                // 2. 识别意图
+                AgentIntentRequestDTO intentReq = new AgentIntentRequestDTO();
+                intentReq.setMessage(request.getMessage());
+                // 注意：这里调用 classifyIntent 是同步阻塞的，这正是我们放在异步线程的原因
+                AgentIntentResponseVO intentVO = classifyIntent(intentReq);
+                String intent = intentVO.getType();
+                
+                // 3. 发送意图事件给前端
+                emitter.send(SseEmitter.event().name("intent").data(intent));
+                
+                // 4. 根据意图构建 Prompt 和参数
+                String model;
+                String systemPrompt;
+                
+                if ("gen".equals(intent)) {
+                    model = genModel;
+                    systemPrompt = AgentPrompts.SYSTEM + "\n\n" + AgentPrompts.GEN;
+                } else {
+                    model = chatModel;
+                    systemPrompt = AgentPrompts.SYSTEM + "\n\n" + AgentPrompts.CHAT;
+                }
+                
+                ChatMessage systemMessage = ChatMessage.builder()
+                        .role(ChatMessageRole.SYSTEM.value())
+                        .content(systemPrompt)
+                        .build();
+
+                ChatMessage userMessage = ChatMessage.builder()
+                        .role(ChatMessageRole.USER.value())
+                        .content(request.getMessage())
+                        .build();
+
+                ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
+                        .model(model)
+                        .messages(Arrays.asList(systemMessage, userMessage))
+                        .stream(true)
+                        .temperature(intent.equals("gen") ? 0.2f : 0.7f)
+                        .maxTokens(4096)
+                        .build();
+                        
+                // 5. 执行流式生成
+                executeStream(emitter, params, null, (fullContent) -> {
+                    saveAssistantMessage(userId, sessionId, fullContent);
+                });
+                
+            } catch (Exception e) {
+                emitter.completeWithError(e);
+            }
+        });
+        
+        return emitter;
     }
 
     public AgentIntentResponseVO classifyIntent(AgentIntentRequestDTO request) {
@@ -245,6 +312,15 @@ public class AgentService {
         String sessionId = request.getSessionId();
         if (sessionId == null || sessionId.isEmpty()) {
             sessionId = java.util.UUID.randomUUID().toString();
+            
+            // 创建新会话
+            String title = request.getMessage().length() > 20 ? request.getMessage().substring(0, 20) + "..." : request.getMessage();
+            ChatSessionEntity sessionEntity = ChatSessionEntity.builder()
+                    .userId(userId)
+                    .sessionId(sessionId)
+                    .title(title)
+                    .build();
+            chatSessionRepository.save(sessionEntity);
         }
 
         // 保存用户消息

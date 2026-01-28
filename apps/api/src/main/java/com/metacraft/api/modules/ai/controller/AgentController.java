@@ -31,6 +31,18 @@ public class AgentController {
         this.aiAgentService = aiAgentService;
         this.jwtTokenProvider = jwtTokenProvider;
     }
+    
+    @PostMapping(value = "/unified")
+    @Operation(summary = "智能体统一入口", description = "SSE 流式统一入口，自动识别意图并流式返回")
+    public Object unified(
+            @Valid @RequestBody AgentRequestDTO request,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        AuthUtils.validateAuthorization(authHeader, jwtTokenProvider);
+        String token = authHeader.substring(7);
+        Long userId = jwtTokenProvider.getUserIdFromToken(token);
+        return aiAgentService.unifiedStream(request, userId);
+    }
+
 
     @PostMapping(value = "/intent")
     @Operation(summary = "判断用户意图", description = "返回 chat 或 gen，非流式")
@@ -53,17 +65,6 @@ public class AgentController {
         String token = authHeader.substring(7);
         Long userId = jwtTokenProvider.getUserIdFromToken(token);
         return aiAgentService.chatStream(request, userId);
-    }
-
-    @PostMapping(value = "/plan")
-    @Operation(summary = "智能体规划", description = "SSE 流式规划")
-    public Object plan(
-            @Valid @RequestBody AgentRequestDTO request,
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
-        AuthUtils.validateAuthorization(authHeader, jwtTokenProvider);
-        String token = authHeader.substring(7);
-        Long userId = jwtTokenProvider.getUserIdFromToken(token);
-        return aiAgentService.planStream(request, userId);
     }
 
     @PostMapping(value = "/gen")
