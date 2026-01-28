@@ -42,9 +42,9 @@ public class ChatSessionEntity {
 
     @Generated(event = EventType.INSERT)
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 
-    @Generated(event = EventType.INSERT)
-    @Column(name = "updated_at", nullable = false, updatable = false)
-    private LocalDateTime updatedAt;
+    @Generated(event = {EventType.INSERT, EventType.UPDATE})
+    @Column(name = "updated_at", nullable = false, insertable = false, updatable = false)
+    private OffsetDateTime updatedAt;
 }

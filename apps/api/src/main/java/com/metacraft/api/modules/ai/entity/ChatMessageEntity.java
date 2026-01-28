@@ -1,16 +1,13 @@
 package com.metacraft.api.modules.ai.entity;
 
-import com.metacraft.api.modules.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Data
