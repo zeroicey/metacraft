@@ -2,6 +2,7 @@ package com.metacraft.api.modules.ai.controller;
 
 import com.metacraft.api.modules.ai.dto.AgentRequestDTO;
 import com.metacraft.api.modules.ai.dto.AgentIntentRequestDTO;
+import com.metacraft.api.modules.ai.service.AgentIntentService;
 import com.metacraft.api.modules.ai.service.AgentService;
 import com.metacraft.api.modules.ai.vo.AgentIntentResponseVO;
 import com.metacraft.api.response.ApiResponse;
@@ -24,11 +25,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "AI 智能体", description = "AI 智能体相关接口(仅流式输出)")
 public class AgentController {
 
-    private final AgentService aiAgentService;
+    private final AgentIntentService agentIntentService;
+    private final AgentService agentService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public AgentController(AgentService aiAgentService, JwtTokenProvider jwtTokenProvider) {
-        this.aiAgentService = aiAgentService;
+    public AgentController(AgentIntentService agentIntentService, AgentService agentService, JwtTokenProvider jwtTokenProvider) {
+        this.agentIntentService = agentIntentService;
+        this.agentService = agentService;
         this.jwtTokenProvider = jwtTokenProvider;
     }
     
@@ -40,7 +43,7 @@ public class AgentController {
         AuthUtils.validateAuthorization(authHeader, jwtTokenProvider);
         String token = authHeader.substring(7);
         Long userId = jwtTokenProvider.getUserIdFromToken(token);
-        return aiAgentService.unifiedStream(request, userId);
+        return agentService.unifiedStream(request, userId);
     }
 
 
@@ -50,7 +53,7 @@ public class AgentController {
             @Valid @RequestBody AgentIntentRequestDTO request,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         AuthUtils.validateAuthorization(authHeader, jwtTokenProvider);
-        AgentIntentResponseVO intent = aiAgentService.classifyIntent(request);
+        AgentIntentResponseVO intent = agentIntentService.classifyIntent(request);
         return Response.success("Intent classified")
                 .data(intent)
                 .build();
@@ -64,7 +67,7 @@ public class AgentController {
         AuthUtils.validateAuthorization(authHeader, jwtTokenProvider);
         String token = authHeader.substring(7);
         Long userId = jwtTokenProvider.getUserIdFromToken(token);
-        return aiAgentService.chatStream(request, userId);
+        return agentService.chatStream(request, userId);
     }
 
     @PostMapping(value = "/gen")
@@ -75,6 +78,6 @@ public class AgentController {
         AuthUtils.validateAuthorization(authHeader, jwtTokenProvider);
         String token = authHeader.substring(7);
         Long userId = jwtTokenProvider.getUserIdFromToken(token);
-        return aiAgentService.genStream(request, userId);
+        return agentService.genStream(request, userId);
     }
 }

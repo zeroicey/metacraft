@@ -80,8 +80,8 @@ public class ChatSessionService {
                 .sessionId(entity.getSessionId())
                 .title(entity.getTitle())
                 .relatedAppId(entity.getRelatedAppId())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
+                .createdAt(entity.getCreatedAt().toLocalDateTime())
+                .updatedAt(entity.getUpdatedAt().toLocalDateTime())
                 .build();
     }
 }

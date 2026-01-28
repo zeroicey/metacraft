@@ -27,6 +27,7 @@ public class AppService {
         AppEntity app = AppEntity.builder()
                 .userId(userId)
                 .name(name)
+                .uuid(java.util.UUID.randomUUID().toString())
                 .description(description)
                 .isPublic(false)
                 .build();

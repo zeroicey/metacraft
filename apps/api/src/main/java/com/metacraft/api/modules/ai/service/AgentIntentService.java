@@ -2,9 +2,9 @@ package com.metacraft.api.modules.ai.service;
 
 import ai.z.openapi.service.model.ChatCompletionCreateParams;
 import ai.z.openapi.service.model.ChatCompletionResponse;
+import ai.z.openapi.service.model.ChatMessage;
+import ai.z.openapi.service.model.ChatMessageRole;
 import com.metacraft.api.modules.ai.dto.AgentIntentRequestDTO;
-import com.metacraft.api.modules.ai.entity.ChatMessage;
-import com.metacraft.api.modules.ai.entity.ChatMessageRole;
 import com.metacraft.api.modules.ai.prompt.AgentPrompts;
 import com.metacraft.api.modules.ai.vo.AgentIntentResponseVO;
 import lombok.RequiredArgsConstructor;

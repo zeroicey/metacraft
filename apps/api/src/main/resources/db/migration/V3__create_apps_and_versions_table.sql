@@ -1,6 +1,7 @@
 -- 1. 创建 apps 表 (应用容器)
 CREATE TABLE apps (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    uuid VARCHAR(64) NOT NULL UNIQUE, -- 对外展示的唯一标识 (UUID)
     user_id BIGINT NOT NULL,
     name VARCHAR(255),
     description TEXT,

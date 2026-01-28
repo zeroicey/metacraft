@@ -20,6 +20,9 @@ public class AppEntity {
     @Column(nullable = false)
     private Long id;
 
+    @Column(nullable = false, unique = true, length = 64)
+    private String uuid;
+
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
