@@ -7,4 +7,6 @@ import lombok.Data;
 public class ChatSessionCreateDTO {
     @NotBlank(message = "Title cannot be empty")
     private String title;
+
+    private Long relatedAppId;
 }

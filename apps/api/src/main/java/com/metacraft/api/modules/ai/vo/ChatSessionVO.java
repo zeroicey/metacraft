@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class ChatSessionVO {
     private String sessionId;
     private String title;
+    private Long relatedAppId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -37,6 +37,16 @@ public class ChatMessageEntity {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
+    @Column(length = 50, nullable = false)
+    @Builder.Default
+    private String type = "text"; // "text", "app"
+
+    @Column(name = "related_app_id")
+    private Long relatedAppId;
+
+    @Column(name = "related_version_id")
+    private Long relatedVersionId;
+
     @Generated(event = EventType.INSERT)
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;

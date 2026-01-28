@@ -37,6 +37,9 @@ public class ChatSessionEntity {
     @Column(columnDefinition = "TEXT")
     private String title;
 
+    @Column(name = "related_app_id")
+    private Long relatedAppId;
+
     @Generated(event = EventType.INSERT)
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

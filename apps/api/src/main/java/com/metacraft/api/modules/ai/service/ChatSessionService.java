@@ -79,6 +79,7 @@ public class ChatSessionService {
         return ChatSessionVO.builder()
                 .sessionId(entity.getSessionId())
                 .title(entity.getTitle())
+                .relatedAppId(entity.getRelatedAppId())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
