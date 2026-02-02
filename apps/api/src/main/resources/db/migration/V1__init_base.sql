@@ -1,6 +1,3 @@
--- 初始化数据库基础设施
-
--- 创建自动更新 updated_at 的触发器函数
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN

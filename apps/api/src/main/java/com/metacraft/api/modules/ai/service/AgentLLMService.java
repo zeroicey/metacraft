@@ -60,8 +60,13 @@ public class AgentLLMService {
                                     if (!content.isEmpty()) {
                                         try {
                                             // 1. 发送给前端
+                                            // 生产级方案：使用 JSON 包装内容，自动处理所有特殊字符（空格、换行等）
+                                            // 这避免了自定义协议 (<SPACE>) 的潜在冲突，是行业标准做法。
+                                            java.util.Map<String, String> chunk = new java.util.HashMap<>();
+                                            chunk.put("content", content);
+                                            
                                             emitter.send(SseEmitter.event()
-                                                    .data(content)
+                                                    .data(chunk)
                                                     .name("message"));
 
                                             // 2. 拼接到缓存
