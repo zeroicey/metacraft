@@ -45,39 +45,4 @@ public class AgentController {
         Long userId = jwtTokenProvider.getUserIdFromToken(token);
         return agentService.unifiedStream(request, userId);
     }
-
-
-    @PostMapping(value = "/intent")
-    @Operation(summary = "判断用户意图", description = "返回 chat 或 gen，非流式")
-    public ResponseEntity<ApiResponse<AgentIntentResponseVO>> classifyIntent(
-            @Valid @RequestBody AgentIntentRequestDTO request,
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
-        AuthUtils.validateAuthorization(authHeader, jwtTokenProvider);
-        AgentIntentResponseVO intent = agentIntentService.classifyIntent(request);
-        return Response.success("Intent classified")
-                .data(intent)
-                .build();
-    }
-
-    @PostMapping(value = "/chat")
-    @Operation(summary = "智能体聊天", description = "SSE 流式聊天")
-    public Object chat(
-            @Valid @RequestBody AgentRequestDTO request,
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
-        AuthUtils.validateAuthorization(authHeader, jwtTokenProvider);
-        String token = authHeader.substring(7);
-        Long userId = jwtTokenProvider.getUserIdFromToken(token);
-        return agentService.chatStream(request, userId);
-    }
-
-    @PostMapping(value = "/gen")
-    @Operation(summary = "智能体生成", description = "SSE 流式生成代码/页面/工具")
-    public Object gen(
-            @Valid @RequestBody AgentRequestDTO request,
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
-        AuthUtils.validateAuthorization(authHeader, jwtTokenProvider);
-        String token = authHeader.substring(7);
-        Long userId = jwtTokenProvider.getUserIdFromToken(token);
-        return agentService.genStream(request, userId);
-    }
 }
