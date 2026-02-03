@@ -70,6 +70,7 @@ export struct ChatPanel {
   @State messages: ChatMessage[] = [];
   @State inputText: string = '';
   @State lastMsgUpdateTrigger: number = 0; // Force UI update trigger
+  @State isSending: boolean = false;
   private scroller: Scroller = new Scroller(); // Add scroller
 
   aboutToAppear() {
@@ -77,6 +78,7 @@ export struct ChatPanel {
   }
 
   onSessionIdChange() {
+    this.isSending = false;
     this.loadHistory();
   }
 
@@ -108,6 +110,11 @@ export struct ChatPanel {
     if (content.length === 0) {
       return;
     }
+
+    if (this.isSending) {
+      return;
+    }
+    this.isSending = true;
     
     // Optimistic update
     this.messages.push(new ChatMessage(Date.now(), content, true));
@@ -125,13 +132,14 @@ export struct ChatPanel {
     // Pass sessionId if available
     const req = new AiChatRequestModel(content, this.sessionId);
 
-    await aiChatApi.sendStreamMessage(
-      req,
-      (text: string) => {
-        currentText += text;
-        const now = Date.now();
-        console.info(`[ChatPanel] Received text chunk: "${text}", current total length: ${currentText.length}`);
-        
+    try {
+      await aiChatApi.sendStreamMessage(
+        req,
+        (text: string) => {
+          currentText += text;
+          const now = Date.now();
+          console.info(`[ChatPanel] Received text chunk: "${text}", current total length: ${currentText.length}`);
+
           // Throttle updates to avoid UI flickering
           if (now - lastUpdateTime >= UPDATE_INTERVAL) {
             const index = this.messages.findIndex(m => m.id === botMsgId);
@@ -146,27 +154,37 @@ export struct ChatPanel {
           }
         },
         () => {
+          this.isSending = false;
           // Flush any remaining text update
           const index = this.messages.findIndex(m => m.id === botMsgId);
           if (index !== -1) {
             const msg = this.messages[index];
             // Only update if there's a difference to avoid unnecessary render
             if (msg.text !== currentText) {
-               console.info(`[ChatPanel] Final flush UI, msgId: ${botMsgId}, text length: ${currentText.length}`);
-               this.messages[index].text = currentText;
+              console.info(`[ChatPanel] Final flush UI, msgId: ${botMsgId}, text length: ${currentText.length}`);
+              this.messages[index].text = currentText;
             }
             this.scrollToBottom();
           }
           console.info('Stream completed');
         },
-      (err: string) => {
-        const index = this.messages.findIndex(m => m.id === botMsgId);
-        if (index !== -1) {
-          const msg = this.messages[index];
-          this.messages[index].text = msg.text ? `${msg.text}\n[Error: ${err}]` : `请求失败：${err}`;
+        (err: string) => {
+          this.isSending = false;
+          const index = this.messages.findIndex(m => m.id === botMsgId);
+          if (index !== -1) {
+            const msg = this.messages[index];
+            this.messages[index].text = msg.text ? `${msg.text}\n[Error: ${err}]` : `请求失败：${err}`;
+          }
         }
+      );
+    } catch (error) {
+      this.isSending = false;
+      console.error('[ChatPanel] Send exception:', error);
+      const index = this.messages.findIndex(m => m.id === botMsgId);
+      if (index !== -1) {
+        this.messages[index].text += `\n[Exception: ${JSON.stringify(error)}]`;
       }
-    );
+    }
   }
 
   scrollToBottom() {
@@ -210,7 +228,7 @@ export struct ChatPanel {
             .backgroundColor($r('sys.color.ohos_id_color_emphasize'))
             .borderRadius(10)
             .margin({ left: 8 })
-            .enabled(this.inputText.trim().length > 0)
+            .enabled(!this.isSending && this.inputText.trim().length > 0)
             .onClick(() => { this.send(); })
         }
         .width('100%')
