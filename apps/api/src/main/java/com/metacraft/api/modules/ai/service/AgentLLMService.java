@@ -48,6 +48,59 @@ public class AgentLLMService {
             Consumer<String> onRealTimeChunk,
             Consumer<String> onComplete
     ) {
+        executeStreamWithCallback(params, 
+            chunk -> {
+                try {
+                    // 1. 发送给前端
+                    java.util.Map<String, String> data = new java.util.HashMap<>();
+                    data.put("content", chunk);
+                    
+                    emitter.send(SseEmitter.event()
+                            .data(data)
+                            .name("message"));
+
+                    // 2. 实时回调
+                    if (onRealTimeChunk != null) {
+                        onRealTimeChunk.accept(chunk);
+                    }
+                } catch (IOException e) {
+                    emitter.completeWithError(e);
+                }
+            },
+            fullContent -> {
+                try {
+                    emitter.send(SseEmitter.event().data("[DONE]").name("done"));
+                    emitter.complete();
+
+                    // 3. 完成回调
+                    if (onComplete != null) {
+                        onComplete.accept(fullContent);
+                    }
+                } catch (IOException e) {
+                    emitter.completeWithError(e);
+                }
+            },
+            error -> {
+                log.error("Stream error", error);
+                emitter.completeWithError(error);
+            }
+        );
+    }
+
+    /**
+     * 自定义回调流式执行器 (不依赖 SseEmitter)
+     *
+     * @param params          Zhipu 请求参数
+     * @param onChunk         实时 Chunk 回调
+     * @param onComplete      完成回调
+     * @param onError         错误回调
+     */
+    public void executeStreamWithCallback(
+            ChatCompletionCreateParams params,
+            Consumer<String> onChunk,
+            Consumer<String> onComplete,
+            Consumer<Throwable> onError
+    ) {
         StringBuilder accumulator = new StringBuilder();
 
         client.chat().createChatCompletion(params).getFlowable()
@@ -58,46 +111,22 @@ public class AgentLLMService {
                                 if (delta != null && delta.getContent() != null) {
                                     String content = delta.getContent();
                                     if (!content.isEmpty()) {
-                                        try {
-                                            // 1. 发送给前端
-                                            // 生产级方案：使用 JSON 包装内容，自动处理所有特殊字符（空格、换行等）
-                                            // 这避免了自定义协议 (<SPACE>) 的潜在冲突，是行业标准做法。
-                                            java.util.Map<String, String> chunk = new java.util.HashMap<>();
-                                            chunk.put("content", content);
-                                            
-                                            emitter.send(SseEmitter.event()
-                                                    .data(chunk)
-                                                    .name("message"));
-
-                                            // 2. 拼接到缓存
-                                            accumulator.append(content);
-
-                                            // 3. 实时回调
-                                            if (onRealTimeChunk != null) {
-                                                onRealTimeChunk.accept(content);
-                                            }
-                                        } catch (IOException e) {
-                                            emitter.completeWithError(e);
+                                        accumulator.append(content);
+                                        if (onChunk != null) {
+                                            onChunk.accept(content);
                                         }
                                     }
                                 }
                             }
                         },
                         error -> {
-                            log.error("Stream error", error);
-                            emitter.completeWithError(error);
+                            if (onError != null) {
+                                onError.accept(error);
+                            }
                         },
                         () -> {
-                            try {
-                                emitter.send(SseEmitter.event().data("[DONE]").name("done"));
-                                emitter.complete();
-
-                                // 4. 完成回调
-                                if (onComplete != null) {
-                                    onComplete.accept(accumulator.toString());
-                                }
-                            } catch (IOException e) {
-                                emitter.completeWithError(e);
+                            if (onComplete != null) {
+                                onComplete.accept(accumulator.toString());
                             }
                         }
                 );

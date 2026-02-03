@@ -7,6 +7,7 @@ import com.metacraft.api.modules.ai.dto.AgentIntentRequestDTO;
 import com.metacraft.api.modules.ai.dto.AgentRequestDTO;
 import com.metacraft.api.modules.ai.prompt.AgentPrompts;
 import com.metacraft.api.modules.ai.vo.AgentIntentResponseVO;
+import com.metacraft.api.modules.app.service.AppService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +30,7 @@ public class AgentService {
     private final AgentLLMService llmService;
     private final AgentIntentService intentService;
     private final AgentMessageService messageService;
+    private final AppService appService;
 
     public SseEmitter unifiedStream(AgentRequestDTO request, Long userId) {
         SseEmitter emitter = new SseEmitter(0L);
@@ -78,13 +80,82 @@ public class AgentService {
                         .build();
                         
                 // 5. 执行流式生成
-                llmService.executeStream(emitter, params, null, (fullContent) -> {
-                    if ("gen".equals(intent)) {
-                        messageService.handleGenCompletion(userId, sessionId, request.getMessage(), fullContent);
-                    } else {
-                        messageService.saveAssistantMessage(userId, sessionId, fullContent);
-                    }
-                });
+                if ("gen".equals(intent)) {
+                    StringBuilder localBuffer = new StringBuilder();
+                    java.util.concurrent.atomic.AtomicInteger sentLength = new java.util.concurrent.atomic.AtomicInteger(0);
+                    java.util.concurrent.atomic.AtomicBoolean planFinished = new java.util.concurrent.atomic.AtomicBoolean(false);
+                    String DELIMITER = "<<<<CODE_GENERATION>>>>";
+                    int KEEP_COUNT = DELIMITER.length() - 1;
+
+                    llmService.executeStreamWithCallback(params, 
+                        chunk -> {
+                            try {
+                                if (!planFinished.get()) {
+                                    localBuffer.append(chunk);
+                                    int delimiterIndex = localBuffer.indexOf(DELIMITER);
+                                    
+                                    if (delimiterIndex != -1) {
+                                        // Found delimiter
+                                        planFinished.set(true);
+                                        
+                                        // Send remaining plan part
+                                        if (delimiterIndex > sentLength.get()) {
+                                            String contentToSend = localBuffer.substring(sentLength.get(), delimiterIndex);
+                                            java.util.Map<String, String> data = new java.util.HashMap<>();
+                                            data.put("content", contentToSend);
+                                            emitter.send(SseEmitter.event().data(data).name("plan"));
+                                        }
+                                    } else {
+                                        // Delimiter not found yet.
+                                        // Send safe part, keep tail
+                                        int safeEndIndex = localBuffer.length() - KEEP_COUNT;
+                                        if (safeEndIndex > sentLength.get()) {
+                                             String contentToSend = localBuffer.substring(sentLength.get(), safeEndIndex);
+                                             java.util.Map<String, String> data = new java.util.HashMap<>();
+                                             data.put("content", contentToSend);
+                                             emitter.send(SseEmitter.event().data(data).name("plan"));
+                                             sentLength.set(safeEndIndex);
+                                        }
+                                    }
+                                }
+                            } catch (Exception e) {
+                                log.error("Stream error", e);
+                                emitter.completeWithError(e);
+                            }
+                        }, 
+                        fullContent -> {
+                             try {
+                                // Extract Code
+                                String codePart = fullContent;
+                                int delimiterIndex = fullContent.indexOf(DELIMITER);
+                                if (delimiterIndex != -1) {
+                                    codePart = fullContent.substring(delimiterIndex + DELIMITER.length());
+                                }
+                                
+                                com.metacraft.api.modules.app.entity.AppVersionEntity version = messageService.handleGenCompletion(userId, sessionId, request.getMessage(), codePart);
+                                
+                                if (version != null) {
+                                    com.metacraft.api.modules.app.entity.AppEntity app = appService.getApp(version.getAppId());
+                                    String previewUrl = "/api/preview/" + app.getUuid() + "/v/" + version.getVersionNumber();
+                                    
+                                    emitter.send(SseEmitter.event().name("app_generated").data(previewUrl));
+                                }
+                                
+                                emitter.send(SseEmitter.event().data("[DONE]").name("done"));
+                                emitter.complete();
+                             } catch (Exception e) {
+                                 log.error("Completion error", e);
+                                 emitter.completeWithError(e);
+                             }
+                        },
+                        error -> {
+                            log.error("Stream error", error);
+                            emitter.completeWithError(error);
+                        }
+                    );
+                } else {
+                    llmService.executeStream(emitter, params, null, (fullContent) -> messageService.saveAssistantMessage(userId, sessionId, fullContent));
+                }
                 
             } catch (Exception e) {
                 log.error("Unified stream error", e);

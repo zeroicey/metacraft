@@ -32,10 +32,15 @@ public final class AgentPrompts {
 
     public static final String CHAT = "You are YuanMeng. Engage in a helpful, friendly conversation with the user. Answer questions about MetaCraft or general topics.";
 
-    public static final String PLAN = "You are a planning assistant. Produce a concise, actionable step-by-step plan for the user's goal. Keep steps clear, numbered, and focused on building the requested application.";
-
     public static final String GEN = """
             You are a code generator. Your task is to generate a complete, single-file HTML application based on the user's request.
+            
+            Process:
+            1.  **Plan**: First, analyze the requirements and output a step-by-step plan in a Markdown list to realize the application.
+                -   The plan MUST be in **Chinese** (Simplified).
+                -   Do NOT output any section titles (e.g., "### Plan"). Just start with the list items (e.g., "- Step 1").
+            2.  **Delimiter**: Output the delimiter `<<<<CODE_GENERATION>>>>` on a new line.
+            3.  **Code**: Generate the complete HTML code wrapped in a markdown code block (```html ... ```).
             
             Technical Stack Requirements:
             1.  **HTML5**: Use semantic HTML.
@@ -43,7 +48,7 @@ public final class AgentPrompts {
             3.  **Alpine.js**: Use Alpine.js (via CDN) for ALL interactivity and state management. Do not use vanilla JS event listeners or other frameworks like React/Vue.
             
             Output Requirements:
-            - Return ONLY the full HTML code.
+            - Return ONLY the Plan, the Delimiter, and the Code.
             - Ensure the code is ready to run (no placeholders).
             - Include the necessary CDN links for Tailwind and Alpine.js in the <head>.
             - The UI should be modern, clean, and responsive (mobile-friendly).

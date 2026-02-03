@@ -68,7 +68,7 @@ public class AgentMessageService {
     }
 
     @Transactional
-    public void handleGenCompletion(Long userId, String sessionId, String userPrompt, String fullContent) {
+    public AppVersionEntity handleGenCompletion(Long userId, String sessionId, String userPrompt, String fullContent) {
         // Clean up markdown code blocks
         String cleanContent = fullContent;
         if (cleanContent.startsWith("```html")) {
@@ -86,7 +86,7 @@ public class AgentMessageService {
         if (session == null) {
             log.warn("Session not found for completion: {}", sessionId);
             saveAssistantMessage(userId, sessionId, cleanContent);
-            return;
+            return null;
         }
 
         Long appId = session.getRelatedAppId();
@@ -107,5 +107,7 @@ public class AgentMessageService {
 
         // 4. Save Message with relation (content is null for app generation)
         saveAssistantMessage(userId, sessionId, null, appId, version.getId());
+        
+        return version;
     }
 }
