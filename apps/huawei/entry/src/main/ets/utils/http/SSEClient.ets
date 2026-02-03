@@ -23,6 +23,24 @@ export interface SSEListener {
    * 流结束时触发
    */
   onDone?: () => void;
+
+  /**
+   * 收到意图识别结果时触发
+   * @param intent 意图类型 (chat | gen)
+   */
+  onIntent?: (intent: string) => void;
+
+  /**
+   * 收到计划内容时触发 (用于 gen 模式)
+   * @param data 计划内容片段
+   */
+  onPlan?: (data: string) => void;
+
+  /**
+   * 应用生成完毕时触发
+   * @param previewUrl 预览链接
+   */
+  onAppGenerated?: (previewUrl: string) => void;
 }
 
 /**
@@ -104,8 +122,22 @@ class SSEWriteStream implements rcp.WriteStream {
     console.info(`[SSEWriteStream] Parsed event - Name: '${eventName}', Data length: ${eventData.length}, Data: '${eventData.replace(/\n/g, '\\n')}'`);
 
     // 根据事件类型分发
-    if ((!eventName || eventName === 'message') && eventData.length > 0) {
-      this.listener.onMessage(eventData);
+    if (!eventName || eventName === 'message') {
+      if (eventData.length > 0) {
+        this.listener.onMessage(eventData);
+      }
+    } else if (eventName === 'plan') {
+      if (this.listener.onPlan && eventData.length > 0) {
+        this.listener.onPlan(eventData);
+      }
+    } else if (eventName === 'intent') {
+      if (this.listener.onIntent && eventData.length > 0) {
+        this.listener.onIntent(eventData);
+      }
+    } else if (eventName === 'app_generated') {
+      if (this.listener.onAppGenerated && eventData.length > 0) {
+        this.listener.onAppGenerated(eventData);
+      }
     } else if (eventName === 'done') {
       // 收到结束事件
       if (this.listener.onDone) this.listener.onDone();
@@ -139,6 +171,14 @@ export class SSEClient {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'text/event-stream'
+      },
+      requestConfiguration: {
+        transfer: {
+          timeout: {
+            connectMs: 60000, // 60s
+            transferMs: 3600000 // 1 hour for long generation tasks
+          }
+        }
       }
     });
 
@@ -152,7 +192,10 @@ export class SSEClient {
         if (this.listener.onDone) {
           this.listener.onDone();
         }
-      }
+      },
+      onPlan: this.listener.onPlan,
+      onIntent: this.listener.onIntent,
+      onAppGenerated: this.listener.onAppGenerated
     });
 
     try {

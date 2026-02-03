@@ -27,15 +27,15 @@ export class HttpManager {
         new AuthInterceptor(),
         new ResponseInterceptor()
       ],
-      // 可选：配置超时、代理等 [5][6]
-      // requestConfiguration: {
-      //   transfer: {
-      //     timeout: {
-      //       connectMs: 5000,
-      //       transferMs: 10000
-      //     }
-      //   }
-      // }
+      // 配置超时
+      requestConfiguration: {
+        transfer: {
+          timeout: {
+            connectMs: 60000,
+            transferMs: 3600000 // 1 hour
+          }
+        }
+      }
     };
 
     // 3. 创建 Session [7]

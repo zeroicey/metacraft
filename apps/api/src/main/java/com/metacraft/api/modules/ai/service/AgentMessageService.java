@@ -70,12 +70,23 @@ public class AgentMessageService {
     @Transactional
     public AppVersionEntity handleGenCompletion(Long userId, String sessionId, String userPrompt, String fullContent) {
         // Clean up markdown code blocks
-        String cleanContent = fullContent;
+        String cleanContent = fullContent.trim();
+        
+        // Safety check: Remove delimiter if it exists (in case AgentService missed it or passed raw content)
+        String DELIMITER = "<<<<CODE_GENERATION>>>>";
+        int delimiterIndex = cleanContent.lastIndexOf(DELIMITER);
+        if (delimiterIndex != -1) {
+            cleanContent = cleanContent.substring(delimiterIndex + DELIMITER.length()).trim();
+        }
+
         if (cleanContent.startsWith("```html")) {
             cleanContent = cleanContent.substring(7);
         } else if (cleanContent.startsWith("```")) {
             cleanContent = cleanContent.substring(3);
         }
+        
+        cleanContent = cleanContent.trim();
+        
         if (cleanContent.endsWith("```")) {
             cleanContent = cleanContent.substring(0, cleanContent.length() - 3);
         }

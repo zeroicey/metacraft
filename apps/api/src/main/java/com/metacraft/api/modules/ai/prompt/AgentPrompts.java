@@ -38,7 +38,7 @@ public final class AgentPrompts {
             Process:
             1.  **Plan**: First, analyze the requirements and output a step-by-step plan in a Markdown list to realize the application.
                 -   The plan MUST be in **Chinese** (Simplified).
-                -   Do NOT output any section titles (e.g., "### Plan"). Just start with the list items (e.g., "- Step 1").
+                -   Do NOT output any section titles (e.g., "### Plan"). Just start with the list items (e.g., "- 1").
             2.  **Delimiter**: Output the delimiter `<<<<CODE_GENERATION>>>>` on a new line.
             3.  **Code**: Generate the complete HTML code wrapped in a markdown code block (```html ... ```).
             

@@ -127,10 +127,11 @@ public class AgentService {
                              try {
                                 // Extract Code
                                 String codePart = fullContent;
-                                int delimiterIndex = fullContent.indexOf(DELIMITER);
+                                int delimiterIndex = fullContent.lastIndexOf(DELIMITER);
                                 if (delimiterIndex != -1) {
                                     codePart = fullContent.substring(delimiterIndex + DELIMITER.length());
                                 }
+                                codePart = codePart.trim();
                                 
                                 com.metacraft.api.modules.app.entity.AppVersionEntity version = messageService.handleGenCompletion(userId, sessionId, request.getMessage(), codePart);
                                 

@@ -1,6 +1,5 @@
-import { http, ApiResponse } from '../utils/http/HttpManager';
 import { SSEClient } from '../utils/http/SSEClient';
-import { AiChatRequest, AiChatReply, AiChatModel, AiChatApiResponse } from '../model/aiChatModel';
+import { AiChatRequest, AiChatReply, AiChatModel } from '../model/aiChatModel';
 
 export interface AiChatResult {
   success: boolean;
@@ -9,54 +8,14 @@ export interface AiChatResult {
 }
 
 class AiChatApi {
-  async sendMessage(req: AiChatRequest): Promise<AiChatResult> {
-    console.info('[AiChatApi] ======== Send Message (non-stream) ========');
-
-    const GeneratedDestructObj_1 = AiChatModel.validateRequest(req);
-    const valid = GeneratedDestructObj_1.valid;
-    const error = GeneratedDestructObj_1.error;
-    if (!valid) {
-      console.error('[AiChatApi] Validation failed:', error);
-      return { success: false, error };
-    }
-
-    const dto = AiChatModel.toDTO(req);
-    console.info('[AiChatApi] URL: /api/ai/chat/message');
-    console.info('[AiChatApi] Payload:', JSON.stringify(dto));
-
-    try {
-      const response = await http.post<ApiResponse<AiChatReply>>('/api/ai/chat/message', dto);
-      console.info('[AiChatApi] Response message:', response.message);
-      console.info('[AiChatApi] Response error:', response.error);
-      console.info('[AiChatApi] Response data:', JSON.stringify(response.data));
-
-      if (response.error) {
-        const errMsg = typeof response.error === 'string' ? response.error : response.message || 'Server error';
-        console.error('[AiChatApi] Business error:', errMsg);
-        return { success: false, error: errMsg };
-      }
-
-      const data = AiChatModel.fromResponse(response as AiChatApiResponse);
-      if (!data) {
-        const msg = response.message || 'Empty response data';
-        console.error('[AiChatApi] Empty data');
-        return { success: false, error: msg };
-      }
-
-      console.info('[AiChatApi] ======== Chat Success ========');
-      return { success: true, data };
-    } catch (err) {
-      const errorObj = err as Error;
-      console.error('[AiChatApi] Network/HTTP error:', errorObj.message);
-      return { success: false, error: errorObj.message || 'Network request failed' };
-    }
-  }
-
   async sendStreamMessage(
     req: AiChatRequest,
     onMessage: (text: string) => void,
     onDone: () => void,
-    onError: (err: string) => void
+    onError: (err: string) => void,
+    onPlan?: (text: string) => void,
+    onIntent?: (intent: string) => void,
+    onAppGenerated?: (url: string) => void
   ): Promise<void> {
     console.info('[AiChatApi] ======== Send Message (stream - rcp) ========');
 
@@ -73,14 +32,17 @@ class AiChatApi {
     }
     
     // Using the specific agent chat endpoint for streaming
-    const url = 'http://192.168.1.118:8080/api/ai/agent/chat';
+    const url = 'http://192.168.1.118:8080/api/ai/agent/unified';
     console.info('[AiChatApi] Stream URL:', url);
 
     // Instantiate SSEClient with callbacks
     const client = new SSEClient({
       onMessage: onMessage,
       onError: onError,
-      onDone: onDone
+      onDone: onDone,
+      onPlan: onPlan,
+      onIntent: onIntent,
+      onAppGenerated: onAppGenerated
     });
 
     // Start connection

@@ -3,17 +3,20 @@ import { chatSessionApi } from '../api/chatSession';
 import { Markdown } from '@luvi/lv-markdown-in';
 import { AiChatRequestModel } from '../model/aiChatModel';
 import { ChatMessage as ApiChatMessage } from '../model/chatSessionModel';
+import { AppPreviewCard } from './AppPreviewCard';
 
 @Observed
 export class ChatMessage {
   id: number;
   text: string;
   isUser: boolean;
+  previewUrl?: string;
 
-  constructor(id: number, text: string, isUser: boolean) {
+  constructor(id: number, text: string, isUser: boolean, previewUrl?: string) {
     this.id = id;
     this.text = text;
     this.isUser = isUser;
+    this.previewUrl = previewUrl;
   }
 }
 
@@ -41,16 +44,18 @@ struct MessageItem {
     } else {
       Row() {
         Column() {
-          // Debug Text to verify data flow - KEEP THIS until resolved
-          // Text(`[Debug] Len: ${this.message.text.length}`).fontSize(10).fontColor(Color.Red)
-          
-          if (this.message.text.length > 0) {
+          // Safe check for message text
+          if (this.message.text && this.message.text.length > 0) {
             Markdown({
               text: this.message.text,
               mode: 'text'
             })
           } else {
-             LoadingProgress().width(24).height(24).color('#999999')
+            LoadingProgress().width(24).height(24).color('#999999')
+          }
+
+          if (this.message.previewUrl) {
+            AppPreviewCard({ previewUrl: this.message.previewUrl })
           }
         }
         .alignItems(HorizontalAlign.Start)
@@ -132,27 +137,32 @@ export struct ChatPanel {
     // Pass sessionId if available
     const req = new AiChatRequestModel(content, this.sessionId);
 
+    // Helper to handle text chunks (chat or plan)
+    const handleTextChunk = (text: string) => {
+      currentText += text;
+      const now = Date.now();
+      // console.info(`[ChatPanel] Received text chunk: "${text}", current total length: ${currentText.length}`);
+
+      // Throttle updates to avoid UI flickering
+      if (now - lastUpdateTime >= UPDATE_INTERVAL) {
+        const index = this.messages.findIndex(m => m.id === botMsgId);
+        if (index !== -1) {
+          // console.info(`[ChatPanel] Updating UI, msgId: ${botMsgId}, text length: ${currentText.length}`);
+          this.messages[index].text = currentText;
+          lastUpdateTime = now;
+          this.scrollToBottom();
+        }
+      }
+    };
+
     try {
       await aiChatApi.sendStreamMessage(
         req,
+        // onMessage
         (text: string) => {
-          currentText += text;
-          const now = Date.now();
-          console.info(`[ChatPanel] Received text chunk: "${text}", current total length: ${currentText.length}`);
-
-          // Throttle updates to avoid UI flickering
-          if (now - lastUpdateTime >= UPDATE_INTERVAL) {
-            const index = this.messages.findIndex(m => m.id === botMsgId);
-            if (index !== -1) {
-              console.info(`[ChatPanel] Updating UI, msgId: ${botMsgId}, text length: ${currentText.length}`);
-              // Update text
-              // Trigger state update by modifying the @Observed object property directly
-              this.messages[index].text = currentText;
-              lastUpdateTime = now;
-              this.scrollToBottom();
-            }
-          }
+          handleTextChunk(text);
         },
+        // onDone
         () => {
           this.isSending = false;
           // Flush any remaining text update
@@ -168,6 +178,7 @@ export struct ChatPanel {
           }
           console.info('Stream completed');
         },
+        // onError
         (err: string) => {
           this.isSending = false;
           const index = this.messages.findIndex(m => m.id === botMsgId);
@@ -175,6 +186,23 @@ export struct ChatPanel {
             const msg = this.messages[index];
             this.messages[index].text = msg.text ? `${msg.text}\n[Error: ${err}]` : `请求失败：${err}`;
           }
+        },
+        // onPlan
+        (text: string) => {
+          handleTextChunk(text);
+        },
+        // onIntent
+        (intent: string) => {
+           console.info(`[ChatPanel] Intent: ${intent}`);
+        },
+        // onAppGenerated
+        (url: string) => {
+           console.info(`[ChatPanel] App Generated: ${url}`);
+           const index = this.messages.findIndex(m => m.id === botMsgId);
+           if (index !== -1) {
+             this.messages[index].previewUrl = url;
+             this.scrollToBottom();
+           }
         }
       );
     } catch (error) {
