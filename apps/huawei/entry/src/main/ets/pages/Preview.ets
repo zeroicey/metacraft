@@ -1,5 +1,4 @@
 import { webview } from '@kit.ArkWeb';
-import { router } from '@kit.ArkUI';
 
 @Entry
 @Component
@@ -11,7 +10,7 @@ struct PreviewPage {
 
   aboutToAppear() {
     this.topRectHeight = AppStorage.get<number>('topRectHeight') ?? 0;
-    const params = router.getParams() as Record<string, string>;
+    const params = this.getUIContext().getRouter().getParams() as Record<string, string>;
     if (params && params['url']) {
       // Assuming the URL from backend is relative "/api/preview/..." or absolute
       // If relative, prepend host. 
@@ -32,7 +31,7 @@ struct PreviewPage {
           .width(24)
           .height(24)
           .onClick(() => {
-            router.back();
+            this.getUIContext().getRouter().back();
           })
         Text('App Preview')
           .fontSize(18)
@@ -40,7 +39,6 @@ struct PreviewPage {
           .margin({ left: 16 })
       }
       .width('100%')
-      .height(56)
       .padding({
         top: this.getUIContext().px2vp(this.topRectHeight),
         left: 16,
