@@ -16,6 +16,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Arrays;
 
+import com.metacraft.api.modules.ai.dto.AppMetadataDTO;
+import java.util.concurrent.CompletableFuture;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,6 +35,7 @@ public class AgentService {
     private final AgentIntentService intentService;
     private final AgentMessageService messageService;
     private final AppService appService;
+    private final ObjectMapper objectMapper;
 
     public SseEmitter unifiedStream(AgentRequestDTO request, Long userId) {
         SseEmitter emitter = new SseEmitter(0L);
@@ -81,6 +86,11 @@ public class AgentService {
                         
                 // 5. 执行流式生成
                 if ("gen".equals(intent)) {
+                    // Start async metadata generation
+                    CompletableFuture<AppMetadataDTO> metadataFuture = CompletableFuture.supplyAsync(() -> 
+                        generateAppMetadata(request.getMessage())
+                    );
+
                     StringBuilder localBuffer = new StringBuilder();
                     java.util.concurrent.atomic.AtomicInteger sentLength = new java.util.concurrent.atomic.AtomicInteger(0);
                     java.util.concurrent.atomic.AtomicBoolean planFinished = new java.util.concurrent.atomic.AtomicBoolean(false);
@@ -133,7 +143,13 @@ public class AgentService {
                                 }
                                 codePart = codePart.trim();
                                 
-                                com.metacraft.api.modules.app.entity.AppVersionEntity version = messageService.handleGenCompletion(userId, sessionId, request.getMessage(), codePart);
+                                com.metacraft.api.modules.app.entity.AppVersionEntity version = messageService.handleGenCompletion(
+                                    userId, 
+                                    sessionId, 
+                                    request.getMessage(), 
+                                    codePart,
+                                    metadataFuture
+                                );
                                 
                                 if (version != null) {
                                     com.metacraft.api.modules.app.entity.AppEntity app = appService.getApp(version.getAppId());
@@ -165,5 +181,49 @@ public class AgentService {
         });
         
         return emitter;
+    }
+
+    private AppMetadataDTO generateAppMetadata(String userPrompt) {
+        try {
+            String systemPrompt = AgentPrompts.METADATA_GEN;
+            
+            ChatMessage systemMsg = ChatMessage.builder()
+                    .role(ChatMessageRole.SYSTEM.value())
+                    .content(systemPrompt)
+                    .build();
+            
+            ChatMessage userMsg = ChatMessage.builder()
+                    .role(ChatMessageRole.USER.value())
+                    .content(userPrompt)
+                    .build();
+
+            ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
+                    .model(chatModel) // Use chat model for faster/cheaper metadata gen
+                    .messages(Arrays.asList(systemMsg, userMsg))
+                    .temperature(0.7f)
+                    .maxTokens(500)
+                    .build();
+
+            ai.z.openapi.service.model.ChatCompletionResponse response = llmService.executeSync(params);
+            
+            if (response.getData() != null && response.getData().getChoices() != null && !response.getData().getChoices().isEmpty()) {
+                String content = response.getData().getChoices().get(0).getMessage().getContent().toString();
+                // Clean content if it has Markdown
+                if (content.startsWith("```json")) {
+                    content = content.substring(7);
+                } else if (content.startsWith("```")) {
+                    content = content.substring(3);
+                }
+                if (content.endsWith("```")) {
+                    content = content.substring(0, content.length() - 3);
+                }
+                content = content.trim();
+                
+                return objectMapper.readValue(content, AppMetadataDTO.class);
+            }
+        } catch (Exception e) {
+            log.error("Failed to generate app metadata", e);
+        }
+        return null;
     }
 }

@@ -81,4 +81,21 @@ public class AppService {
         return appRepository.findById(appId)
                 .orElseThrow(() -> new RuntimeException("App not found: " + appId));
     }
+
+    /**
+     * 更新应用元数据
+     */
+    @Transactional
+    public void updateAppMetadata(Long appId, String name, String description) {
+        appRepository.findById(appId).ifPresent(app -> {
+            if (name != null && !name.isEmpty()) {
+                app.setName(name);
+            }
+            if (description != null && !description.isEmpty()) {
+                app.setDescription(description);
+            }
+            appRepository.save(app);
+            log.info("Updated metadata for app {}: name={}, description={}", appId, name, description);
+        });
+    }
 }

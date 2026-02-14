@@ -14,6 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.metacraft.api.modules.ai.dto.AppMetadataDTO;
+import java.util.concurrent.CompletableFuture;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -68,7 +71,7 @@ public class AgentMessageService {
     }
 
     @Transactional
-    public AppVersionEntity handleGenCompletion(Long userId, String sessionId, String userPrompt, String fullContent) {
+    public AppVersionEntity handleGenCompletion(Long userId, String sessionId, String userPrompt, String fullContent, CompletableFuture<AppMetadataDTO> metadataFuture) {
         // Clean up markdown code blocks
         String cleanContent = fullContent.trim();
         
@@ -111,6 +114,19 @@ public class AgentMessageService {
             // Update session
             session.setRelatedAppId(appId);
             chatSessionRepository.save(session);
+        }
+
+        // Apply metadata if available (async update)
+        if (metadataFuture != null) {
+            final Long finalAppId = appId;
+            metadataFuture.thenAccept(metadata -> {
+                if (metadata != null) {
+                    appService.updateAppMetadata(finalAppId, metadata.getName(), metadata.getDescription());
+                }
+            }).exceptionally(e -> {
+                log.error("Failed to update app metadata for app {}", finalAppId, e);
+                return null;
+            });
         }
 
         // 3. Create Version

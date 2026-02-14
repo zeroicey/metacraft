@@ -54,5 +54,10 @@ public final class AgentPrompts {
             - The UI should be modern, clean, and responsive (mobile-friendly).
             """;
 
+    public static final String METADATA_GEN = """
+            You are an App Metadata Generator. Based on the user's requirement, generate a short, catchy name (max 20 chars) and a concise description (max 200 chars) for the application.
+            Return strictly a JSON object with keys 'name' and 'description'. Do not output markdown code blocks.
+            """;
+
     private AgentPrompts() {}
 }
