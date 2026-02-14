@@ -5,12 +5,18 @@ import { chatSessionApi } from '../../api/chatSession';
 export struct SessionList {
   @Param @Require selectedSessionId: string;
   @Param onSessionClick: (sessionId: string) => void = () => {};
+  @Param refreshSignal: number = 0;
 
   @Local todaySessions: ChatSession[] = [];
   @Local yesterdaySessions: ChatSession[] = [];
   @Local past30DaysSessions: ChatSession[] = [];
   @Local isLoading: boolean = false;
   @Local isEmpty: boolean = false;
+
+  @Monitor('refreshSignal')
+  onRefreshSignalChange() {
+    this.fetchSessions();
+  }
 
   aboutToAppear() {
     this.fetchSessions();

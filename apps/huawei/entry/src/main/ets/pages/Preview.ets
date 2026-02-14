@@ -15,11 +15,11 @@ struct PreviewPage {
     if (params && params['url']) {
       // Assuming the URL from backend is relative "/api/preview/..." or absolute
       // If relative, prepend host. 
-      // For now, let's assume we need to prepend the host as used in aiChat.ets (192.168.1.118:8080)
+      // For now, let's assume we need to prepend the host as used in aiChat.ets (192.168.2.133:8080)
       // Or better, let the caller handle the full URL.
       this.url = params['url'];
       if (this.url.startsWith('/')) {
-        this.url = 'http://192.168.1.118:8080' + this.url;
+        this.url = 'http://192.168.2.133:8080' + this.url;
       }
     }
   }

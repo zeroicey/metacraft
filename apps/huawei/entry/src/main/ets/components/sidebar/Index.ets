@@ -1,6 +1,7 @@
 // components/Sidebar.ets
 import { HdsSideBar } from '@kit.UIDesignKit';
 import { SessionList } from './SessionList';
+import { chatSessionApi } from '../../api/chatSession';
 
 @ComponentV2
 export struct Sidebar {
@@ -13,6 +14,14 @@ export struct Sidebar {
   @Local isSideBarContainerMask: boolean = false;
   @Local isAutoHide: boolean = false;
   @Local selectedApp: string = '云养猫互动应用开发'; // 当前选中的应用
+  @Local sessionListRefreshSignal: number = 0;
+
+  @Monitor('isShowSidebar')
+  watchSidebarStatus() {
+    if (this.isShowSidebar) {
+      this.sessionListRefreshSignal++;
+    }
+  }
 
   @Builder
   SideBarPanelBuilder() {
@@ -65,8 +74,7 @@ export struct Sidebar {
         .backgroundColor('#F2F2F2')
         .borderRadius(10)
         .onClick(() => {
-          // TODO: 在主工程中，这里可以通过事件或回调重置首页 Stage 为 Landing
-          this.onSideBarChange(false);
+          this.handleCreateApp();
         })
 
       // Navigation 区域
@@ -86,6 +94,7 @@ export struct Sidebar {
         Column() {
           SessionList({
             selectedSessionId: this.selectedSessionId,
+            refreshSignal: this.sessionListRefreshSignal,
             onSessionClick: (sessionId: string) => {
               this.onSessionChange(sessionId);
               // TODO: 触发主页面切换到对应会话
@@ -151,6 +160,48 @@ export struct Sidebar {
           }
         })
     )
+  }
+
+  private async handleCreateApp() {
+    const DEFAULT_TITLE = '未命名应用';
+    
+    try {
+      // 1. 获取所有会话
+      const sessionsResult = await chatSessionApi.getUserSessions();
+      let targetSessionId: string = '';
+
+      if (sessionsResult.success && sessionsResult.data) {
+        // 2. 查找是否有同名默认会话
+        const candidateSessions = sessionsResult.data.filter((s) => s.title === DEFAULT_TITLE);
+        
+        // 3. 检查这些会话是否为空
+        for (const session of candidateSessions) {
+          const messagesResult = await chatSessionApi.getSessionMessages(session.sessionId);
+          if (messagesResult.success && messagesResult.data && messagesResult.data.length === 0) {
+            targetSessionId = session.sessionId;
+            break; // 找到一个空的默认会话，直接复用
+          }
+        }
+      }
+
+      if (targetSessionId) {
+        // 复用现有会话
+        this.onSessionChange(targetSessionId);
+      } else {
+        // 创建新会话
+        const createResult = await chatSessionApi.createSession(DEFAULT_TITLE);
+        if (createResult.success && createResult.data) {
+          this.onSessionChange(createResult.data.sessionId);
+        } else {
+          console.error('[Sidebar] Failed to create session:', createResult.error);
+        }
+      }
+    } catch (error) {
+      console.error('[Sidebar] Error in handleCreateApp:', error);
+    } finally {
+      // 无论成功失败，关闭侧边栏
+      this.onSideBarChange(false);
+    }
   }
 
   @Builder
