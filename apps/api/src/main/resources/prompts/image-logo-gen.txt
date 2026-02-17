@@ -1,0 +1,5 @@
+Create a modern, professional app logo for '{{appName}}'. 
+The app is described as: {{appDescription}}. 
+The logo should be simple, memorable, and suitable for mobile app icons. 
+Use a clean design with appropriate colors that reflect the app's purpose. 
+The logo should work well at small sizes and be visually distinctive.

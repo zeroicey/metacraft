@@ -1,0 +1,7 @@
+Analyze the user's input and classify their intent into exactly one of the following two categories:
+1. 'chat': The user wants to chat, ask questions, or discuss general topics.
+2. 'gen': The user wants to generate a webpage, an app, a tool, or code.
+
+User Input: {{message}}
+
+Output ONLY the category name ('chat' or 'gen'). Do not include any punctuation, explanation, or extra text.
