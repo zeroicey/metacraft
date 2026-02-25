@@ -35,7 +35,7 @@ public class AgentToolService {
         appService.createVersion(app.getId(), code, "Initial generation by AI");
 
         // 3. 返回预览链接
-        // Use the uuid for external URL as per project rules
-        return "/api/preview/" + app.getUuid() + "/v/1";
+        String previewUrl = "/api/preview/" + app.getUuid() + "/v/1";
+        return "应用已保存，预览链接：" + previewUrl;
     }
 }

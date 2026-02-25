@@ -101,18 +101,8 @@ class SSEWriteStream implements rcp.WriteStream {
         if (content.startsWith(' ')) {
           content = content.substring(1);
         }
-        
-        // Try to parse as JSON (Industry Standard)
-        // Backend now wraps content in JSON object: { "content": "..." }
-        try {
-          const json = JSON.parse(content) as Record<string, Object>;
-          if (json && typeof json.content === 'string') {
-            content = json.content;
-          }
-        } catch (e) {
-          // Not JSON (e.g. "[DONE]" or legacy raw text), keep original content
-        }
-        
+
+        // Backend sends plain text, no JSON parsing needed
         dataBuffer.push(content);
       }
     }

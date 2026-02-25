@@ -98,4 +98,12 @@ public class AppService {
             log.info("Updated metadata for app {}: name={}, description={}", appId, name, description);
         });
     }
+
+    /**
+     * 获取用户最新创建的应用
+     */
+    public AppEntity getLatestAppByUserId(Long userId) {
+        return appRepository.findTopByUserIdOrderByIdDesc(userId)
+                .orElse(null);
+    }
 }

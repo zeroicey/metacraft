@@ -32,7 +32,7 @@ class AiChatApi {
     }
     
     // Using the specific agent chat endpoint for streaming
-    const url = 'http://192.168.2.133:8080/api/ai/agent/unified';
+    const url = 'http://192.168.1.42:8080/api/ai/agent/unified';
     console.info('[AiChatApi] Stream URL:', url);
 
     // Instantiate SSEClient with callbacks

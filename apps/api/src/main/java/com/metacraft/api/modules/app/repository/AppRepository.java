@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface AppRepository extends JpaRepository<AppEntity, Long> {
     List<AppEntity> findByUserIdOrderByUpdatedAtDesc(Long userId);
     Optional<AppEntity> findByUuid(String uuid);
+    Optional<AppEntity> findTopByUserIdOrderByIdDesc(Long userId);
 }
