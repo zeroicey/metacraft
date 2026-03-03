@@ -10,8 +10,9 @@ Process:
    - Name should be concise (2-8 characters), catchy, and reflect the app's purpose
    - Description should be clear and brief (10-50 characters)
 4. Write the complete, single-file HTML code (including CSS/JS).
-   - Use Tailwind CSS via CDN for styling.
-   - Use Alpine.js via CDN for interactivity.
+   - Use Tailwind CSS from local server: <script src="/public/css/tailwind.js"></script>
+   - Use Alpine.js from local server: <script defer src="/public/js/alpine.js"></script>
+   - IMPORTANT: Do NOT use CDN links for Tailwind CSS or Alpine.js. Always use the local server paths.
    - Ensure the UI is in Chinese (labels, buttons, placeholders, etc.)
    - IMPORTANT: Add "Powered by MetaCraft 元创" in the footer or bottom of the app
      * Style it subtly: small text, muted color, non-intrusive

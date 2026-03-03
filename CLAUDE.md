@@ -28,6 +28,14 @@ cd apps/huawei
 ohpm install                    # Install dependencies
 ```
 
+### Running Tests
+```bash
+cd apps/api
+./mvnw test                     # Run all tests
+./mvnw test -Dtest=ClassName    # Run specific test class
+./mvnw test -Dtest=ClassName#methodName  # Run specific test method
+```
+
 ## Technology Stack
 
 **Backend (apps/api/):**
@@ -38,12 +46,26 @@ ohpm install                    # Install dependencies
 - Flyway for database migrations
 - Reactor (`Flux<String>`) for SSE streaming
 - SpringDoc OpenAPI 2.8.14 for Swagger
+- Lombok for reducing boilerplate (configured in maven-compiler-plugin)
 
 **Frontend (apps/huawei/):**
 - ArkTS (TypeScript variant for HarmonyOS)
 - ETS (Extensible Type Script) for UI
 - OHPM for package management
 - @luvi/lv-markdown-in for markdown rendering
+- Custom SSE client using `@kit.RemoteCommunicationKit` (rcp)
+
+### SSE Event Types
+
+The unified endpoint emits custom event types:
+
+| Event | Description | Frontend Handler |
+|-------|-------------|------------------|
+| `intent` | Intent classification result ("chat" or "gen") | `onIntent()` |
+| `message` | Streaming AI response content | `onMessage()` |
+| `plan` | App generation plan (gen mode only) | `onPlan()` |
+| `app_generated` | App generation complete with preview URL | `onAppGenerated()` |
+| `done` | Stream ended | `onDone()` |
 
 ## Architecture
 
@@ -99,6 +121,26 @@ public String saveApp(
 - `agent-gen-app.txt` - App generation prompt (instructs AI to use Tailwind CSS, Alpine.js, call saveApp)
 - `intent-classification.txt` - Intent recognition prompt
 - `image-logo-gen.txt` - Logo generation prompt
+
+### Frontend API Layer
+
+HarmonyOS app uses a layered API architecture:
+
+```
+UI Components (pages/)
+    ↓
+API Modules (api/)
+    ↓
+HttpManager (utils/http/)
+    ↓
+SSEClient / rcp.Session
+```
+
+**Key Patterns:**
+- API modules (e.g., `aiChat.ets`) define request/response interfaces
+- `HttpManager` wraps `rcp.Session` with interceptors
+- `AuthInterceptor` automatically injects JWT tokens
+- `SSEClient` handles streaming responses with custom event parsing
 
 ### Application Version Management
 
@@ -173,7 +215,12 @@ apps/
 │           ├── db/migration/   # V1__*.sql to V5__*.sql
 │           └── prompts/        # AI prompt templates
 └── huawei/                # HarmonyOS app
-    ├── entry/             # Main app entry
+    ├── entry/src/main/ets/
+    │   ├── pages/         # Page components (Index, Explore, Profile, Preview, etc.)
+    │   ├── components/    # Reusable components (ChatPanel, SessionList, AppPreviewCard)
+    │   ├── api/           # API client modules (auth.ets, aiChat.ets, chatSession.ets)
+    │   ├── utils/http/    # HTTP utilities (HttpManager, SSEClient, Interceptors)
+    │   └── model/         # Data models (auth.ets, aiChatModel.ets, chatSessionModel.ets)
     └── ohos_agcit/        # Common modules (login, collect info, settings)
 ```
 
@@ -202,6 +249,12 @@ apps/
 1. Create new Flyway migration `V{n}__description.sql`
 2. Run `./mvnw spring-boot:run` - Flyway auto-applies migrations
 
+**Frontend API integration:**
+1. Define request/response interfaces in `apps/huawei/entry/src/main/ets/api/`
+2. Add endpoint methods using `HttpManager` or `SSEClient`
+3. Update `Interceptors.ets` if authentication headers are needed
+4. Handle SSE events in components using `SSEListener` interface
+
 ## Important Gotchas
 
 1. **LangChain4j tools must be Spring beans** - Use `@Service` or `@Component`
@@ -209,3 +262,8 @@ apps/
 3. **SSE streaming requires Flux<ServerSentEvent<String>>** - Map Flux<String> to SSE events in controller
 4. **File paths use app ID, not UUID** - UUID is for external access, internal storage uses numeric ID
 5. **AI prompt templates use {{variable}} syntax** - Must match `@V("variable")` parameter names
+6. **Manual JWT validation in agent endpoints** - `/api/ai/agent/**` uses `AuthUtils.validateAuthorization()` instead of Spring Security
+7. **RCP error code 1007900992** - In HarmonyOS SSE client, this means "Request canceled" and is expected when closing sessions
+8. **SSE text decoder must use stream mode** - `decoder.decodeToString(buffer, { stream: true })` handles multi-byte UTF-8 characters across chunks
+9. **StorageService path validation** - Always use `normalize()` and `startsWith()` to prevent directory traversal attacks
+10. **Flyway migrations run automatically** - New migrations in `db/migration/` apply on server startup

@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-// @RestController
+@RestController
 @RequestMapping("/ai/messages")
 @Tag(name = "AI 聊天消息", description = "聊天消息管理相关接口（手动 CRUD）")
 @RequiredArgsConstructor

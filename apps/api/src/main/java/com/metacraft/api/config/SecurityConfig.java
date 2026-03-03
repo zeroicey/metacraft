@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                         .requestMatchers("/api/preview/**").permitAll()
+                        .requestMatchers("/public/**").permitAll() // 静态资源访问
                         .requestMatchers("/api/health").permitAll()
                         .requestMatchers("/api/ai/agent/**").permitAll() // 手动进行验证,避免 Security 异常
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/api/v3/api-docs/**")

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-// @RestController
+@RestController
 @RequestMapping("/ai/sessions")
 @Tag(name = "AI 聊天会话", description = "聊天会话管理相关接口")
 @RequiredArgsConstructor
