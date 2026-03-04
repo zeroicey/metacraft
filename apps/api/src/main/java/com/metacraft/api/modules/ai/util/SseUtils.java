@@ -22,22 +22,41 @@ public class SseUtils {
     }
 
     /**
-     * Safely serialize content to JSON string using Jackson.
-     * Handles all special characters, Unicode, and escaping automatically.
-     *
-     * @param content The content to serialize
-     * @return JSON string representation (e.g., "\"content\"")
+     * Create intent event data as a JSON object.
+     * Format: {"intent":"chat" or "gen"}
      */
-    public String toJson(String content) {
-        if (content == null) {
-            return "\"\"";
-        }
+    public String toIntentJson(String intent) {
         try {
-            return objectMapper.writeValueAsString(content);
+            Map<String, String> data = new HashMap<>();
+            data.put("intent", intent != null ? intent : "");
+            return objectMapper.writeValueAsString(data);
         } catch (Exception e) {
-            log.error("JSON serialization failed for content: {}", content.substring(0, Math.min(100, content.length())), e);
-            return "\"\""; // Fallback to empty JSON string
+            log.error("Failed to serialize intent data", e);
+            return "{\"intent\":\"\"}";
         }
+    }
+
+    /**
+     * Create content event data as a JSON object for message/plan events.
+     * Format: {"content":"..."}
+     */
+    public String toContentJson(String content) {
+        try {
+            Map<String, String> data = new HashMap<>();
+            data.put("content", content != null ? content : "");
+            return objectMapper.writeValueAsString(data);
+        } catch (Exception e) {
+            log.error("Failed to serialize content data", e);
+            return "{\"content\":\"\"}";
+        }
+    }
+
+    /**
+     * Create done event data as a JSON object.
+     * Format: {}
+     */
+    public String toDoneJson() {
+        return "{}";
     }
 
     /**

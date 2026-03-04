@@ -80,10 +80,10 @@ public class AgentService {
             chatMessageService.saveMessage(userId, userMessageDto);
             log.info("Saved user message for session {}", sessionId);
 
-            // Send intent event first (JSON: "chat" or "gen")
+            // Send intent event first (JSON: {"intent":"chat"} or {"intent":"gen"})
             ServerSentEvent<String> intentEvent = ServerSentEvent.<String>builder()
                     .event("intent")
-                    .data(sseUtils.toJson(intent))
+                    .data(sseUtils.toIntentJson(intent))
                     .build();
 
             Flux<String> aiStream;
@@ -97,7 +97,7 @@ public class AgentService {
 
             String eventType = "gen".equalsIgnoreCase(intent) ? "plan" : "message";
 
-            // Stream AI content as plan/message events (JSON: content wrapped)
+            // Stream AI content as plan/message events (JSON: {"content":"..."})
             // Also collect content for saving later
             Flux<ServerSentEvent<String>> messageStream = aiStream
                     .doOnNext(content -> {
@@ -106,7 +106,7 @@ public class AgentService {
                     })
                     .map(content -> ServerSentEvent.<String>builder()
                             .event(eventType)
-                            .data(sseUtils.toJson(content))
+                            .data(sseUtils.toContentJson(content))
                             .build());
 
             // After stream ends, save AI message and check for new app
@@ -160,11 +160,11 @@ public class AgentService {
                 return Flux.empty();
             });
 
-            // Send done event at the end (JSON: empty string)
+            // Send done event at the end (JSON: {})
             Flux<ServerSentEvent<String>> doneEvent = Flux.just(
                     ServerSentEvent.<String>builder()
                             .event("done")
-                            .data(sseUtils.toJson(""))
+                            .data(sseUtils.toDoneJson())
                             .build()
             );
 

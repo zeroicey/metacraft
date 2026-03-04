@@ -6,13 +6,14 @@ import { AuthInterceptor } from './Interceptors';
 /**
  * SSE 回调接口
  *
- * 数据格式说明：
- * - intent: JSON 字符串 "chat" 或 "gen"
- * - message/plan: JSON 字符串内容片段（流式）
- * - app_generated: JSON 对象格式 {"url":"...", "uuid":"...", "name":"...", "description":"..."}
- * - done: JSON 空字符串 ""
+ * 数据格式说明（所有事件均为 JSON 对象格式）：
+ * - intent: {"intent":"chat"} 或 {"intent":"gen"}
+ * - message: {"content":"..."} 内容片段（流式）
+ * - plan: {"content":"..."} 计划片段（流式）
+ * - app_generated: {"url":"...", "uuid":"...", "name":"...", "description":"..."}
+ * - done: {} 空对象
  *
- * 前端会自动解析 JSON，如果解析失败则回退到纯文本（向后兼容）
+ * 前端会自动解析 JSON 对象并提取对应字段
  */
 export interface SSEListener {
   /**
@@ -118,53 +119,55 @@ class SSEWriteStream implements rcp.WriteStream {
 
     const eventData = dataBuffer.join('\n');
 
-    // Handle app_generated event specially (JSON object format)
-    if (eventName === 'app_generated') {
-      if (this.listener.onAppGenerated && eventData.length > 0) {
-        try {
-          // Parse as JSON object: {"url":"...", "uuid":"...", "name":"...", "description":"..."}
-          const appData: Record<string, string> = JSON.parse(eventData);
-          const url = appData.url || '';
-          const appName = appData.name;
-          const appDescription = appData.description;
-          console.info(`[SSEWriteStream] App generated - URL: ${url}, Name: ${appName}`);
-          this.listener.onAppGenerated(url, appName, appDescription);
-        } catch (e) {
-          console.error('[SSEWriteStream] Failed to parse app_generated JSON:', eventData);
-          // Fallback: try to parse as pipe-delimited string for backward compatibility
-          const parts = eventData.split('|');
-          if (parts.length >= 1) {
-            this.listener.onAppGenerated(parts[0]);
-          }
-        }
-      }
-      return;
-    }
+    // Parse JSON and extract field based on event type
+    // All events now use JSON object format
+    let extractedContent: string = '';
 
-    // Parse JSON for other events, fallback to raw data for backward compatibility
-    let parsedContent = eventData;
     try {
-      const parsed: string = JSON.parse(eventData);
-      parsedContent = parsed !== null ? parsed : eventData;
-    } catch (e) {
-      // Not JSON, use as-is (backward compatibility or plain text)
-      console.info('[SSEWriteStream] Not JSON, using raw data');
-    }
+      const parsed: Record<string, Object> = JSON.parse(eventData);
 
-    console.info(`[SSEWriteStream] Event: ${eventName}, Content length: ${parsedContent.length}`);
+      if (eventName === 'intent') {
+        // {"intent":"chat" or "gen"}
+        extractedContent = parsed.intent as string;
+        console.info(`[SSEWriteStream] Intent: ${extractedContent}`);
+      } else if (eventName === 'message' || eventName === 'plan') {
+        // {"content":"..."}
+        extractedContent = parsed.content as string;
+      } else if (eventName === 'done') {
+        // {} - empty object, no content to extract
+        extractedContent = '';
+      } else if (eventName === 'app_generated') {
+        // {"url":"...", "uuid":"...", "name":"...", "description":"..."}
+        if (this.listener.onAppGenerated) {
+          const url = parsed.url as string;
+          const appName = parsed.name as string;
+          const appDescription = parsed.description as string;
+          console.info(`[SSEWriteStream] App generated - URL: ${url}, Name: ${appName}`);
+          this.listener.onAppGenerated(url || '', appName, appDescription);
+        }
+        return;
+      } else {
+        // Unknown event type, try to use as-is
+        extractedContent = eventData;
+      }
+    } catch (e) {
+      // JSON parse failed, use raw data for backward compatibility
+      console.info('[SSEWriteStream] JSON parse failed, using raw data:', eventData);
+      extractedContent = eventData;
+    }
 
     // 根据事件类型分发
     if (!eventName || eventName === 'message') {
-      if (parsedContent.length > 0) {
-        this.listener.onMessage(parsedContent);
+      if (extractedContent.length > 0) {
+        this.listener.onMessage(extractedContent);
       }
     } else if (eventName === 'plan') {
-      if (this.listener.onPlan && parsedContent.length > 0) {
-        this.listener.onPlan(parsedContent);
+      if (this.listener.onPlan && extractedContent.length > 0) {
+        this.listener.onPlan(extractedContent);
       }
     } else if (eventName === 'intent') {
-      if (this.listener.onIntent && parsedContent.length > 0) {
-        this.listener.onIntent(parsedContent);
+      if (this.listener.onIntent && extractedContent.length > 0) {
+        this.listener.onIntent(extractedContent);
       }
     } else if (eventName === 'done') {
       // 收到结束事件
