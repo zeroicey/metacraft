@@ -13,4 +13,10 @@ public class ChatMessageCreateDTO {
 
     @NotBlank(message = "Content cannot be empty")
     private String content;
+
+    private String type = "text"; // "text" or "app"
+
+    private Long relatedAppId;
+
+    private Long relatedVersionId;
 }

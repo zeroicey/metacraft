@@ -6,6 +6,7 @@ struct PreviewPage {
   topRectHeight: number = 0;
 
   @State url: string = '';
+  @State appName: string = 'App Preview';
   controller: webview.WebviewController = new webview.WebviewController();
 
   aboutToAppear() {
@@ -13,13 +14,16 @@ struct PreviewPage {
     const params = this.getUIContext().getRouter().getParams() as Record<string, string>;
     if (params && params['url']) {
       // Assuming the URL from backend is relative "/api/preview/..." or absolute
-      // If relative, prepend host. 
-      // For now, let's assume we need to prepend the host as used in aiChat.ets (172.20.10.3:8080)
+      // If relative, prepend host.
+      // For now, let's assume we need to prepend the host as used in aiChat.ets (192.168.5.4:8080)
       // Or better, let the caller handle the full URL.
       this.url = params['url'];
       if (this.url.startsWith('/')) {
-        this.url = 'http://172.20.10.3:8080' + this.url;
+        this.url = 'http://192.168.5.4:8080' + this.url;
       }
+    }
+    if (params && params['appName']) {
+      this.appName = params['appName'];
     }
   }
 
@@ -33,7 +37,7 @@ struct PreviewPage {
           .onClick(() => {
             this.getUIContext().getRouter().back();
           })
-        Text('App Preview')
+        Text(this.appName)
           .fontSize(18)
           .fontWeight(FontWeight.Bold)
           .margin({ left: 16 })

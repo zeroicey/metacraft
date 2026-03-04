@@ -61,11 +61,11 @@ The unified endpoint emits custom event types:
 
 | Event | Description | Frontend Handler |
 |-------|-------------|------------------|
-| `intent` | Intent classification result ("chat" or "gen") | `onIntent()` |
-| `message` | Streaming AI response content | `onMessage()` |
-| `plan` | App generation plan (gen mode only) | `onPlan()` |
-| `app_generated` | App generation complete with preview URL | `onAppGenerated()` |
-| `done` | Stream ended | `onDone()` |
+| `intent` | Intent classification result (JSON: "chat" or "gen") | `onIntent()` |
+| `message` | Streaming AI response content (JSON string) | `onMessage()` |
+| `plan` | App generation plan (JSON string, gen mode only) | `onPlan()` |
+| `app_generated` | App generation complete (JSON object: {url, uuid, name, description}) | `onAppGenerated()` |
+| `done` | Stream ended (JSON: "") | `onDone()` |
 
 ## Architecture
 
@@ -267,3 +267,30 @@ apps/
 8. **SSE text decoder must use stream mode** - `decoder.decodeToString(buffer, { stream: true })` handles multi-byte UTF-8 characters across chunks
 9. **StorageService path validation** - Always use `normalize()` and `startsWith()` to prevent directory traversal attacks
 10. **Flyway migrations run automatically** - New migrations in `db/migration/` apply on server startup
+
+## ArkTS (HarmonyOS) Specific Notes
+
+**Documentation Reference:** `ohos-dev-doc/` folder contains official HarmonyOS development documentation.
+
+**Common ArkTS Compiler Errors:**
+
+| Error Code | Rule | Solution |
+|------------|------|----------|
+| 10605008 | `arkts-no-any-unknown` | Use explicit types instead of `any` or `unknown` |
+
+**JSON.parse Type Annotation:**
+In ArkTS, `JSON.parse()` returns `unknown` type, which triggers compiler error. Always add explicit type annotation:
+
+```typescript
+// ❌ Error: arkts-no-any-unknown
+const parsed = JSON.parse(eventData);
+
+// ✅ Correct: Add explicit type
+const parsed: string = JSON.parse(eventData);
+
+// For complex objects, use Record type
+const data: Record<string, Object> = JSON.parse(jsonStr);
+const value = data.property as string;
+```
+
+Reference: `ohos-dev-doc/Getting_Started/Learning_ArkTS/Migration_from_TypeScript_to_ArkTS/`

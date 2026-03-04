@@ -17,6 +17,13 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system'; // 限定 role 类型
   content: string;
   createdAt: string; // ISO 8601 string
+  // App binding info (when type = "app")
+  type?: string;
+  relatedAppId?: number;
+  relatedVersionId?: number;
+  relatedAppUuid?: string;
+  relatedAppName?: string;
+  relatedAppDescription?: string;
 }
 
 // 创建会话请求 DTO

@@ -70,7 +70,7 @@ public class AppService {
         app.setCurrentVersionId(version.getId());
         appRepository.save(app);
 
-        log.info("Created new version {} for app {}", nextVersion, appId);
+        log.info("Created version {} (id={}) for app {}", nextVersion, version.getId(), appId);
         return version;
     }
     

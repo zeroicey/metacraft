@@ -3,6 +3,8 @@ import { router } from '@kit.ArkUI';
 @Component
 export struct AppPreviewCard {
   @Prop previewUrl: string;
+  @Prop appName: string = 'Application Generated';
+  @Prop appDescription: string = 'Click to preview the app';
 
   build() {
     Column() {
@@ -19,29 +21,34 @@ export struct AppPreviewCard {
             .fontColor(Color.White)
         }
         .margin({ right: 12 })
-          
+
         Column() {
-          Text('Application Generated')
+          Text(this.appName)
             .fontSize(16)
             .fontWeight(FontWeight.Bold)
             .fontColor('#333333')
             .margin({ bottom: 4 })
-          Text('Click to preview the app')
+            .maxLines(1)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+          Text(this.appDescription)
             .fontSize(12)
             .fontColor('#999999')
+            .maxLines(2)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
         }
         .alignItems(HorizontalAlign.Start)
         .layoutWeight(1)
-        
+
         Button('Preview')
           .fontSize(12)
           .height(28)
           .backgroundColor('#007AFF')
           .onClick(() => {
              router.pushUrl({
-               url: 'pages/Preview', 
+               url: 'pages/Preview',
                params: {
-                 url: this.previewUrl
+                 url: this.previewUrl,
+                 appName: this.appName
                }
              });
           })

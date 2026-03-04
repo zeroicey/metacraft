@@ -17,4 +17,12 @@ public class ChatMessageVO {
     private String role;
     private String content;
     private OffsetDateTime createdAt;
+
+    // App binding info (when type = "app")
+    private String type;
+    private Long relatedAppId;
+    private Long relatedVersionId;
+    private String relatedAppUuid;
+    private String relatedAppName;
+    private String relatedAppDescription;
 }

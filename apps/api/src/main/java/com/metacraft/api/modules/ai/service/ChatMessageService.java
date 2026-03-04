@@ -6,6 +6,8 @@ import com.metacraft.api.modules.ai.entity.ChatSessionEntity;
 import com.metacraft.api.modules.ai.repository.ChatMessageRepository;
 import com.metacraft.api.modules.ai.repository.ChatSessionRepository;
 import com.metacraft.api.modules.ai.vo.ChatMessageVO;
+import com.metacraft.api.modules.app.entity.AppEntity;
+import com.metacraft.api.modules.app.repository.AppRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ public class ChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final ChatSessionRepository chatSessionRepository;
+    private final AppRepository appRepository;
 
     @Transactional
     public ChatMessageVO saveMessage(Long userId, ChatMessageCreateDTO dto) {
@@ -35,6 +38,9 @@ public class ChatMessageService {
                 .sessionId(dto.getSessionId())
                 .role(dto.getRole())
                 .content(dto.getContent())
+                .type(dto.getType() != null ? dto.getType() : "text")
+                .relatedAppId(dto.getRelatedAppId())
+                .relatedVersionId(dto.getRelatedVersionId())
                 .build();
         
         ChatMessageEntity saved = chatMessageRepository.save(message);
@@ -76,12 +82,25 @@ public class ChatMessageService {
     }
 
     private ChatMessageVO convertToVO(ChatMessageEntity entity) {
-        return ChatMessageVO.builder()
+        ChatMessageVO.ChatMessageVOBuilder builder = ChatMessageVO.builder()
                 .id(entity.getId())
                 .sessionId(entity.getSessionId())
                 .role(entity.getRole())
                 .content(entity.getContent())
                 .createdAt(entity.getCreatedAt())
-                .build();
+                .type(entity.getType())
+                .relatedAppId(entity.getRelatedAppId())
+                .relatedVersionId(entity.getRelatedVersionId());
+
+        // If message has related app, fetch app details
+        if (entity.getRelatedAppId() != null) {
+            appRepository.findById(entity.getRelatedAppId()).ifPresent(app -> {
+                builder.relatedAppUuid(app.getUuid());
+                builder.relatedAppName(app.getName());
+                builder.relatedAppDescription(app.getDescription());
+            });
+        }
+
+        return builder.build();
     }
 }

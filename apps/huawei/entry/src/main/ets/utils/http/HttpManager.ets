@@ -13,7 +13,7 @@ export interface ApiResponse<T> {
 export class HttpManager {
   private static instance: HttpManager;
   private session: rcp.Session;
-  private readonly baseUrl: string = 'http://172.20.10.3:8080';
+  private readonly baseUrl: string = 'http://192.168.5.4:8080';
 
   private constructor() {
     // 1. 配置 Session [4]

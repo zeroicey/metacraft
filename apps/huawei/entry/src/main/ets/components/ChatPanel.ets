@@ -11,12 +11,16 @@ export class ChatMessage {
   text: string;
   isUser: boolean;
   previewUrl?: string;
+  appName?: string;
+  appDescription?: string;
 
-  constructor(id: number, text: string, isUser: boolean, previewUrl?: string) {
+  constructor(id: number, text: string, isUser: boolean, previewUrl?: string, appName?: string, appDescription?: string) {
     this.id = id;
     this.text = text;
     this.isUser = isUser;
     this.previewUrl = previewUrl;
+    this.appName = appName;
+    this.appDescription = appDescription;
   }
 }
 
@@ -55,7 +59,11 @@ struct MessageItem {
           }
 
           if (this.message.previewUrl) {
-            AppPreviewCard({ previewUrl: this.message.previewUrl })
+            AppPreviewCard({
+              previewUrl: this.message.previewUrl,
+              appName: this.message.appName,
+              appDescription: this.message.appDescription
+            })
           }
         }
         .alignItems(HorizontalAlign.Start)
@@ -98,7 +106,16 @@ export struct ChatPanel {
       this.messages = result.data.map((msg: ApiChatMessage) => {
         // 后端 role: "user" | "assistant"
         const isUser = msg.role === 'user';
-        return new ChatMessage(msg.id, msg.content, isUser);
+        // Check if message has related app (type = "app")
+        let previewUrl: string | undefined = undefined;
+        let appName: string | undefined = undefined;
+        let appDescription: string | undefined = undefined;
+        if (msg.type === 'app' && msg.relatedAppUuid) {
+          previewUrl = 'http://192.168.5.4:8080/api/preview/' + msg.relatedAppUuid;
+          appName = msg.relatedAppName;
+          appDescription = msg.relatedAppDescription;
+        }
+        return new ChatMessage(msg.id, msg.content, isUser, previewUrl, appName, appDescription);
       });
       // Scroll to bottom after loading
       setTimeout(() => {
@@ -196,11 +213,13 @@ export struct ChatPanel {
            console.info(`[ChatPanel] Intent: ${intent}`);
         },
         // onAppGenerated
-        (url: string) => {
-           console.info(`[ChatPanel] App Generated: ${url}`);
+        (previewUrl: string, appName?: string, appDescription?: string) => {
+           console.info(`[ChatPanel] App Generated: ${previewUrl}, name: ${appName}`);
            const index = this.messages.findIndex(m => m.id === botMsgId);
            if (index !== -1) {
-             this.messages[index].previewUrl = url;
+             this.messages[index].previewUrl = previewUrl;
+             this.messages[index].appName = appName;
+             this.messages[index].appDescription = appDescription;
              this.scrollToBottom();
            }
         }
