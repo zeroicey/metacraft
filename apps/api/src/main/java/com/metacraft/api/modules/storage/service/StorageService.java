@@ -84,4 +84,25 @@ public class StorageService {
             throw new RuntimeException("Failed to read file.", e);
         }
     }
+
+    /**
+     * 删除文件
+     *
+     * @param relativePath 相对路径
+     */
+    public void deleteFile(String relativePath) {
+        try {
+            Path file = this.rootLocation.resolve(relativePath).normalize();
+            if (!file.startsWith(this.rootLocation)) {
+                throw new SecurityException("Cannot delete file outside current directory.");
+            }
+            if (Files.exists(file)) {
+                Files.delete(file);
+                log.info("File deleted: {}", file);
+            }
+        } catch (IOException e) {
+            log.error("Failed to delete file: {}", relativePath, e);
+            throw new RuntimeException("Failed to delete file.", e);
+        }
+    }
 }
