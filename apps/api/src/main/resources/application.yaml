@@ -47,3 +47,5 @@ langchain4j:
       streaming-chat-model:
         model-name: ${MODEL_NAME:qwen-plus}
         api-key: ${API_KEY}
+zhipu:
+  api-key: ${ZHIPU_API_KEY}
