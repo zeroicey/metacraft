@@ -89,8 +89,8 @@ public class ImageService {
     /**
      * 异步触发 logo 生成和下载落盘，不阻塞主流程。
      */
-    public void generateAndSaveLogoAsync(String name, String description, String logoUuid) {
-        CompletableFuture.runAsync(() -> {
+    public CompletableFuture<String> generateAndSaveLogoAsync(String name, String description, String logoUuid) {
+        return CompletableFuture.supplyAsync(() -> {
             try {
                 GenerateLogoRequestDTO request = new GenerateLogoRequestDTO();
                 request.setName(name);
@@ -100,12 +100,14 @@ public class ImageService {
                 String imageUrl = response.getImageUrl();
                 if (imageUrl == null || imageUrl.isBlank()) {
                     log.warn("Logo generation succeeded but image URL is empty, uuid={}", logoUuid);
-                    return;
+                    throw new IllegalStateException("Logo image URL is empty");
                 }
 
                 downloadAndStoreLogo(imageUrl, logoUuid);
+                return "/api/logo/" + logoUuid;
             } catch (Exception e) {
                 log.warn("Async logo task failed, uuid={}", logoUuid, e);
+                throw new IllegalStateException("Async logo task failed", e);
             }
         });
     }

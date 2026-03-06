@@ -63,8 +63,8 @@ public class OpenApiConfig {
     @Bean
     public GroupedOpenApi aiAgentApi() {
         return GroupedOpenApi.builder()
-                .group("AI Agent")
-                .pathsToMatch("/api/ai/agent/**")
+                                .group("AI Runs")
+                                .pathsToMatch("/api/ai/runs/**")
                 .build();
     }
 

@@ -13,5 +13,5 @@ public interface AgentAiService {
     Flux<String> chat(@UserMessage String message);
 
     @SystemMessage(fromResource = "prompts/agent-gen-app.txt")
-    Flux<String> generateApp(@UserMessage String message, @V("userId") Long userId, @V("logoUuid") String logoUuid);
+    Flux<String> generateApp(@UserMessage String message, @V("userId") Long userId, @V("logoUuid") String logoUuid, @V("runId") String runId);
 }

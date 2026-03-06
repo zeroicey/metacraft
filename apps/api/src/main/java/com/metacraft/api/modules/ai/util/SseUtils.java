@@ -21,83 +21,141 @@ public class SseUtils {
         this.objectMapper = objectMapper;
     }
 
-    /**
-     * Create intent event data as a JSON object.
-     * Format: {"intent":"chat" or "gen"}
-     */
-    public String toIntentJson(String intent) {
+    public String toRunStartedJson(String runId, String sessionId) {
         try {
             Map<String, String> data = new HashMap<>();
+            data.put("runId", runId != null ? runId : "");
+            data.put("sessionId", sessionId != null ? sessionId : "");
+            return objectMapper.writeValueAsString(data);
+        } catch (Exception e) {
+            log.error("Failed to serialize run_started data", e);
+            return "{\"runId\":\"\",\"sessionId\":\"\"}";
+        }
+    }
+
+    public String toIntentJson(String runId, String intent) {
+        try {
+            Map<String, String> data = new HashMap<>();
+            data.put("runId", runId != null ? runId : "");
             data.put("intent", intent != null ? intent : "");
             return objectMapper.writeValueAsString(data);
         } catch (Exception e) {
-            log.error("Failed to serialize intent data", e);
-            return "{\"intent\":\"\"}";
+            log.error("Failed to serialize run intent data", e);
+            return "{\"runId\":\"\",\"intent\":\"\"}";
         }
     }
 
-    /**
-     * Create content event data as a JSON object for message/plan events.
-     * Format: {"content":"..."}
-     */
-    public String toContentJson(String content) {
+    public String toContentJson(String runId, String content) {
         try {
             Map<String, String> data = new HashMap<>();
+            data.put("runId", runId != null ? runId : "");
             data.put("content", content != null ? content : "");
             return objectMapper.writeValueAsString(data);
         } catch (Exception e) {
-            log.error("Failed to serialize content data", e);
-            return "{\"content\":\"\"}";
+            log.error("Failed to serialize run content data", e);
+            return "{\"runId\":\"\",\"content\":\"\"}";
         }
     }
 
-    /**
-     * Create done event data as a JSON object.
-     * Format: {}
-     */
-    public String toDoneJson() {
-        return "{}";
-    }
-
-    /**
-     * Create error event data as a JSON object.
-     * Format: {"message":"..."}
-     */
-    public String toErrorJson(String message) {
+    public String toDoneJson(String runId) {
         try {
             Map<String, String> data = new HashMap<>();
+            data.put("runId", runId != null ? runId : "");
+            return objectMapper.writeValueAsString(data);
+        } catch (Exception e) {
+            log.error("Failed to serialize run done data", e);
+            return "{\"runId\":\"\"}";
+        }
+    }
+
+    public String toErrorJson(String runId, String message) {
+        try {
+            Map<String, String> data = new HashMap<>();
+            data.put("runId", runId != null ? runId : "");
             data.put("message", message != null ? message : "");
             return objectMapper.writeValueAsString(data);
         } catch (Exception e) {
-            log.error("Failed to serialize error data", e);
-            return "{\"message\":\"\"}";
+            log.error("Failed to serialize run error data", e);
+            return "{\"runId\":\"\",\"message\":\"\"}";
         }
     }
 
-    /**
-     * Create app_generated event data as a JSON object.
-     * Format: {"url":"...", "uuid":"...", "name":"...", "description":"...", "logo":"..."}
-     *
-     * @param url The preview URL
-     * @param uuid The app UUID
-     * @param name The app name
-     * @param description The app description
-    * @param logo The app logo URL (e.g. /api/logo/{uuid})
-     * @return JSON object string representation
-     */
-    public String toAppGeneratedJson(String url, String uuid, String name, String description, String logo) {
+    public String toAppSavedJson(String runId, Long appId, String appUuid, Long versionId, String previewUrl, String name, String description, String logoUrl) {
         try {
-            Map<String, String> data = new HashMap<>();
-            data.put("url", url != null ? url : "");
-            data.put("uuid", uuid != null ? uuid : "");
+            Map<String, Object> data = new HashMap<>();
+            data.put("runId", runId != null ? runId : "");
+            data.put("appId", appId);
+            data.put("appUuid", appUuid != null ? appUuid : "");
+            data.put("versionId", versionId);
+            data.put("previewUrl", previewUrl != null ? previewUrl : "");
             data.put("name", name != null ? name : "");
             data.put("description", description != null ? description : "");
-            data.put("logo", logo != null ? logo : "");
+            data.put("logoUrl", logoUrl != null ? logoUrl : "");
             return objectMapper.writeValueAsString(data);
         } catch (Exception e) {
-            log.error("Failed to serialize app_generated data", e);
-            // Fallback to minimal JSON object
-            return "{\"url\":\"\",\"uuid\":\"\",\"name\":\"\",\"description\":\"\",\"logo\":\"\"}";
+            log.error("Failed to serialize app_saved data", e);
+            return "{\"runId\":\"\",\"previewUrl\":\"\"}";
         }
     }
+
+    public String toSpecReadyJson(String runId, String name, String description) {
+        try {
+            Map<String, String> data = new HashMap<>();
+            data.put("runId", runId != null ? runId : "");
+            data.put("name", name != null ? name : "");
+            data.put("description", description != null ? description : "");
+            return objectMapper.writeValueAsString(data);
+        } catch (Exception e) {
+            log.error("Failed to serialize spec_ready data", e);
+            return "{\"runId\":\"\",\"name\":\"\",\"description\":\"\"}";
+        }
+    }
+
+    public String toRunOnlyJson(String runId) {
+        try {
+            Map<String, String> data = new HashMap<>();
+            data.put("runId", runId != null ? runId : "");
+            return objectMapper.writeValueAsString(data);
+        } catch (Exception e) {
+            log.error("Failed to serialize run-only data", e);
+            return "{\"runId\":\"\"}";
+        }
+    }
+
+    public String toLogoStartedJson(String runId, String logoUuid) {
+        try {
+            Map<String, String> data = new HashMap<>();
+            data.put("runId", runId != null ? runId : "");
+            data.put("logoUuid", logoUuid != null ? logoUuid : "");
+            return objectMapper.writeValueAsString(data);
+        } catch (Exception e) {
+            log.error("Failed to serialize logo_started data", e);
+            return "{\"runId\":\"\",\"logoUuid\":\"\"}";
+        }
+    }
+
+    public String toLogoReadyJson(String runId, String logoUrl) {
+        try {
+            Map<String, String> data = new HashMap<>();
+            data.put("runId", runId != null ? runId : "");
+            data.put("logoUrl", logoUrl != null ? logoUrl : "");
+            return objectMapper.writeValueAsString(data);
+        } catch (Exception e) {
+            log.error("Failed to serialize logo_ready data", e);
+            return "{\"runId\":\"\",\"logoUrl\":\"\"}";
+        }
+    }
+
+    public String toLogoFailedJson(String runId, String reason) {
+        try {
+            Map<String, String> data = new HashMap<>();
+            data.put("runId", runId != null ? runId : "");
+            data.put("reason", reason != null ? reason : "");
+            return objectMapper.writeValueAsString(data);
+        } catch (Exception e) {
+            log.error("Failed to serialize logo_failed data", e);
+            return "{\"runId\":\"\",\"reason\":\"\"}";
+        }
+    }
+
 }

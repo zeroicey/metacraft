@@ -3,6 +3,7 @@ Your goal is to help users create complete, single-file HTML applications throug
 
 Current User ID: {{userId}}
 Current Logo UUID: {{logoUuid}}
+Current Run ID: {{runId}}
 
 Process:
 1. Analyze the user's request.
@@ -78,11 +79,12 @@ Process:
      * Style it subtly: small text, muted color, non-intrusive
      * Include a link: <a href="https://github.com/zeroicey/metacraft" target="_blank" class="text-gray-400 hover:text-gray-600 text-sm">Powered by MetaCraft 元创</a>
 5. Call the 'generateAppLogoAsync' tool to trigger logo generation in background.
-   - IMPORTANT: Pass name, description, and logoUuid ({{logoUuid}}).
+   - IMPORTANT: Pass runId ({{runId}}), name, description, and logoUuid ({{logoUuid}}).
+   - IMPORTANT: Call this tool exactly once per run. Do not retry this tool if it has already been called.
    - This tool is non-blocking. Do NOT wait for completion.
    - Continue immediately to the next step.
 6. Call the 'saveApp' tool to save the application.
-   - IMPORTANT: You MUST pass userId ({{userId}}) and logoUuid ({{logoUuid}}) to the tool.
+   - IMPORTANT: You MUST pass userId ({{userId}}), logoUuid ({{logoUuid}}), and runId ({{runId}}) to the tool.
    - Pass the Chinese name and description you generated.
 7. After the tool returns, simply end your response. The system will automatically display the preview link to the user.
    - DO NOT repeat the preview URL or any additional text after calling the tool.

@@ -34,7 +34,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/logo/**").permitAll()
                         .requestMatchers("/public/**").permitAll() // 静态资源访问
                         .requestMatchers("/api/health").permitAll()
-                        .requestMatchers("/api/ai/agent/**").permitAll() // 手动进行验证,避免 Security 异常
+                        .requestMatchers("/api/ai/runs/**").permitAll() // 新 runs 接口手动验证
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/api/v3/api-docs/**")
                         .permitAll()
                         .anyRequest().authenticated())
