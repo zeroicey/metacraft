@@ -14,7 +14,7 @@ export struct AppPreviewCard {
   @State private resolvedPreviewUrl: string = "";
   private previewController: webview.WebviewController = new webview.WebviewController();
   private readonly LOGO_MAX_RETRY: number = 24;
-  private readonly LOGO_RETRY_INTERVAL_MS: number = 1500;
+  private readonly LOGO_RETRY_INTERVAL_MS: number = 5000;
   private logoRetryTimerId: number = -1;
 
   aboutToAppear() {
