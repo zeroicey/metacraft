@@ -127,6 +127,17 @@ public class AppService {
     }
 
     /**
+     * 根据用户和 logoUuid 获取本次生成的应用（logo 字段通常形如 uuid.png）。
+     */
+    public AppEntity getLatestAppByUserIdAndLogoUuid(Long userId, String logoUuid) {
+        if (logoUuid == null || logoUuid.isBlank()) {
+            return null;
+        }
+        return appRepository.findTopByUserIdAndLogoStartingWithOrderByIdDesc(userId, logoUuid)
+                .orElse(null);
+    }
+
+    /**
      * 创建新应用 (使用 DTO)
      */
     @Transactional

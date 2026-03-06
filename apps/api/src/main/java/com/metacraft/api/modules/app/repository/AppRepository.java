@@ -12,4 +12,5 @@ public interface AppRepository extends JpaRepository<AppEntity, Long> {
     List<AppEntity> findByUserIdOrderByUpdatedAtDesc(Long userId);
     Optional<AppEntity> findByUuid(String uuid);
     Optional<AppEntity> findTopByUserIdOrderByIdDesc(Long userId);
+    Optional<AppEntity> findTopByUserIdAndLogoStartingWithOrderByIdDesc(Long userId, String logoPrefix);
 }

@@ -60,6 +60,21 @@ public class SseUtils {
     }
 
     /**
+     * Create error event data as a JSON object.
+     * Format: {"message":"..."}
+     */
+    public String toErrorJson(String message) {
+        try {
+            Map<String, String> data = new HashMap<>();
+            data.put("message", message != null ? message : "");
+            return objectMapper.writeValueAsString(data);
+        } catch (Exception e) {
+            log.error("Failed to serialize error data", e);
+            return "{\"message\":\"\"}";
+        }
+    }
+
+    /**
      * Create app_generated event data as a JSON object.
      * Format: {"url":"...", "uuid":"...", "name":"...", "description":"...", "logo":"..."}
      *

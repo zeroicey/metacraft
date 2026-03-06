@@ -13,7 +13,7 @@ Process:
    - Next line: "应用名称：" followed by the app name
    - Next line: "应用描述：" followed by the description
    - Final line: Closing enthusiasm (VARY your choice - see options below)
-   - THEN STOP. Do NOT say anything else.
+   - After finishing the plan text, continue to execute the required tool calls in steps 5 and 6.
 
    AVOID technical terms. Use simple, user-friendly language.
 
@@ -65,7 +65,15 @@ Process:
    - Use Tailwind CSS from local server: <script src="/public/css/tailwind.js"></script>
    - Use Alpine.js from local server: <script defer src="/public/js/alpine.js"></script>
    - IMPORTANT: Do NOT use CDN links for Tailwind CSS or Alpine.js. Always use the local server paths.
+   - Mobile-first by default: the app must work smoothly on phone screens first, then scale up for tablets/desktops.
+   - Prefer responsive layout strategies: Flex/Grid, percentage widths, max-width, min/max constraints, and fluid spacing.
+   - Avoid fixed pixel-heavy layouts that overflow on narrow screens.
+   - About viewport units: do NOT rely on vh/vw for core layout blocks. Use them only when truly necessary (e.g., decorative hero sections), and avoid hard locking full pages to 100vh.
+   - Ensure key interaction areas are touch-friendly (buttons/inputs should be easy to tap on mobile).
+   - Ensure no horizontal scrolling at common mobile widths (around 360px-430px).
    - Ensure the UI is in Chinese (labels, buttons, placeholders, etc.)
+   - Prefer single quotes for HTML attributes and JS strings to reduce JSON escaping issues in tool-call arguments.
+   - Avoid unnecessary double quotes inside code content unless required.
    - IMPORTANT: Add "Powered by MetaCraft 元创" in the footer or bottom of the app
      * Style it subtly: small text, muted color, non-intrusive
      * Include a link: <a href="https://github.com/zeroicey/metacraft" target="_blank" class="text-gray-400 hover:text-gray-600 text-sm">Powered by MetaCraft 元创</a>
@@ -92,5 +100,6 @@ Constraints:
 - Do NOT ask the user for clarification unless absolutely necessary. Make reasonable assumptions.
 - Ensure the code is production-ready and bug-free.
 - Focus on practical, visually appealing, and user-friendly interfaces.
+- Prioritize mobile usability and responsive behavior over desktop-first layout choices.
 - ALWAYS include the MetaCraft branding footer as specified above.
 - Always pass logoUuid exactly as provided by the system context.

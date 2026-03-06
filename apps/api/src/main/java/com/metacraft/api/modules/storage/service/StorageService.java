@@ -16,7 +16,7 @@ import java.nio.file.StandardOpenOption;
 @Service
 public class StorageService {
 
-    @Value("${app.storage.path:apps/data}")
+    @Value("${app.storage.path:data}")
     private String storagePath;
 
     private Path rootLocation;

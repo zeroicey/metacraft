@@ -1,6 +1,6 @@
 app:
   storage:
-    path: ${APP_STORAGE_PATH:apps/data}
+    path: ${APP_STORAGE_PATH:data}
 jwt:
   expiration: ${JWT_EXPIRATION:8640000000}
   secret: ${JWT_SECRET:change-this-secretfdsfas-key-in-produfasdftion-at-least-256-bits}

@@ -15,13 +15,20 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AgentService {
+
+    private static final Pattern APP_NAME_PATTERN = Pattern.compile("应用名称：([^\\r\\n]+)");
+    private static final Pattern APP_DESCRIPTION_PATTERN = Pattern.compile("应用描述：([^\\r\\n]+)");
+    private static final Pattern HTML_PATTERN = Pattern.compile("(?is)(<!doctype\\s+html.*?</html>)");
 
     private final AgentIntentService intentService;
     private final AgentAiService agentAiService;
@@ -116,11 +123,10 @@ public class AgentService {
             String finalSessionId = sessionId;
             String finalLogoUuid = logoUuid;
             Flux<ServerSentEvent<String>> postStream = Flux.defer(() -> {
-                // For gen mode, get the latest app first
-                AppEntity latestApp = null;
-                if ("gen".equalsIgnoreCase(intent)) {
-                    latestApp = appService.getLatestAppByUserId(userId);
-                }
+                // For gen mode, locate the app created in this request using unique logo UUID.
+                AppEntity generatedApp = "gen".equalsIgnoreCase(intent)
+                        ? appService.getLatestAppByUserIdAndLogoUuid(userId, finalLogoUuid)
+                        : null;
 
                 // Save AI assistant message
                 String fullResponse = aiResponseContent.get();
@@ -131,34 +137,50 @@ public class AgentService {
                     aiMessageDto.setContent(fullResponse);
 
                     // If gen mode and app was generated, bind app info to message
-                    if ("gen".equalsIgnoreCase(intent) && latestApp != null) {
+                    if ("gen".equalsIgnoreCase(intent) && generatedApp != null) {
                         aiMessageDto.setType("app");
-                        aiMessageDto.setRelatedAppId(latestApp.getId());
-                        aiMessageDto.setRelatedVersionId(latestApp.getCurrentVersionId());
+                        aiMessageDto.setRelatedAppId(generatedApp.getId());
+                        aiMessageDto.setRelatedVersionId(generatedApp.getCurrentVersionId());
                         log.info("Gen mode: binding app {} with current version record {} to AI message",
-                            latestApp.getId(), latestApp.getCurrentVersionId());
+                            generatedApp.getId(), generatedApp.getCurrentVersionId());
                     }
 
                     chatMessageService.saveMessage(userId, aiMessageDto);
                     log.info("Saved AI response for session {}, content length: {}", finalSessionId, fullResponse.length());
                 }
 
-                // Check if user has a new app and send app_generated event
-                if ("gen".equalsIgnoreCase(intent) && latestApp != null) {
-                    String previewUrl = "/api/preview/" + latestApp.getUuid() + "/v/1";
+                if ("gen".equalsIgnoreCase(intent) && generatedApp == null) {
+                    generatedApp = recoverGeneratedAppFromResponse(userId, finalLogoUuid, fullResponse);
+                    if (generatedApp != null) {
+                        log.warn("Recovered app creation from streamed content for user {}, appId={}", userId, generatedApp.getId());
+                    }
+                }
+
+                if ("gen".equalsIgnoreCase(intent) && generatedApp == null) {
+                    log.warn("Gen mode finished but no app is bound to logoUuid={}, userId={}", finalLogoUuid, userId);
+                    return Flux.just(
+                            ServerSentEvent.<String>builder()
+                                    .event("error")
+                                    .data(sseUtils.toErrorJson("本次生成未成功保存应用，请重试"))
+                                    .build()
+                    );
+                }
+
+                if (generatedApp != null) {
+                    String previewUrl = "/api/preview/" + generatedApp.getUuid();
                     String logoUrl = finalLogoUuid != null ? "/api/logo/" + finalLogoUuid : null;
-                    log.info("Gen mode completed, sending app_generated event with URL: {}, name: {}", previewUrl, latestApp.getName());
+                    log.info("Gen mode completed, sending app_generated event with URL: {}, name: {}", previewUrl, generatedApp.getName());
 
                     // Update session with related app
                     com.metacraft.api.modules.ai.dto.ChatSessionUpdateDTO updateDto =
                         new com.metacraft.api.modules.ai.dto.ChatSessionUpdateDTO();
-                    updateDto.setTitle(latestApp.getName());
+                    updateDto.setTitle(generatedApp.getName());
                     chatSessionService.updateSession(userId, finalSessionId, updateDto);
 
                     return Flux.just(
                             ServerSentEvent.<String>builder()
                                     .event("app_generated")
-                                    .data(sseUtils.toAppGeneratedJson(previewUrl, latestApp.getUuid(), latestApp.getName(), latestApp.getDescription(), logoUrl))
+                                    .data(sseUtils.toAppGeneratedJson(previewUrl, generatedApp.getUuid(), generatedApp.getName(), generatedApp.getDescription(), logoUrl))
                                     .build()
                     );
                 }
@@ -173,7 +195,52 @@ public class AgentService {
                             .build()
             );
 
-            return Flux.concat(Flux.just(intentEvent), messageStream, postStream, doneEvent);
+            return Flux.concat(Flux.just(intentEvent), messageStream, postStream, doneEvent)
+                    .onErrorResume(e -> {
+                        log.error("Unified agent stream failed for user {}", userId, e);
+                        return Flux.just(
+                                ServerSentEvent.<String>builder()
+                                        .event("error")
+                                        .data(sseUtils.toErrorJson("生成流程失败，请重试"))
+                                        .build(),
+                                ServerSentEvent.<String>builder()
+                                        .event("done")
+                                        .data(sseUtils.toDoneJson())
+                                        .build()
+                        );
+                    });
         });
+    }
+
+    private AppEntity recoverGeneratedAppFromResponse(Long userId, String logoUuid, String fullResponse) {
+        if (fullResponse == null || fullResponse.isBlank() || logoUuid == null || logoUuid.isBlank()) {
+            return null;
+        }
+
+        String html = extractFirstGroup(HTML_PATTERN, fullResponse).orElse(null);
+        if (html == null || html.isBlank()) {
+            return null;
+        }
+
+        String name = extractFirstGroup(APP_NAME_PATTERN, fullResponse).orElse("未命名应用").trim();
+        String description = extractFirstGroup(APP_DESCRIPTION_PATTERN, fullResponse).orElse("AI 生成应用").trim();
+
+        try {
+            AppEntity app = appService.createApp(userId, name, description);
+            appService.updateAppLogo(app.getId(), logoUuid + ".png");
+            appService.createVersion(app.getId(), html, "Recovered from streamed generation");
+            return appService.getApp(app.getId());
+        } catch (Exception e) {
+            log.error("Failed to recover app from streamed content for user {}", userId, e);
+            return null;
+        }
+    }
+
+    private Optional<String> extractFirstGroup(Pattern pattern, String text) {
+        Matcher matcher = pattern.matcher(text);
+        if (!matcher.find()) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(matcher.group(1));
     }
 }

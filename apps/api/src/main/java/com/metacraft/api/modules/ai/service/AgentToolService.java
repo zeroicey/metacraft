@@ -26,18 +26,18 @@ public class AgentToolService {
     ) {
         // 1. 获取当前用户
         if (userId == null) {
-            log.warn("User ID not provided, using default system user (1L)");
-            userId = 1L;
+            throw new IllegalArgumentException("User ID is required to save app");
+        }
+        if (logoUuid == null || logoUuid.isBlank()) {
+            throw new IllegalArgumentException("logoUuid is required to save app");
         }
         
         log.info("Saving app for user {}: name={}, description={}", userId, name, description);
 
         // 2. 调用 AppService 保存应用
         AppEntity app = appService.createApp(userId, name, description);
-        if (logoUuid != null && !logoUuid.isBlank()) {
-            // Keep db value as uuid.ext. Async logo task may later overwrite extension if needed.
-            appService.updateAppLogo(app.getId(), logoUuid + ".png");
-        }
+        // Keep db value as uuid.ext. Async logo task may later overwrite extension if needed.
+        appService.updateAppLogo(app.getId(), logoUuid + ".png");
         appService.createVersion(app.getId(), code, "Initial generation by AI");
 
         // 3. 返回预览链接
