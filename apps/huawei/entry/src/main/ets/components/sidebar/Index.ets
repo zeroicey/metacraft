@@ -80,7 +80,7 @@ export struct Sidebar {
       // Navigation 区域
       Column({ space: 4 }) {
         this.buildNavItem('我的元应用', 'more');
-        this.buildNavItem('我的收藏', 'star');
+        this.buildNavItem('元应用商店', 'search_things');
         this.buildNavItem('元数据中心', 'folder');
       }
       .padding({ left: 16, right: 16, bottom: 12 })
@@ -228,8 +228,8 @@ export struct Sidebar {
       let targetUrl = '';
       if (label === '我的元应用') {
         targetUrl = 'pages/MyApps';
-      } else if (label === '我的收藏') {
-        targetUrl = 'pages/MyFavorites';
+      } else if (label === '元应用商店') {
+        targetUrl = 'pages/AppStore';
       } else if (label === '元数据中心') {
         targetUrl = 'pages/DataCenter';
       }

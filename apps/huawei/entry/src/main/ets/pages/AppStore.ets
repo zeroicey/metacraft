@@ -1,6 +1,6 @@
 @Entry
 @ComponentV2
-struct MyFavorites {
+struct AppStore {
   topRectHeight: number = 0;
 
   aboutToAppear(): void {
@@ -24,7 +24,7 @@ struct MyFavorites {
           this.getUIContext().getRouter().back();
         })
 
-        Text('我的收藏')
+        Text('元应用商店')
           .fontSize(18)
           .fontWeight(FontWeight.Medium)
           .margin({ left: 8 })
@@ -41,12 +41,12 @@ struct MyFavorites {
 
       // 占位内容
       Column() {
-        Text('我的收藏')
+        Text('元应用商店')
           .fontSize(24)
           .fontWeight(FontWeight.Bold)
           .margin({ bottom: 16 })
 
-        Text('这里将展示你收藏的应用和灵感')
+        Text('这里将展示可发现的元应用与推荐内容')
           .fontSize(14)
           .fontColor('#888888')
       }

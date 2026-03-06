@@ -6,7 +6,7 @@
     "pages/Profile",
     "pages/Setting",
     "pages/MyApps",
-    "pages/MyFavorites",
+    "pages/AppStore",
     "pages/DataCenter"
   ]
 }
