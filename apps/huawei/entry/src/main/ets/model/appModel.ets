@@ -17,6 +17,7 @@ export interface App {
   uuid: string;
   name: string;
   description: string;
+  logo?: string;
   isPublic: boolean;
   currentVersionId: number | null;
   versions: AppVersion[];

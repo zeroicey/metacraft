@@ -1,4 +1,5 @@
 import { webview } from '@kit.ArkWeb';
+import { toApiUrl } from '../utils/http/ApiConfig';
 
 @Entry
 @Component
@@ -7,23 +8,25 @@ struct PreviewPage {
 
   @State url: string = '';
   @State appName: string = 'App Preview';
+  @State logoUrl: string = '';
+  @State logoLoadFailed: boolean = false;
   controller: webview.WebviewController = new webview.WebviewController();
 
   aboutToAppear() {
     this.topRectHeight = AppStorage.get<number>('topRectHeight') ?? 0;
     const params = this.getUIContext().getRouter().getParams() as Record<string, string>;
     if (params && params['url']) {
-      // Assuming the URL from backend is relative "/api/preview/..." or absolute
-      // If relative, prepend host.
-      // For now, let's assume we need to prepend the host as used in aiChat.ets (10.225.11.177:8080)
-      // Or better, let the caller handle the full URL.
       this.url = params['url'];
       if (this.url.startsWith('/')) {
-        this.url = 'http://10.225.11.177:8080' + this.url;
+        this.url = toApiUrl(this.url);
       }
     }
     if (params && params['appName']) {
       this.appName = params['appName'];
+    }
+    if (params && params['logoUrl']) {
+      this.logoUrl = params['logoUrl'];
+      this.logoLoadFailed = false;
     }
   }
 
@@ -37,10 +40,23 @@ struct PreviewPage {
           .onClick(() => {
             this.getUIContext().getRouter().back();
           })
+
+        if (this.logoUrl.length > 0 && !this.logoLoadFailed) {
+          Image(this.logoUrl)
+            .width(26)
+            .height(26)
+            .borderRadius(6)
+            .objectFit(ImageFit.Cover)
+            .margin({ left: 12 })
+            .onError(() => {
+              this.logoLoadFailed = true;
+            })
+        }
+
         Text(this.appName)
           .fontSize(18)
           .fontWeight(FontWeight.Bold)
-          .margin({ left: 16 })
+          .margin({ left: 12 })
       }
       .width('100%')
       .padding({

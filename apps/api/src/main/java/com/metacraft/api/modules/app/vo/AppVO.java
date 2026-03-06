@@ -17,6 +17,7 @@ public class AppVO {
     private String uuid;
     private String name;
     private String description;
+    private String logo;
     private Boolean isPublic;
     private Long currentVersionId;
     private List<AppVersionVO> versions;

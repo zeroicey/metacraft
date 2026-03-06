@@ -333,6 +333,7 @@ public class AppService {
                 .uuid(entity.getUuid())
                 .name(entity.getName())
                 .description(entity.getDescription())
+            .logo(entity.getLogo())
                 .isPublic(entity.getIsPublic())
                 .currentVersionId(entity.getCurrentVersionId())
                 .versions(versions)

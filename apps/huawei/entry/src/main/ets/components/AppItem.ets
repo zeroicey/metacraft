@@ -5,11 +5,13 @@
 import { router } from '@kit.ArkUI';
 import { App } from '../model/appModel';
 import { AppActionMenu, AppActionMenuOptions } from './AppActionMenu';
+import { toApiUrl } from '../utils/http/ApiConfig';
 
 @ComponentV2
 export struct AppItem {
   @Require @Param app: App;
   @Param onRefresh: (() => void) | null = null;
+  @Local logoLoadFailed: boolean = false;
 
   // 生成应用Logo颜色（基于应用名称的简单哈希）
   private getLogoColor(name: string): string {
@@ -74,19 +76,45 @@ export struct AppItem {
     return `${year}/${month}/${day}`;
   }
 
+  // 解析 logo URL，后端存储的是 uuid.ext
+  private getLogoUrl(): string {
+    if (!this.app.logo || this.app.logo.length === 0) {
+      return '';
+    }
+
+    if (this.app.logo.startsWith('http://') || this.app.logo.startsWith('https://')) {
+      return this.app.logo;
+    }
+
+    const dotIndex: number = this.app.logo.lastIndexOf('.');
+    const logoUuid: string = dotIndex > 0 ? this.app.logo.substring(0, dotIndex) : this.app.logo;
+    return toApiUrl(`/api/logo/${logoUuid}`);
+  }
+
   build() {
     Row() {
       // Logo区域
       Stack() {
-        Rect()
-          .width(56)
-          .height(56)
-          .fill(this.getLogoColor(this.app.name))
-          .radius(14)
-        Text(this.getLogoInitial(this.app.name))
-          .fontSize(24)
-          .fontWeight(FontWeight.Bold)
-          .fontColor(Color.White)
+        if (!this.logoLoadFailed && this.getLogoUrl().length > 0) {
+          Image(this.getLogoUrl())
+            .width(56)
+            .height(56)
+            .borderRadius(14)
+            .objectFit(ImageFit.Cover)
+            .onError(() => {
+              this.logoLoadFailed = true;
+            })
+        } else {
+          Rect()
+            .width(56)
+            .height(56)
+            .fill(this.getLogoColor(this.app.name))
+            .radius(14)
+          Text(this.getLogoInitial(this.app.name))
+            .fontSize(24)
+            .fontWeight(FontWeight.Bold)
+            .fontColor(Color.White)
+        }
       }
       .margin({ right: 16 })
 
@@ -174,15 +202,15 @@ export struct AppItem {
   }
 
   private handlePreview(): void {
-    const baseUrl: string = 'http://192.168.5.4:8080';
-    const previewUrl: string = `${baseUrl}/api/preview/${this.app.uuid}`;
+    const previewUrl: string = toApiUrl(`/api/preview/${this.app.uuid}`);
 
     router.pushUrl({
       url: 'pages/Preview',
       params: {
         url: previewUrl,
         appName: this.app.name,
-        appUuid: this.app.uuid
+        appUuid: this.app.uuid,
+        logoUrl: this.getLogoUrl()
       }
     }).catch((err: Error) => {
       console.error('Failed to navigate to preview:', err.message);

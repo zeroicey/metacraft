@@ -1,6 +1,7 @@
 import { rcp } from '@kit.RemoteCommunicationKit';
 import { AuthInterceptor, ResponseInterceptor } from './Interceptors';
 import { BusinessError } from '@kit.BasicServicesKit';
+import { API_BASE_URL } from './ApiConfig';
 
 // 后端统一响应结构
 export interface ApiResponse<T> {
@@ -13,7 +14,7 @@ export interface ApiResponse<T> {
 export class HttpManager {
   private static instance: HttpManager;
   private session: rcp.Session;
-  private readonly baseUrl: string = 'http://10.225.11.177:8080';
+  private readonly baseUrl: string = API_BASE_URL;
 
   private constructor() {
     // 1. 配置 Session [4]

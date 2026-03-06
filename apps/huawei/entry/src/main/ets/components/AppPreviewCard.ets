@@ -65,7 +65,8 @@ export struct AppPreviewCard {
                url: 'pages/Preview',
                params: {
                  url: this.previewUrl,
-                 appName: this.appName
+                 appName: this.appName,
+                 logoUrl: this.logoUrl
                }
              });
           })

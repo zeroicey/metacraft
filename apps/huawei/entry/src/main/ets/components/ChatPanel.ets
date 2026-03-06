@@ -4,6 +4,7 @@ import { Markdown } from '@luvi/lv-markdown-in';
 import { AiChatRequestModel } from '../model/aiChatModel';
 import { ChatMessage as ApiChatMessage } from '../model/chatSessionModel';
 import { AppPreviewCard } from './AppPreviewCard';
+import { toApiUrl } from '../utils/http/ApiConfig';
 
 @Observed
 export class ChatMessage {
@@ -115,14 +116,14 @@ export struct ChatPanel {
         let appDescription: string | undefined = undefined;
         let logoUrl: string | undefined = undefined;
         if (msg.type === 'app' && msg.relatedAppUuid) {
-          previewUrl = 'http://10.225.11.177:8080/api/preview/' + msg.relatedAppUuid;
+          previewUrl = toApiUrl('/api/preview/' + msg.relatedAppUuid);
           appName = msg.relatedAppName;
           appDescription = msg.relatedAppDescription;
           if (msg.relatedAppLogo && msg.relatedAppLogo.length > 0) {
             const logoName = msg.relatedAppLogo;
             const dotIndex = logoName.lastIndexOf('.');
             const logoUuid = dotIndex > 0 ? logoName.substring(0, dotIndex) : logoName;
-            logoUrl = 'http://10.225.11.177:8080/api/logo/' + logoUuid;
+            logoUrl = toApiUrl('/api/logo/' + logoUuid);
           }
         }
         return new ChatMessage(msg.id, msg.content, isUser, previewUrl, appName, appDescription, logoUrl);

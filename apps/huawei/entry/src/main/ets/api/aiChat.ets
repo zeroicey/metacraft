@@ -1,4 +1,5 @@
 import { SSEClient } from '../utils/http/SSEClient';
+import { toApiUrl } from '../utils/http/ApiConfig';
 import { AiChatRequest, AiChatReply, AiChatModel } from '../model/aiChatModel';
 
 export interface AiChatResult {
@@ -32,7 +33,7 @@ class AiChatApi {
     }
     
     // Using the specific agent chat endpoint for streaming
-    const url = 'http://10.225.11.177:8080/api/ai/agent/unified';
+    const url = toApiUrl('/api/ai/agent/unified');
     console.info('[AiChatApi] Stream URL:', url);
 
     // Instantiate SSEClient with callbacks
