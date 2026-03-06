@@ -113,7 +113,7 @@ struct MyApps {
         .padding({ left: 32, right: 32 })
       } else {
         // 应用列表
-        List({ space: 0 }) {
+        List({ space: 12 }) {
           ForEach(this.apps, (app: App, index: number) => {
             ListItem() {
               AppItem({
@@ -127,8 +127,7 @@ struct MyApps {
         }
         .layoutWeight(1)
         .width('100%')
-        .padding({ left: 16, right: 16 })
-        .divider({ strokeWidth: 1, color: '#EEEEEE', startMargin: 76, endMargin: 16 })
+        .padding({ left: 16, right: 16, top: 8, bottom: 8 })
       }
     }
     .width('100%')

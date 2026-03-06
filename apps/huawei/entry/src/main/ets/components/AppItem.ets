@@ -1,6 +1,6 @@
 /**
  * 应用列表项组件
- * 显示应用卡片，包含图标、名称、描述和操作按钮
+ * 显示应用卡片，点击直接跳转到预览页面
  */
 import { router } from '@kit.ArkUI';
 import { App } from '../model/appModel';
@@ -38,96 +38,137 @@ export struct AppItem {
     return name && name.length > 0 ? name.charAt(0).toUpperCase() : 'A';
   }
 
+  // 格式化时间显示
+  private formatTime(isoString: string): string {
+    const date: Date = new Date(isoString);
+    const now: Date = new Date();
+    const diffMs: number = now.getTime() - date.getTime();
+    const diffDays: number = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      const diffHours: number = Math.floor(diffMs / (1000 * 60 * 60));
+      if (diffHours === 0) {
+        const diffMinutes: number = Math.floor(diffMs / (1000 * 60));
+        return diffMinutes <= 1 ? '刚刚' : `${diffMinutes}分钟前`;
+      }
+      return `${diffHours}小时前`;
+    } else if (diffDays === 1) {
+      return '昨天';
+    } else if (diffDays < 7) {
+      return `${diffDays}天前`;
+    } else if (diffDays < 30) {
+      return `${Math.floor(diffDays / 7)}周前`;
+    } else if (diffDays < 365) {
+      return `${Math.floor(diffDays / 30)}月前`;
+    } else {
+      return `${Math.floor(diffDays / 365)}年前`;
+    }
+  }
+
+  // 格式化完整日期
+  private formatFullDate(isoString: string): string {
+    const date: Date = new Date(isoString);
+    const year: number = date.getFullYear();
+    const month: number = date.getMonth() + 1;
+    const day: number = date.getDate();
+    return `${year}/${month}/${day}`;
+  }
+
   build() {
     Row() {
       // Logo区域
       Stack() {
         Rect()
-          .width(52)
-          .height(52)
+          .width(56)
+          .height(56)
           .fill(this.getLogoColor(this.app.name))
-          .radius(12)
+          .radius(14)
         Text(this.getLogoInitial(this.app.name))
-          .fontSize(20)
+          .fontSize(24)
           .fontWeight(FontWeight.Bold)
           .fontColor(Color.White)
       }
-      .margin({ right: 14 })
+      .margin({ right: 16 })
 
       // 应用信息区域
       Column() {
-        Text(this.app.name)
-          .fontSize(17)
-          .fontWeight(FontWeight.Medium)
-          .fontColor($r('sys.color.ohos_id_color_text_primary'))
-          .maxLines(1)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
+        // 第一行：名称和版本标签
+        Row() {
+          Text(this.app.name)
+            .fontSize(17)
+            .fontWeight(FontWeight.Medium)
+            .fontColor($r('sys.color.ohos_id_color_text_primary'))
+            .maxLines(1)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
 
-        Text(this.app.description || '暂无描述')
-          .fontSize(13)
-          .fontColor('#999999')
-          .margin({ top: 2 })
-          .maxLines(1)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-
-        // 版本信息
-        if (this.app.versions && this.app.versions.length > 0) {
-          Row() {
-            Text(`v${this.app.versions[0].versionNumber}`)
-              .fontSize(11)
+          if (this.app.versions && this.app.versions.length > 0) {
+            Text(` v${this.app.versions[0].versionNumber}`)
+              .fontSize(13)
               .fontColor('#007AFF')
-              .padding({ left: 6, right: 6, top: 2, bottom: 2 })
-              .backgroundColor('#E5F1FF')
-              .borderRadius(4)
-
-            if (this.app.versions.length > 1) {
-              Text(`${this.app.versions.length} 个版本`)
-                .fontSize(11)
-                .fontColor('#999999')
-                .margin({ left: 6 })
-            }
+              .margin({ left: 6 })
           }
-          .margin({ top: 6 })
+
+          Blank()
         }
+        .width('100%')
+
+        // 第二行：描述
+        Text(this.app.description || '暂无描述')
+          .fontSize(14)
+          .fontColor('#8E8E93')
+          .margin({ top: 3 })
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+
+        // 第三行：时间信息
+        Row() {
+          Text(`创建于 ${this.formatTime(this.app.createdAt)}`)
+            .fontSize(12)
+            .fontColor('#C7C7CC')
+
+          if (this.app.updatedAt !== this.app.createdAt) {
+            Text(' · ')
+              .fontSize(12)
+              .fontColor('#C7C7CC')
+
+            Text(`更新 ${this.formatTime(this.app.updatedAt)}`)
+              .fontSize(12)
+              .fontColor('#C7C7CC')
+          }
+
+          if (this.app.versions && this.app.versions.length > 1) {
+            Text(' · ')
+              .fontSize(12)
+              .fontColor('#C7C7CC')
+
+            Text(`${this.app.versions.length}个版本`)
+              .fontSize(12)
+              .fontColor('#C7C7CC')
+          }
+        }
+        .margin({ top: 6 })
       }
       .alignItems(HorizontalAlign.Start)
       .layoutWeight(1)
 
-      // 操作按钮区域
-      Row({ space: 8 }) {
-        // 预览按钮
-        Button() {
-          Text('▶')
-            .fontSize(14)
-            .fontColor(Color.White)
-        }
-        .width(36)
-        .height(36)
-        .backgroundColor('#007AFF')
-        .borderRadius(10)
-        .onClick(() => {
-          this.handlePreview();
-        })
-
-        // 更多操作菜单
-        AppActionMenu({
-          options: {
-            app: this.app,
-            onRefresh: () => {
-              if (this.onRefresh) {
-                this.onRefresh();
-              }
+      // 更多操作菜单
+      AppActionMenu({
+        options: {
+          app: this.app,
+          onRefresh: () => {
+            if (this.onRefresh) {
+              this.onRefresh();
             }
           }
-        })
-      }
+        }
+      })
     }
     .width('100%')
-    .height(76)
-    .padding({ left: 4, right: 4, top: 8, bottom: 8 })
-    .backgroundColor(Color.Transparent)
+    .height(88)
+    .padding({ left: 16, right: 12, top: 12, bottom: 12 })
+    .backgroundColor(Color.White)
+    .borderRadius(16)
     .onClick(() => {
-      // 点击整个卡片也可以预览
       this.handlePreview();
     })
   }
