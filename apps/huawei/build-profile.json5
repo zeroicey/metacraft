@@ -23,6 +23,21 @@
         "name": "release"
       }
     ],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\happpy\\.ohos\\config\\default_huawei_iiuulm3MyP5YDEARUtA_kT8IxPE01AjvH4QZVi59z10=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001BC765ED4BF67D0AA3AE95877AFEA7C39EF92A68581446669C5674212D60B9D2294CE9907D1D595D",
+          "profile": "C:\\Users\\happpy\\.ohos\\config\\default_huawei_iiuulm3MyP5YDEARUtA_kT8IxPE01AjvH4QZVi59z10=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\happpy\\.ohos\\config\\default_huawei_iiuulm3MyP5YDEARUtA_kT8IxPE01AjvH4QZVi59z10=.p12",
+          "storePassword": "0000001BFEF69C63DC53D1B15C11024A1C84258FFAE03D8F0CD96FE61804D6223FF75FDA6BAEFC2D5EA7D6"
+        }
+      }
+    ]
   },
   "modules": [
     {
