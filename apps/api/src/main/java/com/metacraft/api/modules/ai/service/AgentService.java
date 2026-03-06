@@ -15,6 +15,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
@@ -87,10 +88,12 @@ public class AgentService {
                     .build();
 
             Flux<String> aiStream;
+            String logoUuid = null;
 
             if ("gen".equalsIgnoreCase(intent)) {
+                logoUuid = UUID.randomUUID().toString();
                 // Pass userId to AI service for tool execution
-                aiStream = agentAiService.generateApp(request.getMessage(), userId);
+                aiStream = agentAiService.generateApp(request.getMessage(), userId, logoUuid);
             } else {
                 aiStream = agentAiService.chat(request.getMessage());
             }
@@ -111,6 +114,7 @@ public class AgentService {
 
             // After stream ends, save AI message and check for new app
             String finalSessionId = sessionId;
+            String finalLogoUuid = logoUuid;
             Flux<ServerSentEvent<String>> postStream = Flux.defer(() -> {
                 // For gen mode, get the latest app first
                 AppEntity latestApp = null;
@@ -142,6 +146,7 @@ public class AgentService {
                 // Check if user has a new app and send app_generated event
                 if ("gen".equalsIgnoreCase(intent) && latestApp != null) {
                     String previewUrl = "/api/preview/" + latestApp.getUuid() + "/v/1";
+                    String logoUrl = finalLogoUuid != null ? "/api/logo/" + finalLogoUuid : null;
                     log.info("Gen mode completed, sending app_generated event with URL: {}, name: {}", previewUrl, latestApp.getName());
 
                     // Update session with related app
@@ -153,7 +158,7 @@ public class AgentService {
                     return Flux.just(
                             ServerSentEvent.<String>builder()
                                     .event("app_generated")
-                                    .data(sseUtils.toAppGeneratedJson(previewUrl, latestApp.getUuid(), latestApp.getName(), latestApp.getDescription()))
+                                    .data(sseUtils.toAppGeneratedJson(previewUrl, latestApp.getUuid(), latestApp.getName(), latestApp.getDescription(), logoUrl))
                                     .build()
                     );
                 }

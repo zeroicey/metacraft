@@ -15,7 +15,7 @@ class AiChatApi {
     onError: (err: string) => void,
     onPlan?: (text: string) => void,
     onIntent?: (intent: string) => void,
-    onAppGenerated?: (url: string) => void
+    onAppGenerated?: (url: string, appName?: string, appDescription?: string, logoUrl?: string) => void
   ): Promise<void> {
     console.info('[AiChatApi] ======== Send Message (stream - rcp) ========');
 
@@ -32,7 +32,7 @@ class AiChatApi {
     }
     
     // Using the specific agent chat endpoint for streaming
-    const url = 'http://192.168.5.4:8080/api/ai/agent/unified';
+    const url = 'http://10.225.11.177:8080/api/ai/agent/unified';
     console.info('[AiChatApi] Stream URL:', url);
 
     // Instantiate SSEClient with callbacks

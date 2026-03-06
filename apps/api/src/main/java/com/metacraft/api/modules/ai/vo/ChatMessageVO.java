@@ -25,4 +25,5 @@ public class ChatMessageVO {
     private String relatedAppUuid;
     private String relatedAppName;
     private String relatedAppDescription;
+    private String relatedAppLogo;
 }

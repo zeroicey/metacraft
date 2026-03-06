@@ -10,7 +10,7 @@ import { AuthInterceptor } from './Interceptors';
  * - intent: {"intent":"chat"} 或 {"intent":"gen"}
  * - message: {"content":"..."} 内容片段（流式）
  * - plan: {"content":"..."} 计划片段（流式）
- * - app_generated: {"url":"...", "uuid":"...", "name":"...", "description":"..."}
+ * - app_generated: {"url":"...", "uuid":"...", "name":"...", "description":"...", "logo":"..."}
  * - done: {} 空对象
  *
  * 前端会自动解析 JSON 对象并提取对应字段
@@ -49,9 +49,10 @@ export interface SSEListener {
    * 应用生成完毕时触发
    * @param previewUrl 预览链接
    * @param appName 应用名称
-   * @param appDescription 应用描述
+  * @param appDescription 应用描述
+  * @param logoUrl 应用 logo 链接
    */
-  onAppGenerated?: (previewUrl: string, appName?: string, appDescription?: string) => void;
+  onAppGenerated?: (previewUrl: string, appName?: string, appDescription?: string, logoUrl?: string) => void;
 }
 
 /**
@@ -137,13 +138,14 @@ class SSEWriteStream implements rcp.WriteStream {
         // {} - empty object, no content to extract
         extractedContent = '';
       } else if (eventName === 'app_generated') {
-        // {"url":"...", "uuid":"...", "name":"...", "description":"..."}
+        // {"url":"...", "uuid":"...", "name":"...", "description":"...", "logo":"..."}
         if (this.listener.onAppGenerated) {
           const url = parsed.url as string;
           const appName = parsed.name as string;
           const appDescription = parsed.description as string;
+          const logoUrl = parsed.logo as string;
           console.info(`[SSEWriteStream] App generated - URL: ${url}, Name: ${appName}`);
-          this.listener.onAppGenerated(url || '', appName, appDescription);
+          this.listener.onAppGenerated(url || '', appName, appDescription, logoUrl);
         }
         return;
       } else {

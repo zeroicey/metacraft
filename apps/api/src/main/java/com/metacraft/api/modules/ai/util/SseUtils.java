@@ -61,26 +61,28 @@ public class SseUtils {
 
     /**
      * Create app_generated event data as a JSON object.
-     * Format: {"url":"...", "uuid":"...", "name":"...", "description":"..."}
+     * Format: {"url":"...", "uuid":"...", "name":"...", "description":"...", "logo":"..."}
      *
      * @param url The preview URL
      * @param uuid The app UUID
      * @param name The app name
      * @param description The app description
+    * @param logo The app logo URL (e.g. /api/logo/{uuid})
      * @return JSON object string representation
      */
-    public String toAppGeneratedJson(String url, String uuid, String name, String description) {
+    public String toAppGeneratedJson(String url, String uuid, String name, String description, String logo) {
         try {
             Map<String, String> data = new HashMap<>();
             data.put("url", url != null ? url : "");
             data.put("uuid", uuid != null ? uuid : "");
             data.put("name", name != null ? name : "");
             data.put("description", description != null ? description : "");
+            data.put("logo", logo != null ? logo : "");
             return objectMapper.writeValueAsString(data);
         } catch (Exception e) {
             log.error("Failed to serialize app_generated data", e);
             // Fallback to minimal JSON object
-            return "{\"url\":\"\",\"uuid\":\"\",\"name\":\"\",\"description\":\"\"}";
+            return "{\"url\":\"\",\"uuid\":\"\",\"name\":\"\",\"description\":\"\",\"logo\":\"\"}";
         }
     }
 }

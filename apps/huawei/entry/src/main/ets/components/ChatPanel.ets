@@ -13,14 +13,16 @@ export class ChatMessage {
   previewUrl?: string;
   appName?: string;
   appDescription?: string;
+  logoUrl?: string;
 
-  constructor(id: number, text: string, isUser: boolean, previewUrl?: string, appName?: string, appDescription?: string) {
+  constructor(id: number, text: string, isUser: boolean, previewUrl?: string, appName?: string, appDescription?: string, logoUrl?: string) {
     this.id = id;
     this.text = text;
     this.isUser = isUser;
     this.previewUrl = previewUrl;
     this.appName = appName;
     this.appDescription = appDescription;
+    this.logoUrl = logoUrl;
   }
 }
 
@@ -62,7 +64,8 @@ struct MessageItem {
             AppPreviewCard({
               previewUrl: this.message.previewUrl,
               appName: this.message.appName,
-              appDescription: this.message.appDescription
+              appDescription: this.message.appDescription,
+              logoUrl: this.message.logoUrl
             })
           }
         }
@@ -110,12 +113,19 @@ export struct ChatPanel {
         let previewUrl: string | undefined = undefined;
         let appName: string | undefined = undefined;
         let appDescription: string | undefined = undefined;
+        let logoUrl: string | undefined = undefined;
         if (msg.type === 'app' && msg.relatedAppUuid) {
-          previewUrl = 'http://192.168.5.4:8080/api/preview/' + msg.relatedAppUuid;
+          previewUrl = 'http://10.225.11.177:8080/api/preview/' + msg.relatedAppUuid;
           appName = msg.relatedAppName;
           appDescription = msg.relatedAppDescription;
+          if (msg.relatedAppLogo && msg.relatedAppLogo.length > 0) {
+            const logoName = msg.relatedAppLogo;
+            const dotIndex = logoName.lastIndexOf('.');
+            const logoUuid = dotIndex > 0 ? logoName.substring(0, dotIndex) : logoName;
+            logoUrl = 'http://10.225.11.177:8080/api/logo/' + logoUuid;
+          }
         }
-        return new ChatMessage(msg.id, msg.content, isUser, previewUrl, appName, appDescription);
+        return new ChatMessage(msg.id, msg.content, isUser, previewUrl, appName, appDescription, logoUrl);
       });
       // Scroll to bottom after loading
       setTimeout(() => {
@@ -213,13 +223,14 @@ export struct ChatPanel {
            console.info(`[ChatPanel] Intent: ${intent}`);
         },
         // onAppGenerated
-        (previewUrl: string, appName?: string, appDescription?: string) => {
+        (previewUrl: string, appName?: string, appDescription?: string, logoUrl?: string) => {
            console.info(`[ChatPanel] App Generated: ${previewUrl}, name: ${appName}`);
            const index = this.messages.findIndex(m => m.id === botMsgId);
            if (index !== -1) {
              this.messages[index].previewUrl = previewUrl;
              this.messages[index].appName = appName;
              this.messages[index].appDescription = appDescription;
+             this.messages[index].logoUrl = logoUrl;
              this.scrollToBottom();
            }
         }

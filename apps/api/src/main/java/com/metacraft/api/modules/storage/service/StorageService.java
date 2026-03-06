@@ -105,4 +105,59 @@ public class StorageService {
             throw new RuntimeException("Failed to delete file.", e);
         }
     }
+
+    /**
+     * 保存二进制文件
+     *
+     * @param relativePath 相对路径 (例如: logos/uuid.png)
+     * @param content      文件内容
+     * @return 文件的绝对路径
+     */
+    public String saveBinaryFile(String relativePath, byte[] content) {
+        try {
+            Path destinationFile = this.rootLocation.resolve(relativePath).normalize();
+            if (!destinationFile.startsWith(this.rootLocation)) {
+                throw new SecurityException("Cannot store file outside current directory.");
+            }
+
+            Files.createDirectories(destinationFile.getParent());
+            Files.write(destinationFile, content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+            log.info("Binary file saved to: {}", destinationFile);
+            return destinationFile.toString();
+        } catch (IOException e) {
+            log.error("Failed to store binary file: {}", relativePath, e);
+            throw new RuntimeException("Failed to store binary file.", e);
+        }
+    }
+
+    /**
+     * 读取二进制文件
+     */
+    public byte[] readBinaryFile(String relativePath) {
+        try {
+            Path file = this.rootLocation.resolve(relativePath).normalize();
+            if (!file.startsWith(this.rootLocation)) {
+                throw new SecurityException("Cannot read file outside current directory.");
+            }
+            if (Files.notExists(file)) {
+                throw new RuntimeException("File not found: " + relativePath);
+            }
+            return Files.readAllBytes(file);
+        } catch (IOException e) {
+            log.error("Failed to read binary file: {}", relativePath, e);
+            throw new RuntimeException("Failed to read binary file.", e);
+        }
+    }
+
+    /**
+     * 检查文件是否存在
+     */
+    public boolean exists(String relativePath) {
+        Path file = this.rootLocation.resolve(relativePath).normalize();
+        if (!file.startsWith(this.rootLocation)) {
+            return false;
+        }
+        return Files.exists(file);
+    }
 }

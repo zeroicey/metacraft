@@ -32,6 +32,9 @@ public class AppEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "logo", length = 128)
+    private String logo;
+
     @Column(name = "is_public")
     @Builder.Default
     private Boolean isPublic = false;

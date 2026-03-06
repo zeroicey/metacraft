@@ -5,20 +5,37 @@ export struct AppPreviewCard {
   @Prop previewUrl: string;
   @Prop appName: string = 'Application Generated';
   @Prop appDescription: string = 'Click to preview the app';
+  @Prop @Watch('onLogoUrlChange') logoUrl: string = '';
+  @State private logoLoadFailed: boolean = false;
+
+  onLogoUrlChange() {
+    this.logoLoadFailed = false;
+  }
 
   build() {
     Column() {
       Row() {
         // Icon Placeholder
         Stack() {
-          Rect()
-            .width(40)
-            .height(40)
-            .fill('#007AFF')
-            .radius(8)
-          Text('App')
-            .fontSize(12)
-            .fontColor(Color.White)
+          if (this.logoUrl.length > 0 && !this.logoLoadFailed) {
+            Image(this.logoUrl)
+              .width(40)
+              .height(40)
+              .borderRadius(8)
+              .objectFit(ImageFit.Cover)
+              .onError(() => {
+                this.logoLoadFailed = true;
+              })
+          } else {
+            Rect()
+              .width(40)
+              .height(40)
+              .fill('#007AFF')
+              .radius(8)
+            Text('App')
+              .fontSize(12)
+              .fontColor(Color.White)
+          }
         }
         .margin({ right: 12 })
 

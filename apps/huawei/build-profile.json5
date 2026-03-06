@@ -4,8 +4,8 @@
       {
         "name": "default",
         "signingConfig": "default",
-        "targetSdkVersion": "6.0.2(22)",
-        "compatibleSdkVersion": "6.0.2(22)",
+        "targetSdkVersion": "6.0.1(21)",
+        "compatibleSdkVersion": "6.0.1(21)",
         "runtimeOS": "HarmonyOS",
         "buildOption": {
           "strictMode": {
@@ -23,21 +23,6 @@
         "name": "release"
       }
     ],
-    "signingConfigs": [
-      {
-        "name": "default",
-        "type": "HarmonyOS",
-        "material": {
-          "certpath": "C:\\Users\\happpy\\.ohos\\config\\default_huawei_iiuulm3MyP5YDEARUtA_kT8IxPE01AjvH4QZVi59z10=.cer",
-          "keyAlias": "debugKey",
-          "keyPassword": "0000001BBFEAD841E1C76CE50E267CCCD7801CFD7DA9306EED706D3C060AC7B626187C968208183D43C911",
-          "profile": "C:\\Users\\happpy\\.ohos\\config\\default_huawei_iiuulm3MyP5YDEARUtA_kT8IxPE01AjvH4QZVi59z10=.p7b",
-          "signAlg": "SHA256withECDSA",
-          "storeFile": "C:\\Users\\happpy\\.ohos\\config\\default_huawei_iiuulm3MyP5YDEARUtA_kT8IxPE01AjvH4QZVi59z10=.p12",
-          "storePassword": "0000001B4D55152C99134BC6B5F015DDA34983F07AA923CA0F056D7CC90ECFA32F889828A156B6838F451E"
-        }
-      }
-    ]
   },
   "modules": [
     {

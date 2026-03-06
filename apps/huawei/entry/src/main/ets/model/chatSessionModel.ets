@@ -24,6 +24,7 @@ export interface ChatMessage {
   relatedAppUuid?: string;
   relatedAppName?: string;
   relatedAppDescription?: string;
+  relatedAppLogo?: string;
 }
 
 // 创建会话请求 DTO

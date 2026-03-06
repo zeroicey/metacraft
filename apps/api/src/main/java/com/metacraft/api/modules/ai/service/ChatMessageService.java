@@ -98,6 +98,7 @@ public class ChatMessageService {
                 builder.relatedAppUuid(app.getUuid());
                 builder.relatedAppName(app.getName());
                 builder.relatedAppDescription(app.getDescription());
+                builder.relatedAppLogo(app.getLogo());
             });
         }
 

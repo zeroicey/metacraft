@@ -107,6 +107,18 @@ public class AppService {
     }
 
     /**
+     * 更新应用 logo 文件名
+     */
+    @Transactional
+    public void updateAppLogo(Long appId, String logo) {
+        appRepository.findById(appId).ifPresent(app -> {
+            app.setLogo(logo);
+            appRepository.save(app);
+            log.info("Updated logo for app {}: logo={}", appId, logo);
+        });
+    }
+
+    /**
      * 获取用户最新创建的应用
      */
     public AppEntity getLatestAppByUserId(Long userId) {
