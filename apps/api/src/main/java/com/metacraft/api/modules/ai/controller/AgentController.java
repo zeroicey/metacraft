@@ -36,6 +36,6 @@ public class AgentController {
         AuthUtils.validateAuthorization(authHeader, jwtTokenProvider);
         String token = authHeader.substring(7);
         Long userId = jwtTokenProvider.getUserIdFromToken(token);
-        return agentService.unified(request, userId);
+        return agentService.handleRequest(request, userId);
     }
 }

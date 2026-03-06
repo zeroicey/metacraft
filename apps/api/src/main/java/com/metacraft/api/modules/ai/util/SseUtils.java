@@ -1,11 +1,14 @@
 package com.metacraft.api.modules.ai.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Utility class for SSE JSON serialization using Jackson.
@@ -30,7 +33,7 @@ public class SseUtils {
             Map<String, String> data = new HashMap<>();
             data.put("intent", intent != null ? intent : "");
             return objectMapper.writeValueAsString(data);
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             log.error("Failed to serialize intent data", e);
             return "{\"intent\":\"\"}";
         }
@@ -45,7 +48,7 @@ public class SseUtils {
             Map<String, String> data = new HashMap<>();
             data.put("content", content != null ? content : "");
             return objectMapper.writeValueAsString(data);
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             log.error("Failed to serialize content data", e);
             return "{\"content\":\"\"}";
         }
@@ -66,11 +69,11 @@ public class SseUtils {
     public String toErrorJson(String message) {
         try {
             Map<String, String> data = new HashMap<>();
-            data.put("message", message != null ? message : "");
+            data.put("error", message != null ? message : "");
             return objectMapper.writeValueAsString(data);
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             log.error("Failed to serialize error data", e);
-            return "{\"message\":\"\"}";
+            return "{\"error\":\"\"}";
         }
     }
 
@@ -94,7 +97,7 @@ public class SseUtils {
             data.put("description", description != null ? description : "");
             data.put("logo", logo != null ? logo : "");
             return objectMapper.writeValueAsString(data);
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             log.error("Failed to serialize app_generated data", e);
             // Fallback to minimal JSON object
             return "{\"url\":\"\",\"uuid\":\"\",\"name\":\"\",\"description\":\"\",\"logo\":\"\"}";
