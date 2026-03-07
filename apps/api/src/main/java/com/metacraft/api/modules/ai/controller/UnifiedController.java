@@ -1,7 +1,7 @@
 package com.metacraft.api.modules.ai.controller;
 
 import com.metacraft.api.modules.ai.dto.AgentRequestDTO;
-import com.metacraft.api.modules.ai.service.AgentService;
+import com.metacraft.api.modules.ai.service.UnifiedOrchestrator;
 import com.metacraft.api.security.JwtTokenProvider;
 import com.metacraft.api.security.AuthUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,14 +18,14 @@ import reactor.core.publisher.Flux;
 @RestController
 @RequestMapping("/ai/agent")
 @Tag(name = "AI 智能体", description = "AI 智能体相关接口(仅流式输出)")
-public class AgentController {
+public class UnifiedController {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final AgentService agentService;
+    private final UnifiedOrchestrator unifiedOrchestrator;
 
-    public AgentController(AgentService agentService, JwtTokenProvider jwtTokenProvider) {
+    public UnifiedController(UnifiedOrchestrator unifiedOrchestrator, JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
-        this.agentService = agentService;
+        this.unifiedOrchestrator = unifiedOrchestrator;
     }
 
     @PostMapping(value = "/unified")
@@ -36,6 +36,6 @@ public class AgentController {
         AuthUtils.validateAuthorization(authHeader, jwtTokenProvider);
         String token = authHeader.substring(7);
         Long userId = jwtTokenProvider.getUserIdFromToken(token);
-        return agentService.handleRequest(request, userId);
+        return unifiedOrchestrator.handleRequest(request, userId);
     }
 }

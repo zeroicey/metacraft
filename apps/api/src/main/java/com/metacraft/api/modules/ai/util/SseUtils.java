@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.metacraft.api.modules.ai.entity.AppInfoEntity;
+import com.metacraft.api.modules.ai.dto.AppInfoDTO;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -95,29 +95,20 @@ public class SseUtils {
 
     /**
      * Create app_generated event data as a JSON object.
-     * Format: {"url":"...", "uuid":"...", "name":"...", "description":"...",
-     * "logo":"..."}
+     * Format: {"uuid":"..."}
      *
-     * @param url         The preview URL
-     * @param uuid        The app UUID
-     * @param name        The app name
-     * @param description The app description
-     * @param logo        The app logo URL (e.g. /api/logo/{uuid})
+     * @param uuid The app UUID
      * @return JSON object string representation
      */
-    public String toAppGeneratedJson(String url, String uuid, String name, String description, String logo) {
+    public String toAppGeneratedJson(String uuid) {
         try {
             Map<String, String> data = new HashMap<>();
-            data.put("url", url != null ? url : "");
             data.put("uuid", uuid != null ? uuid : "");
-            data.put("name", name != null ? name : "");
-            data.put("description", description != null ? description : "");
-            data.put("logo", logo != null ? logo : "");
             return objectMapper.writeValueAsString(data);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize app_generated data", e);
             // Fallback to minimal JSON object
-            return "{\"url\":\"\",\"uuid\":\"\",\"name\":\"\",\"description\":\"\",\"logo\":\"\"}";
+            return "{\"uuid\":\"\"}";
         }
     }
 
@@ -125,11 +116,12 @@ public class SseUtils {
      * Create appinfo event data as a JSON object.
      * Format: {"name":"...", "description":"..."}
      */
-    public String toAppInfoJson(AppInfoEntity appInfo) {
+    public String toAppInfoJson(AppInfoDTO appInfo) {
         try {
             Map<String, String> data = new HashMap<>();
             data.put("name", appInfo != null && appInfo.getName() != null ? appInfo.getName() : "");
-            data.put("description", appInfo != null && appInfo.getDescription() != null ? appInfo.getDescription() : "");
+            data.put("description",
+                    appInfo != null && appInfo.getDescription() != null ? appInfo.getDescription() : "");
             return objectMapper.writeValueAsString(data);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize appinfo data", e);

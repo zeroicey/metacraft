@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
-import com.metacraft.api.modules.ai.entity.AppInfoEntity;
+import com.metacraft.api.modules.ai.dto.AppInfoDTO;
 import com.metacraft.api.modules.storage.service.StorageService;
 
 import ai.z.openapi.ZhipuAiClient;
@@ -60,7 +60,7 @@ public class ImageService {
     /**
      * 同步生成并保存 App Logo，返回图片扩展名（png/jpg/webp）。
      */
-    public String generateLogoAndSave(AppInfoEntity appInfo, String logoUuid) {
+    public String generateLogoAndSave(AppInfoDTO appInfo, String logoUuid) {
         String prompt = logoPromptTemplate
                 .replace("{{appName}}", appInfo.getName())
                 .replace("{{appDescription}}", appInfo.getDescription());

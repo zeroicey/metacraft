@@ -1,4 +1,4 @@
-package com.metacraft.api.modules.ai.entity;
+package com.metacraft.api.modules.ai.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AppInfoEntity {
+public class AppInfoDTO {
 	private String name;
 	private String description;
 }

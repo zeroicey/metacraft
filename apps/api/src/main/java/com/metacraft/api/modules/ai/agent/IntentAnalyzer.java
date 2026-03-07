@@ -1,6 +1,6 @@
 package com.metacraft.api.modules.ai.agent;
 
-import com.metacraft.api.modules.ai.entity.IntentEntity;
+import com.metacraft.api.modules.ai.dto.IntentDTO;
 
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
@@ -10,5 +10,5 @@ import dev.langchain4j.service.spring.AiService;
 public interface IntentAnalyzer {
     @SystemMessage(fromResource = "prompts/intent.txt")
     @UserMessage("User request: {{it}}")
-    IntentEntity analyze(String message);
+    IntentDTO analyze(String message);
 }
