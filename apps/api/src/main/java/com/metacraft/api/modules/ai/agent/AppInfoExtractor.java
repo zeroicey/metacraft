@@ -8,7 +8,7 @@ import dev.langchain4j.service.spring.AiService;
 
 @AiService
 public interface AppInfoExtractor {
-	@SystemMessage(fromResource = "prompts/app-info.txt")
+	@SystemMessage(fromResource = "prompts/gen-app-info.txt")
 	@UserMessage("User requirement: {{it}}")
 	AppInfoDTO extract(String message);
 }

@@ -9,12 +9,11 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Locale;
 
-import com.metacraft.api.modules.app.entity.AppEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
-import com.metacraft.api.modules.ai.dto.AppInfoDTO;
+import com.metacraft.api.modules.app.entity.AppEntity;
 import com.metacraft.api.modules.storage.service.StorageService;
 
 import ai.z.openapi.ZhipuAiClient;
@@ -32,7 +31,7 @@ public class ImageService {
     @Value("${zhipu.api-key}")
     private String apiKey;
 
-    @Value("classpath:prompts/image-logo-gen.txt")
+    @Value("classpath:prompts/gen-app-logo.txt")
     private Resource logoPromptTemplateResource;
 
     private static final long MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024;
