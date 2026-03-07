@@ -1,7 +1,10 @@
 package com.metacraft.api.modules.ai.agent;
 
-import reactor.core.publisher.Flux;
+import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
 
 public interface CodeGenerator {
-    Flux<String> generateCode(String message, Long userId, String logoUuid, String runId);
+    @SystemMessage(fromResource = "prompts/gen-code.txt")
+    @UserMessage("User requirement: {{it}}")
+    String generateCode(String message);
 }
