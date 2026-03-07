@@ -116,12 +116,12 @@ public class SseUtils {
      * Create appinfo event data as a JSON object.
      * Format: {"name":"...", "description":"..."}
      */
-    public String toAppInfoJson(AppInfoDTO appInfo) {
+    public String toAppInfoJson(String name, String description) {
         try {
             Map<String, String> data = new HashMap<>();
-            data.put("name", appInfo != null && appInfo.getName() != null ? appInfo.getName() : "");
+            data.put("name", name != null ? name : "");
             data.put("description",
-                    appInfo != null && appInfo.getDescription() != null ? appInfo.getDescription() : "");
+                    description != null ? description : "");
             return objectMapper.writeValueAsString(data);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize appinfo data", e);
