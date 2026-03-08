@@ -1,13 +1,15 @@
 package com.metacraft.api.modules.ai.service;
 
-import com.metacraft.api.modules.ai.service.pipeline.AppEditPipelineService;
-import com.metacraft.api.modules.ai.service.pipeline.AppGenPipelineService;
-import com.metacraft.api.modules.ai.service.pipeline.ChatPipelineService;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 
 import com.metacraft.api.modules.ai.agent.IntentAnalyzer;
 import com.metacraft.api.modules.ai.dto.AgentRequestDTO;
+import com.metacraft.api.modules.ai.dto.ChatMessageCreateDTO;
+import com.metacraft.api.modules.ai.dto.ChatSessionCreateDTO;
+import com.metacraft.api.modules.ai.service.pipeline.AppEditPipelineService;
+import com.metacraft.api.modules.ai.service.pipeline.AppGenPipelineService;
+import com.metacraft.api.modules.ai.service.pipeline.ChatPipelineService;
 import com.metacraft.api.modules.ai.util.SseUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ import reactor.core.scheduler.Schedulers;
 public class UnifiedOrchestrator {
     private final IntentAnalyzer intentAnalyzer;
     private final SseUtils sseUtils;
+    private final ChatSessionService chatSessionService;
+    private final ChatMessageService chatMessageService;
 
     // 注入各个专门的流水线 Service
     private final ChatPipelineService chatPipelineService;
@@ -29,9 +33,9 @@ public class UnifiedOrchestrator {
     private final AppEditPipelineService appEditPipelineService;
 
     public Flux<ServerSentEvent<String>> handleRequest(AgentRequestDTO request, Long userId) {
-        String message = request.getMessage();
-
-        return Mono.fromCallable(() -> intentAnalyzer.analyze(message))
+        return Mono.fromCallable(() -> prepareAndSaveUserMessage(request, userId))
+            .subscribeOn(Schedulers.boundedElastic())
+            .flatMapMany(context -> Mono.fromCallable(() -> intentAnalyzer.analyze(context.message()))
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMapMany(intent -> {
                     log.info("User {} intent {}", userId, intent);
@@ -42,16 +46,60 @@ public class UnifiedOrchestrator {
                             .build();
 
                     Flux<ServerSentEvent<String>> contentStream = switch (intent) {
-                        case CHAT -> chatPipelineService.execute(message);
-                        case GEN  -> appGenPipelineService.execute(message, userId);
-                        case EDIT -> appEditPipelineService.execute(message);
+                        case CHAT -> chatPipelineService.execute(context.message());
+                        case GEN  -> appGenPipelineService.execute(context.message(), userId);
+                        case EDIT -> appEditPipelineService.execute(context.message());
                     };
 
                     return contentStream.startWith(intentEvent);
-                })
+                }))
                 .onErrorResume(e -> Flux.just(ServerSentEvent.<String>builder()
                         .event("error")
                         .data(sseUtils.toErrorJson(e.getMessage()))
                         .build()));
+    }
+
+    private RequestContext prepareAndSaveUserMessage(AgentRequestDTO request, Long userId) {
+        String sessionId = resolveSessionId(request, userId);
+
+        ChatMessageCreateDTO userMessageDto = new ChatMessageCreateDTO();
+        userMessageDto.setSessionId(sessionId);
+        userMessageDto.setRole("user");
+        userMessageDto.setContent(request.getMessage());
+        chatMessageService.saveMessage(userId, userMessageDto);
+        log.info("Saved user message for session {}", sessionId);
+
+        return new RequestContext(request.getMessage(), sessionId);
+    }
+
+    private String resolveSessionId(AgentRequestDTO request, Long userId) {
+        String sessionId = request.getSessionId();
+        if (sessionId == null || sessionId.trim().isEmpty()) {
+            String sessionTitle = toSessionTitle(request.getMessage());
+            ChatSessionCreateDTO sessionDto = new ChatSessionCreateDTO();
+            sessionDto.setTitle(sessionTitle);
+            String createdSessionId = chatSessionService.createSession(userId, sessionDto).getSessionId();
+            log.info("Created new session {} for user {}", createdSessionId, userId);
+            return createdSessionId;
+        }
+
+        try {
+            chatSessionService.getSession(userId, sessionId);
+            log.info("Using existing session {} for user {}", sessionId, userId);
+            return sessionId;
+        } catch (IllegalArgumentException e) {
+            log.warn("Session {} validation failed: {}, creating new session", sessionId, e.getMessage());
+            String sessionTitle = toSessionTitle(request.getMessage());
+            ChatSessionCreateDTO sessionDto = new ChatSessionCreateDTO();
+            sessionDto.setTitle(sessionTitle);
+            return chatSessionService.createSession(userId, sessionDto).getSessionId();
+        }
+    }
+
+    private String toSessionTitle(String message) {
+        return message.length() > 50 ? message.substring(0, 47) + "..." : message;
+    }
+
+    private record RequestContext(String message, String sessionId) {
     }
 }
