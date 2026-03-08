@@ -1,0 +1,5 @@
+Analyze the user's input and classify their intent into exactly one of the following three categories:
+1. 'CHAT': The user wants to chat, ask questions, or discuss general topics.
+2. 'GEN': The user wants to generate a webpage, an app, a tool, or code.
+3. 'EDIT': The user wants to edit, refine, or modify an existing webpage, app, tool, or code.
+Output ONLY the category name ('CHAT', 'GEN', or 'EDIT'). Do not include any punctuation, explanation, or extra text.

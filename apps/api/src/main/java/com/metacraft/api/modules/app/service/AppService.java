@@ -1,5 +1,11 @@
 package com.metacraft.api.modules.app.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.metacraft.api.modules.app.dto.AppCreateDTO;
 import com.metacraft.api.modules.app.dto.AppUpdateDTO;
 import com.metacraft.api.modules.app.entity.AppEntity;
@@ -9,13 +15,9 @@ import com.metacraft.api.modules.app.repository.AppVersionRepository;
 import com.metacraft.api.modules.app.vo.AppVO;
 import com.metacraft.api.modules.app.vo.AppVersionVO;
 import com.metacraft.api.modules.storage.service.StorageService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -46,11 +48,12 @@ public class AppService {
      *
      * @param appId       应用ID
      * @param htmlContent HTML内容
+    * @param jsContent   JavaScript内容 (app.js)
      * @param changeLog   变更日志 (通常是用户的提示词)
      * @return 新版本实体
      */
     @Transactional
-    public AppVersionEntity createVersion(Long appId, String htmlContent, String changeLog) {
+    public AppVersionEntity createVersion(Long appId, String htmlContent, String jsContent, String changeLog) {
         // 1. 获取应用
         AppEntity app = appRepository.findById(appId)
                 .orElseThrow(() -> new RuntimeException("App not found: " + appId));
@@ -62,7 +65,9 @@ public class AppService {
 
         // 3. 保存文件
         String relativePath = String.format("apps/%d/v%d/index.html", appId, nextVersion);
+        String jsRelativePath = String.format("apps/%d/v%d/app.js", appId, nextVersion);
         storageService.saveTextFile(relativePath, htmlContent);
+        storageService.saveTextFile(jsRelativePath, jsContent);
 
         // 4. 创建版本记录
         AppVersionEntity version = AppVersionEntity.builder()
@@ -236,6 +241,7 @@ public class AppService {
         for (AppVersionEntity version : versions) {
             try {
                 storageService.deleteFile(version.getStoragePath());
+                storageService.deleteFile(toJsPath(version.getStoragePath()));
             } catch (Exception e) {
                 log.warn("Failed to delete file for version {}: {}", version.getId(), e.getMessage());
             }
@@ -304,6 +310,7 @@ public class AppService {
         // 删除文件
         try {
             storageService.deleteFile(version.getStoragePath());
+            storageService.deleteFile(toJsPath(version.getStoragePath()));
         } catch (Exception e) {
             log.warn("Failed to delete file for version {}: {}", version.getId(), e.getMessage());
         }
@@ -364,5 +371,14 @@ public class AppService {
                 .changeLog(entity.getChangeLog())
                 .createdAt(entity.getCreatedAt())
                 .build();
+    }
+
+    private String toJsPath(String htmlPath) {
+        if (htmlPath == null || htmlPath.isBlank()) {
+            return htmlPath;
+        }
+        return htmlPath.endsWith("index.html")
+                ? htmlPath.substring(0, htmlPath.length() - "index.html".length()) + "app.js"
+                : htmlPath + "/app.js";
     }
 }
