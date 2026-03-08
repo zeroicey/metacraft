@@ -47,7 +47,7 @@ public class UnifiedOrchestrator {
 
                     Flux<ServerSentEvent<String>> contentStream = switch (intent) {
                         case CHAT -> chatPipelineService.execute(context.message(), userId, context.sessionId());
-                        case GEN  -> appGenPipelineService.execute(context.message(), userId);
+                        case GEN  -> appGenPipelineService.execute(context.message(), userId, context.sessionId());
                         case EDIT -> appEditPipelineService.execute(context.message());
                     };
 
