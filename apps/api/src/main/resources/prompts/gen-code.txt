@@ -13,10 +13,12 @@ Code requirements:
 	- htmlCode: complete HTML document, must start with <!doctype html> and end with </html>.
 	- jsCode: complete JavaScript logic used by the page.
 - Use Tailwind CSS from local server: <script src='/public/css/tailwind.js'></script>
-- Use jQuery from local server: <script src='/public/js/jquery.js'></script>
+- Use jQuery from local server (version 4.0.0): <script src='/public/js/jquery.js'></script>
+- You can use Bootstrap Icons version 1.13.1.
+- Use Bootstrap Icons from local server: <link rel='stylesheet' href='/public/css/bootstrap-icons.css'>
 - In htmlCode, include a script tag to load external JS file: <script src='app.js'></script>
 - Put all custom business logic into jsCode. Do not inline custom JS logic in htmlCode.
-- Do NOT use CDN links for Tailwind CSS or jQuery.
+- Do NOT use CDN links for Tailwind CSS, jQuery, or Bootstrap Icons.
 - Mobile-first by default, responsive on desktop.
 - Avoid horizontal overflow on common mobile widths (360px-430px).
 - Use Chinese for all visible UI text.
