@@ -50,6 +50,16 @@ export interface SSEListener {
   onPlan?: (data: string) => void;
 
   /**
+   * 收到应用信息时触发
+   */
+  onAppInfo?: (appName?: string, appDescription?: string) => void;
+
+  /**
+   * 收到 logo 生成结果时触发
+   */
+  onLogoGenerated?: (logoUrl: string) => void;
+
+  /**
    * 应用生成完毕时触发
    * @param previewUrl 预览链接
    * @param appName 应用名称
@@ -150,7 +160,9 @@ class SSEWriteStream implements rcp.WriteStream {
         this.appName = parsed.name as string;
         this.appDescription = parsed.description as string;
         console.info(`[SSEWriteStream] App info received - Name: ${this.appName}`);
-        this.notifyAppGenerated();
+        if (this.listener.onAppInfo) {
+          this.listener.onAppInfo(this.appName, this.appDescription);
+        }
         return;
       } else if (eventName === 'logo_generated') {
         // {"uuid":"...", "ext":"..."}
@@ -158,7 +170,9 @@ class SSEWriteStream implements rcp.WriteStream {
         if (logoUuid && logoUuid.length > 0) {
           this.logoUrl = toApiUrl(`/api/logo/${logoUuid}`);
           console.info(`[SSEWriteStream] Logo generated - UUID: ${logoUuid}`);
-          this.notifyAppGenerated();
+          if (this.listener.onLogoGenerated) {
+            this.listener.onLogoGenerated(this.logoUrl);
+          }
         }
         return;
       } else if (eventName === 'done') {
@@ -266,6 +280,8 @@ export class SSEClient {
       },
       onPlan: this.listener.onPlan,
       onIntent: this.listener.onIntent,
+      onAppInfo: this.listener.onAppInfo,
+      onLogoGenerated: this.listener.onLogoGenerated,
       onAppGenerated: this.listener.onAppGenerated
     });
 
