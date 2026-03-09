@@ -49,3 +49,7 @@ langchain4j:
         api-key: ${API_KEY}
 zhipu:
   api-key: ${ZHIPU_API_KEY}
+
+yuanclaw:
+  shared-room: ${YUANCLAW_SHARED_ROOM:shared}
+  nanobot-token: ${YUANCLAW_NANOBOT_TOKEN:123456}

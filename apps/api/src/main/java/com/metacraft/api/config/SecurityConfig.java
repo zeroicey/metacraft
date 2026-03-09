@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                        .requestMatchers("/ws/yuanclaw/**").permitAll()
                     .requestMatchers("/preview/**").permitAll()
                         .requestMatchers("/api/preview/**").permitAll()
                     .requestMatchers("/logo/**").permitAll()
