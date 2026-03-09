@@ -1,7 +1,7 @@
 import { router } from '@kit.ArkUI';
 import { App } from '../model/appModel';
 import { appApi } from '../api/appApi';
-import { AppItem } from '../components/AppItem';
+import { AppItem } from '../components/app/AppItem';
 
 @Entry
 @ComponentV2

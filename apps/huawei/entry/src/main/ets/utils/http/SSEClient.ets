@@ -2,6 +2,7 @@ import { rcp } from '@kit.RemoteCommunicationKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import util from '@ohos.util';
 import { AuthInterceptor } from './Interceptors';
+import { toApiUrl } from './ApiConfig';
 
 /**
  * SSE 回调接口
@@ -9,8 +10,11 @@ import { AuthInterceptor } from './Interceptors';
  * 数据格式说明（所有事件均为 JSON 对象格式）：
  * - intent: {"intent":"chat"} 或 {"intent":"gen"}
  * - message: {"content":"..."} 内容片段（流式）
- * - plan: {"content":"..."} 计划片段（流式）
- * - app_generated: {"url":"...", "uuid":"...", "name":"...", "description":"...", "logo":"..."}
+ * - plan: {"plan":"..."} 计划片段（流式）
+ * - app_info: {"name":"...", "description":"..."}
+ * - logo_generated: {"uuid":"...", "ext":"..."}
+ * - app_generated: {"uuid":"..."}
+ * - error: {"error":"..."}
  * - done: {} 空对象
  *
  * 前端会自动解析 JSON 对象并提取对应字段
@@ -46,6 +50,16 @@ export interface SSEListener {
   onPlan?: (data: string) => void;
 
   /**
+   * 收到应用信息时触发
+   */
+  onAppInfo?: (appName?: string, appDescription?: string) => void;
+
+  /**
+   * 收到 logo 生成结果时触发
+   */
+  onLogoGenerated?: (logoUrl: string) => void;
+
+  /**
    * 应用生成完毕时触发
    * @param previewUrl 预览链接
    * @param appName 应用名称
@@ -62,6 +76,10 @@ class SSEWriteStream implements rcp.WriteStream {
   private decoder: util.TextDecoder;
   private buffer: string = '';
   private listener: SSEListener;
+  private previewUrl: string = '';
+  private appName: string = '';
+  private appDescription: string = '';
+  private logoUrl: string = '';
 
   constructor(listener: SSEListener) {
     this.listener = listener;
@@ -131,22 +149,46 @@ class SSEWriteStream implements rcp.WriteStream {
         // {"intent":"chat" or "gen"}
         extractedContent = parsed.intent as string;
         console.info(`[SSEWriteStream] Intent: ${extractedContent}`);
-      } else if (eventName === 'message' || eventName === 'plan') {
+      } else if (eventName === 'message') {
         // {"content":"..."}
         extractedContent = parsed.content as string;
+      } else if (eventName === 'plan') {
+        // {"plan":"..."}
+        extractedContent = parsed.plan as string;
+      } else if (eventName === 'app_info') {
+        // {"name":"...", "description":"..."}
+        this.appName = parsed.name as string;
+        this.appDescription = parsed.description as string;
+        console.info(`[SSEWriteStream] App info received - Name: ${this.appName}`);
+        if (this.listener.onAppInfo) {
+          this.listener.onAppInfo(this.appName, this.appDescription);
+        }
+        return;
+      } else if (eventName === 'logo_generated') {
+        // {"uuid":"...", "ext":"..."}
+        const logoUuid = parsed.uuid as string;
+        if (logoUuid && logoUuid.length > 0) {
+          this.logoUrl = toApiUrl(`/api/logo/${logoUuid}`);
+          console.info(`[SSEWriteStream] Logo generated - UUID: ${logoUuid}`);
+          if (this.listener.onLogoGenerated) {
+            this.listener.onLogoGenerated(this.logoUrl);
+          }
+        }
+        return;
       } else if (eventName === 'done') {
         // {} - empty object, no content to extract
         extractedContent = '';
+      } else if (eventName === 'error') {
+        // {"error":"..."}
+        extractedContent = parsed.error as string;
       } else if (eventName === 'app_generated') {
-        // {"url":"...", "uuid":"...", "name":"...", "description":"...", "logo":"..."}
-        if (this.listener.onAppGenerated) {
-          const url = parsed.url as string;
-          const appName = parsed.name as string;
-          const appDescription = parsed.description as string;
-          const logoUrl = parsed.logo as string;
-          console.info(`[SSEWriteStream] App generated - URL: ${url}, Name: ${appName}`);
-          this.listener.onAppGenerated(url || '', appName, appDescription, logoUrl);
-        }
+        // {"uuid":"..."}
+        const appUuid = parsed.uuid as string;
+        this.previewUrl = appUuid && appUuid.length > 0
+          ? toApiUrl(`/api/preview/${appUuid}`)
+          : '';
+        console.info(`[SSEWriteStream] App generated - UUID: ${appUuid}, Name: ${this.appName}`);
+        this.notifyAppGenerated();
         return;
       } else {
         // Unknown event type, try to use as-is
@@ -171,9 +213,19 @@ class SSEWriteStream implements rcp.WriteStream {
       if (this.listener.onIntent && extractedContent.length > 0) {
         this.listener.onIntent(extractedContent);
       }
+    } else if (eventName === 'error') {
+      if (extractedContent.length > 0) {
+        this.listener.onError(extractedContent);
+      }
     } else if (eventName === 'done') {
       // 收到结束事件
       if (this.listener.onDone) this.listener.onDone();
+    }
+  }
+
+  private notifyAppGenerated() {
+    if (this.listener.onAppGenerated && this.previewUrl.length > 0) {
+      this.listener.onAppGenerated(this.previewUrl, this.appName, this.appDescription, this.logoUrl);
     }
   }
 }
@@ -228,6 +280,8 @@ export class SSEClient {
       },
       onPlan: this.listener.onPlan,
       onIntent: this.listener.onIntent,
+      onAppInfo: this.listener.onAppInfo,
+      onLogoGenerated: this.listener.onLogoGenerated,
       onAppGenerated: this.listener.onAppGenerated
     });
 

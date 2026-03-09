@@ -3,9 +3,9 @@
  * 显示应用卡片，点击直接跳转到预览页面
  */
 import { router } from '@kit.ArkUI';
-import { App } from '../model/appModel';
+import { App } from '../../model/appModel';
 import { AppActionMenu, AppActionMenuOptions } from './AppActionMenu';
-import { toApiUrl } from '../utils/http/ApiConfig';
+import { toApiUrl } from '../../utils/http/ApiConfig';
 
 @ComponentV2
 export struct AppItem {

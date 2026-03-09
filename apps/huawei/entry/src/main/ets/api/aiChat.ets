@@ -16,6 +16,8 @@ class AiChatApi {
     onError: (err: string) => void,
     onPlan?: (text: string) => void,
     onIntent?: (intent: string) => void,
+    onAppInfo?: (appName?: string, appDescription?: string) => void,
+    onLogoGenerated?: (logoUrl: string) => void,
     onAppGenerated?: (url: string, appName?: string, appDescription?: string, logoUrl?: string) => void
   ): Promise<void> {
     console.info('[AiChatApi] ======== Send Message (stream - rcp) ========');
@@ -43,6 +45,8 @@ class AiChatApi {
       onDone: onDone,
       onPlan: onPlan,
       onIntent: onIntent,
+      onAppInfo: onAppInfo,
+      onLogoGenerated: onLogoGenerated,
       onAppGenerated: onAppGenerated
     });
 

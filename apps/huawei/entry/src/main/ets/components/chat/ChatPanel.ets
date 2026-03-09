@@ -1,83 +1,12 @@
-import { aiChatApi } from '../api/aiChat';
-import { chatSessionApi } from '../api/chatSession';
-import { Markdown } from '@luvi/lv-markdown-in';
-import { AiChatRequestModel } from '../model/aiChatModel';
-import { ChatMessage as ApiChatMessage } from '../model/chatSessionModel';
-import { AppPreviewCard } from './AppPreviewCard';
-import { toApiUrl } from '../utils/http/ApiConfig';
-
-@Observed
-export class ChatMessage {
-  id: number;
-  text: string;
-  isUser: boolean;
-  previewUrl?: string;
-  appName?: string;
-  appDescription?: string;
-  logoUrl?: string;
-
-  constructor(id: number, text: string, isUser: boolean, previewUrl?: string, appName?: string, appDescription?: string, logoUrl?: string) {
-    this.id = id;
-    this.text = text;
-    this.isUser = isUser;
-    this.previewUrl = previewUrl;
-    this.appName = appName;
-    this.appDescription = appDescription;
-    this.logoUrl = logoUrl;
-  }
-}
-
-@Component
-struct MessageItem {
-  @ObjectLink message: ChatMessage;
-
-  build() {
-    if (this.message.isUser) {
-      Row() {
-        Column() {
-          Text(this.message.text)
-            .fontSize(15)
-            .fontColor('#FFFFFF')
-            .padding({ top: 10, bottom: 10, left: 14, right: 14 })
-            .backgroundColor('#007AFF')
-            .borderRadius(16)
-            .maxLines(999)
-        }
-        .alignItems(HorizontalAlign.End)
-      }
-      .width('100%')
-      .justifyContent(FlexAlign.End)
-      .margin({ bottom: 16 })
-    } else {
-      Row() {
-        Column() {
-          // Safe check for message text
-          if (this.message.text && this.message.text.length > 0) {
-            Markdown({
-              text: this.message.text,
-              mode: 'text'
-            })
-          } else {
-            LoadingProgress().width(24).height(24).color('#999999')
-          }
-
-          if (this.message.previewUrl) {
-            AppPreviewCard({
-              previewUrl: this.message.previewUrl,
-              appName: this.message.appName,
-              appDescription: this.message.appDescription,
-              logoUrl: this.message.logoUrl
-            })
-          }
-        }
-        .alignItems(HorizontalAlign.Start)
-      }
-      .width('100%')
-      .justifyContent(FlexAlign.Start)
-      .margin({ bottom: 16 })
-    }
-  }
-}
+import { aiChatApi } from '../../api/aiChat';
+import { chatSessionApi } from '../../api/chatSession';
+import { AiChatRequestModel } from '../../model/aiChatModel';
+import { ChatMessage as ApiChatMessage } from '../../model/chatSessionModel';
+import { ChatMessage } from './ChatMessageModels';
+import { splitGenMessageContent } from './GenMessageParser';
+import { ChatStreamDraft } from './ChatStreamDraft';
+import { MessageItem } from './MessageItem';
+import { toApiUrl } from '../../utils/http/ApiConfig';
 
 @Component
 export struct ChatPanel {
@@ -86,9 +15,9 @@ export struct ChatPanel {
   @Prop @Watch('onSessionIdChange') sessionId: string = '';
   @State messages: ChatMessage[] = [];
   @State inputText: string = '';
-  @State lastMsgUpdateTrigger: number = 0; // Force UI update trigger
+  @State lastMsgUpdateTrigger: number = 0;
   @State isSending: boolean = false;
-  private scroller: Scroller = new Scroller(); // Add scroller
+  private scroller: Scroller = new Scroller();
 
   aboutToAppear() {
     this.loadHistory();
@@ -108,17 +37,24 @@ export struct ChatPanel {
     const result = await chatSessionApi.getSessionMessages(this.sessionId);
     if (result.success && result.data) {
       this.messages = result.data.map((msg: ApiChatMessage) => {
-        // 后端 role: "user" | "assistant"
         const isUser = msg.role === 'user';
-        // Check if message has related app (type = "app")
         let previewUrl: string | undefined = undefined;
         let appName: string | undefined = undefined;
         let appDescription: string | undefined = undefined;
         let logoUrl: string | undefined = undefined;
+        let plan: string | undefined = undefined;
+        let chatBeforeGen: string | undefined = undefined;
+        let text: string = msg.content;
+        let isGenMessage: boolean = false;
         if (msg.type === 'app' && msg.relatedAppUuid) {
+          isGenMessage = true;
           previewUrl = toApiUrl('/api/preview/' + msg.relatedAppUuid);
           appName = msg.relatedAppName;
           appDescription = msg.relatedAppDescription;
+          const genContent = splitGenMessageContent(msg.content);
+          chatBeforeGen = genContent.chatBeforeGen;
+          plan = genContent.plan;
+          text = '';
           if (msg.relatedAppLogo && msg.relatedAppLogo.length > 0) {
             const logoName = msg.relatedAppLogo;
             const dotIndex = logoName.lastIndexOf('.');
@@ -126,15 +62,13 @@ export struct ChatPanel {
             logoUrl = toApiUrl('/api/logo/' + logoUuid);
           }
         }
-        return new ChatMessage(msg.id, msg.content, isUser, previewUrl, appName, appDescription, logoUrl);
+        return new ChatMessage(msg.id, text, isUser, previewUrl, appName, appDescription, logoUrl, plan, chatBeforeGen, isGenMessage);
       });
-      // Scroll to bottom after loading
       setTimeout(() => {
         this.scrollToBottom();
       }, 100);
     } else {
       console.error('[ChatPanel] Failed to load messages:', result.error);
-      // Optional: show error toast
     }
   }
 
@@ -148,35 +82,35 @@ export struct ChatPanel {
       return;
     }
     this.isSending = true;
-    
-    // Optimistic update
+
     this.messages.push(new ChatMessage(Date.now(), content, true));
     this.inputText = '';
 
-    // Placeholder for AI response
     const botMsgId = Date.now() + 1;
     this.messages.push(new ChatMessage(botMsgId, '', false));
     this.scrollToBottom();
 
-    let currentText = ''; // Keep track of the full text locally
+    const draft = new ChatStreamDraft();
     let lastUpdateTime = 0;
-    const UPDATE_INTERVAL = 100; // Throttle UI updates to every 100ms
-
-    // Pass sessionId if available
+    const UPDATE_INTERVAL = 100;
     const req = new AiChatRequestModel(content, this.sessionId);
 
-    // Helper to handle text chunks (chat or plan)
     const handleTextChunk = (text: string) => {
-      currentText += text;
-      const now = Date.now();
-      // console.info(`[ChatPanel] Received text chunk: "${text}", current total length: ${currentText.length}`);
+      draft.appendTextChunk(text);
+      syncMessageState(false);
+    };
 
-      // Throttle updates to avoid UI flickering
-      if (now - lastUpdateTime >= UPDATE_INTERVAL) {
+    const handlePlanChunk = (text: string) => {
+      draft.appendPlanChunk(text);
+      syncMessageState(false);
+    };
+
+    const syncMessageState = (force: boolean) => {
+      const now = Date.now();
+      if (force || now - lastUpdateTime >= UPDATE_INTERVAL) {
         const index = this.messages.findIndex(m => m.id === botMsgId);
         if (index !== -1) {
-          // console.info(`[ChatPanel] Updating UI, msgId: ${botMsgId}, text length: ${currentText.length}`);
-          this.messages[index].text = currentText;
+          draft.applyToMessage(this.messages[index]);
           lastUpdateTime = now;
           this.scrollToBottom();
         }
@@ -186,27 +120,29 @@ export struct ChatPanel {
     try {
       await aiChatApi.sendStreamMessage(
         req,
-        // onMessage
         (text: string) => {
           handleTextChunk(text);
         },
-        // onDone
         () => {
           this.isSending = false;
-          // Flush any remaining text update
           const index = this.messages.findIndex(m => m.id === botMsgId);
           if (index !== -1) {
             const msg = this.messages[index];
-            // Only update if there's a difference to avoid unnecessary render
-            if (msg.text !== currentText) {
-              console.info(`[ChatPanel] Final flush UI, msgId: ${botMsgId}, text length: ${currentText.length}`);
-              this.messages[index].text = currentText;
+            syncMessageState(true);
+            if (msg.text !== draft.getText()) {
+              console.info(`[ChatPanel] Final flush UI, msgId: ${botMsgId}, text length: ${draft.getText().length}`);
+              this.messages[index].text = draft.getText();
+            }
+            if (msg.chatBeforeGen !== draft.getChatBeforeGen()) {
+              this.messages[index].chatBeforeGen = draft.getChatBeforeGen();
+            }
+            if (msg.plan !== draft.getPlan()) {
+              this.messages[index].plan = draft.getPlan();
             }
             this.scrollToBottom();
           }
           console.info('Stream completed');
         },
-        // onError
         (err: string) => {
           this.isSending = false;
           const index = this.messages.findIndex(m => m.id === botMsgId);
@@ -215,25 +151,41 @@ export struct ChatPanel {
             this.messages[index].text = msg.text ? `${msg.text}\n[Error: ${err}]` : `请求失败：${err}`;
           }
         },
-        // onPlan
         (text: string) => {
-          handleTextChunk(text);
+          handlePlanChunk(text);
         },
-        // onIntent
         (intent: string) => {
-           console.info(`[ChatPanel] Intent: ${intent}`);
+          draft.setIntent(intent);
+          console.info(`[ChatPanel] Intent: ${intent}`);
         },
-        // onAppGenerated
+        (appName?: string, appDescription?: string) => {
+          const index = this.messages.findIndex(m => m.id === botMsgId);
+          if (index !== -1) {
+            this.messages[index].appName = appName;
+            this.messages[index].appDescription = appDescription;
+            this.messages[index].isGenMessage = true;
+            this.scrollToBottom();
+          }
+        },
+        (logoUrl: string) => {
+          const index = this.messages.findIndex(m => m.id === botMsgId);
+          if (index !== -1) {
+            this.messages[index].logoUrl = logoUrl;
+            this.messages[index].isGenMessage = true;
+            this.scrollToBottom();
+          }
+        },
         (previewUrl: string, appName?: string, appDescription?: string, logoUrl?: string) => {
-           console.info(`[ChatPanel] App Generated: ${previewUrl}, name: ${appName}`);
-           const index = this.messages.findIndex(m => m.id === botMsgId);
-           if (index !== -1) {
-             this.messages[index].previewUrl = previewUrl;
-             this.messages[index].appName = appName;
-             this.messages[index].appDescription = appDescription;
-             this.messages[index].logoUrl = logoUrl;
-             this.scrollToBottom();
-           }
+          console.info(`[ChatPanel] App Generated: ${previewUrl}, name: ${appName}`);
+          const index = this.messages.findIndex(m => m.id === botMsgId);
+          if (index !== -1) {
+            this.messages[index].previewUrl = previewUrl;
+            this.messages[index].appName = appName;
+            this.messages[index].appDescription = appDescription;
+            this.messages[index].logoUrl = logoUrl;
+            this.messages[index].isGenMessage = true;
+            this.scrollToBottom();
+          }
         }
       );
     } catch (error) {
@@ -300,4 +252,3 @@ export struct ChatPanel {
     .height('100%')
   }
 }
-

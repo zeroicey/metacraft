@@ -4,7 +4,7 @@ import { setOnUnauthorizedCallback } from '../utils/http/Interceptors';
 import { LoginSheetUtils, LoginInfoOptions, LoginController, ApiController, LoginParams, LoginChannelType, LoginFailError } from 'aggregated_login';
 import { authApi } from '../api/auth';
 import { aiChatApi } from '../api/aiChat';
-import { ChatPanel } from '../components/ChatPanel';
+import { ChatPanel } from '../components/chat/ChatPanel';
 import { PromptAction } from '@kit.ArkUI';
 import { chatSessionApi } from '../api/chatSession';
 
