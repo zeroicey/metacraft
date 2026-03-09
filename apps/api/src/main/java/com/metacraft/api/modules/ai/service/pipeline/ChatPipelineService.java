@@ -21,10 +21,10 @@ public class ChatPipelineService {
     private final SseUtils sseUtils;
     private final ChatMessageService chatMessageService;
 
-    public Flux<ServerSentEvent<String>> execute(String message, Long userId, String sessionId) {
+    public Flux<ServerSentEvent<String>> execute(String message, String history, Long userId, String sessionId) {
         StringBuilder assistantReply = new StringBuilder();
 
-        return chatAgent.chat(message)
+        return chatAgent.chat(message, history)
                 .doOnNext(assistantReply::append)
                 .doOnComplete(() -> saveAssistantMessage(userId, sessionId, assistantReply.toString()))
                 .map(chunk -> ServerSentEvent.<String>builder()

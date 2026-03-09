@@ -40,13 +40,13 @@ public class AppGenPipelineService {
         private final SseUtils sseUtils;
         private final ChatMessageService chatMessageService;
 
-        public Flux<ServerSentEvent<String>> execute(String message, Long userId, String sessionId) {
+        public Flux<ServerSentEvent<String>> execute(String message, String history, Long userId, String sessionId) {
                 StringBuffer chatBeforeGenBuffer = new StringBuffer();
                 StringBuffer planBuffer = new StringBuffer();
                 AtomicReference<Long> relatedAppIdRef = new AtomicReference<>();
                 AtomicReference<Long> relatedVersionIdRef = new AtomicReference<>();
 
-                Flux<ServerSentEvent<String>> chatStream = chatAgent.chatBeforeGen(message)
+                Flux<ServerSentEvent<String>> chatStream = chatAgent.chatBeforeGen(message, history)
                                 .doOnNext(chatBeforeGenBuffer::append)
                                 .map(chunk -> ServerSentEvent.<String>builder()
                                                 .event("message")

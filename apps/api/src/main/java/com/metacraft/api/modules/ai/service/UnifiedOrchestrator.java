@@ -22,6 +22,8 @@ import reactor.core.scheduler.Schedulers;
 @Service
 @RequiredArgsConstructor
 public class UnifiedOrchestrator {
+    private static final int HISTORY_WINDOW_SIZE = 20;
+
     private final IntentAnalyzer intentAnalyzer;
     private final SseUtils sseUtils;
     private final ChatSessionService chatSessionService;
@@ -51,8 +53,10 @@ public class UnifiedOrchestrator {
                             .build();
 
                     Flux<ServerSentEvent<String>> contentStream = switch (intent) {
-                        case CHAT -> chatPipelineService.execute(context.message(), userId, context.sessionId());
-                        case GEN  -> appGenPipelineService.execute(context.message(), userId, context.sessionId());
+                        case CHAT -> chatPipelineService.execute(context.message(), context.history(), userId,
+                            context.sessionId());
+                        case GEN  -> appGenPipelineService.execute(context.message(), context.history(), userId,
+                            context.sessionId());
                         case EDIT -> appEditPipelineService.execute(context.message());
                     };
 
@@ -67,6 +71,7 @@ public class UnifiedOrchestrator {
 
     private RequestContext prepareAndSaveUserMessage(AgentRequestDTO request, Long userId) {
         String sessionId = resolveSessionId(request, userId);
+        String history = chatMessageService.buildRecentConversationHistory(userId, sessionId, HISTORY_WINDOW_SIZE);
 
         ChatMessageCreateDTO userMessageDto = new ChatMessageCreateDTO();
         userMessageDto.setSessionId(sessionId);
@@ -75,7 +80,7 @@ public class UnifiedOrchestrator {
         chatMessageService.saveMessage(userId, userMessageDto);
         log.info("Saved user message for session {}", sessionId);
 
-        return new RequestContext(request.getMessage(), sessionId);
+        return new RequestContext(request.getMessage(), sessionId, history);
     }
 
     private String resolveSessionId(AgentRequestDTO request, Long userId) {
@@ -106,6 +111,6 @@ public class UnifiedOrchestrator {
         return message.length() > 50 ? message.substring(0, 47) + "..." : message;
     }
 
-    private record RequestContext(String message, String sessionId) {
+    private record RequestContext(String message, String sessionId, String history) {
     }
 }
