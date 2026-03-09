@@ -2,8 +2,8 @@
  * 应用操作菜单组件
  * 提供应用的更多操作菜单（编辑、切换版本、删除等）
  */
-import { App, AppVersion } from '../model/appModel';
-import { appApi } from '../api/appApi';
+import { App, AppVersion } from '../../model/appModel';
+import { appApi } from '../../api/appApi';
 
 export interface AppActionMenuOptions {
   app: App;

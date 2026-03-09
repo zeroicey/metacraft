@@ -1,6 +1,6 @@
 import { router } from "@kit.ArkUI";
 import { webview } from "@kit.ArkWeb";
-import { toApiUrl } from "../utils/http/ApiConfig";
+import { toApiUrl } from "../../utils/http/ApiConfig";
 @Component
 export struct AppPreviewCard {
   @Prop @Watch("onPreviewUrlChange") previewUrl: string;

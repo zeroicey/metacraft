@@ -3,27 +3,44 @@ import { chatSessionApi } from '../api/chatSession';
 import { Markdown } from '@luvi/lv-markdown-in';
 import { AiChatRequestModel } from '../model/aiChatModel';
 import { ChatMessage as ApiChatMessage } from '../model/chatSessionModel';
-import { AppPreviewCard } from './AppPreviewCard';
+import { AppPreviewCard } from './app/AppPreviewCard';
+import { AppPlanCard } from './app/AppPlanCard';
 import { toApiUrl } from '../utils/http/ApiConfig';
+
+class GenMessageContent {
+  chatBeforeGen: string;
+  plan: string;
+
+  constructor(chatBeforeGen: string, plan: string) {
+    this.chatBeforeGen = chatBeforeGen;
+    this.plan = plan;
+  }
+}
 
 @Observed
 export class ChatMessage {
   id: number;
   text: string;
+  chatBeforeGen?: string;
+  plan?: string;
   isUser: boolean;
   previewUrl?: string;
   appName?: string;
   appDescription?: string;
   logoUrl?: string;
+  isGenMessage?: boolean;
 
-  constructor(id: number, text: string, isUser: boolean, previewUrl?: string, appName?: string, appDescription?: string, logoUrl?: string) {
+  constructor(id: number, text: string, isUser: boolean, previewUrl?: string, appName?: string, appDescription?: string, logoUrl?: string, plan?: string, chatBeforeGen?: string, isGenMessage?: boolean) {
     this.id = id;
     this.text = text;
+    this.chatBeforeGen = chatBeforeGen;
+    this.plan = plan;
     this.isUser = isUser;
     this.previewUrl = previewUrl;
     this.appName = appName;
     this.appDescription = appDescription;
     this.logoUrl = logoUrl;
+    this.isGenMessage = isGenMessage;
   }
 }
 
@@ -51,14 +68,28 @@ struct MessageItem {
     } else {
       Row() {
         Column() {
-          // Safe check for message text
           if (this.message.text && this.message.text.length > 0) {
             Markdown({
               text: this.message.text,
               mode: 'text'
             })
-          } else {
+          }
+
+          if (this.message.chatBeforeGen && this.message.chatBeforeGen.length > 0) {
+            Markdown({
+              text: this.message.chatBeforeGen,
+              mode: 'text'
+            })
+          }
+
+          if (!this.message.text && !this.message.chatBeforeGen && !this.message.plan && !this.message.previewUrl) {
             LoadingProgress().width(24).height(24).color('#999999')
+          }
+
+          if (this.message.plan && this.message.plan.length > 0) {
+            AppPlanCard({
+              plan: this.message.plan
+            })
           }
 
           if (this.message.previewUrl) {
@@ -115,10 +146,19 @@ export struct ChatPanel {
         let appName: string | undefined = undefined;
         let appDescription: string | undefined = undefined;
         let logoUrl: string | undefined = undefined;
+        let plan: string | undefined = undefined;
+        let chatBeforeGen: string | undefined = undefined;
+        let text: string = msg.content;
+        let isGenMessage: boolean = false;
         if (msg.type === 'app' && msg.relatedAppUuid) {
+          isGenMessage = true;
           previewUrl = toApiUrl('/api/preview/' + msg.relatedAppUuid);
           appName = msg.relatedAppName;
           appDescription = msg.relatedAppDescription;
+          const genContent: GenMessageContent = this.splitGenMessageContent(msg.content);
+          chatBeforeGen = genContent.chatBeforeGen;
+          plan = genContent.plan;
+          text = '';
           if (msg.relatedAppLogo && msg.relatedAppLogo.length > 0) {
             const logoName = msg.relatedAppLogo;
             const dotIndex = logoName.lastIndexOf('.');
@@ -126,7 +166,7 @@ export struct ChatPanel {
             logoUrl = toApiUrl('/api/logo/' + logoUuid);
           }
         }
-        return new ChatMessage(msg.id, msg.content, isUser, previewUrl, appName, appDescription, logoUrl);
+        return new ChatMessage(msg.id, text, isUser, previewUrl, appName, appDescription, logoUrl, plan, chatBeforeGen, isGenMessage);
       });
       // Scroll to bottom after loading
       setTimeout(() => {
@@ -158,7 +198,10 @@ export struct ChatPanel {
     this.messages.push(new ChatMessage(botMsgId, '', false));
     this.scrollToBottom();
 
-    let currentText = ''; // Keep track of the full text locally
+    let currentText = ''; // chat/edit 模式正文
+    let currentChatBeforeGen = '';
+    let currentPlan = '';
+    let currentIntent = '';
     let lastUpdateTime = 0;
     const UPDATE_INTERVAL = 100; // Throttle UI updates to every 100ms
 
@@ -167,16 +210,31 @@ export struct ChatPanel {
 
     // Helper to handle text chunks (chat or plan)
     const handleTextChunk = (text: string) => {
-      currentText += text;
+      if (currentIntent === 'GEN') {
+        currentChatBeforeGen += text;
+      } else {
+        currentText += text;
+      }
+      syncMessageState(false);
+    };
+
+    const handlePlanChunk = (text: string) => {
+      currentPlan += text;
+      syncMessageState(false);
+    };
+
+    const syncMessageState = (force: boolean) => {
       const now = Date.now();
       // console.info(`[ChatPanel] Received text chunk: "${text}", current total length: ${currentText.length}`);
 
       // Throttle updates to avoid UI flickering
-      if (now - lastUpdateTime >= UPDATE_INTERVAL) {
+      if (force || now - lastUpdateTime >= UPDATE_INTERVAL) {
         const index = this.messages.findIndex(m => m.id === botMsgId);
         if (index !== -1) {
-          // console.info(`[ChatPanel] Updating UI, msgId: ${botMsgId}, text length: ${currentText.length}`);
           this.messages[index].text = currentText;
+          this.messages[index].chatBeforeGen = currentChatBeforeGen;
+          this.messages[index].plan = currentPlan;
+          this.messages[index].isGenMessage = currentIntent === 'GEN';
           lastUpdateTime = now;
           this.scrollToBottom();
         }
@@ -197,10 +255,17 @@ export struct ChatPanel {
           const index = this.messages.findIndex(m => m.id === botMsgId);
           if (index !== -1) {
             const msg = this.messages[index];
+            syncMessageState(true);
             // Only update if there's a difference to avoid unnecessary render
             if (msg.text !== currentText) {
               console.info(`[ChatPanel] Final flush UI, msgId: ${botMsgId}, text length: ${currentText.length}`);
               this.messages[index].text = currentText;
+            }
+            if (msg.chatBeforeGen !== currentChatBeforeGen) {
+              this.messages[index].chatBeforeGen = currentChatBeforeGen;
+            }
+            if (msg.plan !== currentPlan) {
+              this.messages[index].plan = currentPlan;
             }
             this.scrollToBottom();
           }
@@ -217,10 +282,11 @@ export struct ChatPanel {
         },
         // onPlan
         (text: string) => {
-          handleTextChunk(text);
+          handlePlanChunk(text);
         },
         // onIntent
         (intent: string) => {
+            currentIntent = intent.toUpperCase();
            console.info(`[ChatPanel] Intent: ${intent}`);
         },
         // onAppGenerated
@@ -248,6 +314,27 @@ export struct ChatPanel {
 
   scrollToBottom() {
     this.scroller.scrollEdge(Edge.Bottom);
+  }
+
+  private splitGenMessageContent(content: string): GenMessageContent {
+    const normalized = content.replace(/\r\n/g, '\n').trim();
+    if (normalized.length === 0) {
+      return new GenMessageContent('', '');
+    }
+
+    if (normalized.startsWith('- ')) {
+      return new GenMessageContent('', normalized);
+    }
+
+    const separatorIndex = normalized.indexOf('\n\n');
+    if (separatorIndex === -1) {
+      return new GenMessageContent(normalized, '');
+    }
+
+    return new GenMessageContent(
+      normalized.substring(0, separatorIndex).trim(),
+      normalized.substring(separatorIndex + 2).trim()
+    );
   }
 
   build() {
