@@ -9,21 +9,12 @@ export struct AppPreviewCard {
   @Prop @Watch("onLogoUrlChange") logoUrl: string = "";
   @State private logoLoadFailed: boolean = false;
   @State private resolvedLogoUrl: string = "";
-  @State private shouldRenderLogo: boolean = true;
-  @State private logoRetryCount: number = 0;
   @State private resolvedPreviewUrl: string = "";
   private previewController: webview.WebviewController = new webview.WebviewController();
-  private readonly LOGO_MAX_RETRY: number = 24;
-  private readonly LOGO_RETRY_INTERVAL_MS: number = 5000;
-  private logoRetryTimerId: number = -1;
 
   aboutToAppear() {
     this.syncResolvedPreviewUrl();
-    this.startLogoRetryFlow();
-  }
-
-  aboutToDisappear() {
-    this.clearLogoRetryTimer();
+    this.syncResolvedLogoUrl();
   }
 
   onPreviewUrlChange() {
@@ -31,7 +22,7 @@ export struct AppPreviewCard {
   }
 
   onLogoUrlChange() {
-    this.startLogoRetryFlow();
+    this.syncResolvedLogoUrl();
   }
 
   private syncResolvedPreviewUrl() {
@@ -44,47 +35,15 @@ export struct AppPreviewCard {
       : this.previewUrl;
   }
 
-  private startLogoRetryFlow() {
-    this.clearLogoRetryTimer();
+  private syncResolvedLogoUrl() {
     this.logoLoadFailed = false;
-    this.logoRetryCount = 0;
-    this.shouldRenderLogo = true;
 
     if (!this.logoUrl || this.logoUrl.length === 0) {
       this.resolvedLogoUrl = "";
-      this.shouldRenderLogo = false;
       return;
     }
 
     this.resolvedLogoUrl = this.withCacheBust(this.logoUrl);
-  }
-
-  private scheduleLogoRetry() {
-    if (!this.logoUrl || this.logoUrl.length === 0) {
-      this.shouldRenderLogo = false;
-      return;
-    }
-
-    if (this.logoRetryCount >= this.LOGO_MAX_RETRY) {
-      this.shouldRenderLogo = false;
-      this.logoLoadFailed = true;
-      return;
-    }
-
-    this.clearLogoRetryTimer();
-    this.logoRetryTimerId = setTimeout(() => {
-      this.logoRetryCount += 1;
-      this.resolvedLogoUrl = this.withCacheBust(this.logoUrl);
-      this.shouldRenderLogo = true;
-      this.logoLoadFailed = false;
-    }, this.LOGO_RETRY_INTERVAL_MS) as number;
-  }
-
-  private clearLogoRetryTimer() {
-    if (this.logoRetryTimerId !== -1) {
-      clearTimeout(this.logoRetryTimerId);
-      this.logoRetryTimerId = -1;
-    }
   }
 
   private withCacheBust(url: string): string {
@@ -97,7 +56,7 @@ export struct AppPreviewCard {
       Row() {
         // Icon Placeholder
         Stack() {
-          if (this.logoUrl.length > 0 && this.shouldRenderLogo && this.resolvedLogoUrl.length > 0) {
+          if (this.logoUrl.length > 0 && this.resolvedLogoUrl.length > 0 && !this.logoLoadFailed) {
             Image(this.resolvedLogoUrl)
               .width(40)
               .height(40)
@@ -105,8 +64,6 @@ export struct AppPreviewCard {
               .objectFit(ImageFit.Cover)
               .onError(() => {
                 this.logoLoadFailed = true;
-                this.shouldRenderLogo = false;
-                this.scheduleLogoRetry();
               });
           } else {
             Rect().width(40).height(40).fill("#007AFF").radius(8);

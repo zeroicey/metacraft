@@ -33,6 +33,11 @@ public class UnifiedOrchestrator {
     private final AppEditPipelineService appEditPipelineService;
 
     public Flux<ServerSentEvent<String>> handleRequest(AgentRequestDTO request, Long userId) {
+        ServerSentEvent<String> doneEvent = ServerSentEvent.<String>builder()
+                .event("done")
+                .data(sseUtils.toDoneJson())
+                .build();
+
         return Mono.fromCallable(() -> prepareAndSaveUserMessage(request, userId))
             .subscribeOn(Schedulers.boundedElastic())
             .flatMapMany(context -> Mono.fromCallable(() -> intentAnalyzer.analyze(context.message()))
@@ -56,7 +61,8 @@ public class UnifiedOrchestrator {
                 .onErrorResume(e -> Flux.just(ServerSentEvent.<String>builder()
                         .event("error")
                         .data(sseUtils.toErrorJson(e.getMessage()))
-                        .build()));
+                        .build()))
+                .concatWithValues(doneEvent);
     }
 
     private RequestContext prepareAndSaveUserMessage(AgentRequestDTO request, Long userId) {
