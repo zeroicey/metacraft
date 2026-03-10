@@ -251,21 +251,28 @@ export class SSEClient {
     // 1. 创建 Session
     // 这里创建一个新的 Session 以便独立管理生命周期 (如取消请求)
     // 同时复用 AuthInterceptor 进行统一的 Token 注入
-    this.session = rcp.createSession({
-      interceptors: [new AuthInterceptor()],
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'text/event-stream'
-      },
-      requestConfiguration: {
-        transfer: {
-          timeout: {
-            connectMs: 60000, // 60s
-            transferMs: 3600000 // 1 hour for long generation tasks
+    try {
+      this.session = rcp.createSession({
+        interceptors: [new AuthInterceptor()],
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/event-stream'
+        },
+        requestConfiguration: {
+          transfer: {
+            timeout: {
+              connectMs: 60000, // 60s
+              transferMs: 3600000 // 1 hour for long generation tasks
+            }
           }
         }
-      }
-    });
+      });
+    } catch (error) {
+      const errorObj = error as BusinessError;
+      console.error('[SSEClient] Failed to create rcp session:', `code=${errorObj.code}`, `message=${errorObj.message}`);
+      this.listener.onError(`Session creation failed: ${errorObj.message}`);
+      return;
+    }
 
     // 2. 创建自定义流写入器
     const sseStream = new SSEWriteStream({
