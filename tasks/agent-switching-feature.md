@@ -28,7 +28,6 @@
 - 未选中状态：透明底色 + 灰色文字 (`#999999`)
 - 圆角：`8px`
 - 高度：`32px`
-- 字体：`16px Medium`
 
 **行为：**
 - 元梦模式：显示会话列表侧边栏
@@ -56,41 +55,26 @@ Index.ets (主页面)
 
 ## 状态管理
 
-```typescript
-enum AgentType {
-  YUANMENG = 'yuanmeng',  // 元梦
-  YUANCLAW = 'yuanclaw'   // 元爪
-}
+**新增状态：**
+- `currentAgent: AgentType` - 当前选中的智能体
+- `yuanmengSessionId: string` - 元梦会话 ID
 
-// Index.ets 新增状态
-@Local currentAgent: AgentType = AgentType.YUANMENG
-@Local yuanmengSessionId: string = ''
-
-// 使用 Preferences 持久化 currentAgent
-```
+**持久化：** 使用 Preferences API 保存 `currentAgent`
 
 ## YuanClaw WebSocket 消息格式
 
-```typescript
-// 发送
-{ "type": "inbound", "content": "用户消息" }
-
-// 接收
-{ "type": "outbound", "content": "AI回复" }
-{ "type": "progress", "content": "处理进度..." }
-```
+| 方向 | 格式 |
+|------|------|
+| 发送 | `{ "type": "inbound", "content": "用户消息" }` |
+| 接收 | `{ "type": "outbound", "content": "AI回复" }` |
+| 接收 | `{ "type": "progress", "content": "处理进度..." }` |
 
 ## UI 切换逻辑
 
-```typescript
-if (currentAgent === AgentType.YUANMENG) {
-  YuanMengChatPanel({ sessionId: yuanmengSessionId })
-  showSidebarButton = true
-} else {
-  YuanClawChatPanel()
-  showSidebarButton = false
-}
-```
+| 当前智能体 | 显示组件 | 侧边栏 |
+|-----------|---------|--------|
+| 元梦 | `YuanMengChatPanel` | 显示 |
+| 元爪 | `YuanClawChatPanel` | 隐藏 |
 
 ## 任务清单
 

@@ -23,9 +23,7 @@ data/templates/
 ├── 象棋游戏_中国象棋对弈/
 │   ├── index.html
 │   └── app.js
-└── 五子棋_简单的五子棋游戏/
-    ├── index.html
-    └── app.js
+└── ...
 ```
 
 **文件夹命名规则：** `{应用名}_{应用描述}`
@@ -55,114 +53,50 @@ UnifiedOrchestrator (intent = GEN)
 
 ## 组件设计
 
-### TemplateMatcher.java
+### TemplateMatcher
 
-```java
-@Service
-public class TemplateMatcher {
+使用 AI 语义匹配用户需求与模板库，返回匹配结果。
 
-    @AiService
-    interface TemplateMatcherAI {
-        @SystemMessage(fromResource = "prompts/template-match.txt")
-        @UserMessage("用户需求: {{requirement}}")
-        TemplateMatchResult match(@V("requirement") String requirement);
-    }
+**职责：**
+- 扫描模板目录
+- 调用 AI 进行语义匹配
+- 返回匹配结果（模板名或无匹配）
 
-    private final TemplateMatcherAI ai;
-    private final String templatePath = "data/templates";
+### TemplateMatchResult
 
-    public Mono<TemplateMatchResult> matchAsync(String userMessage) {
-        // 1. 扫描模板目录
-        List<Template> templates = scanTemplates();
+匹配结果 DTO，包含：
+- `matched: boolean` - 是否匹配成功
+- `templateName: string` - 匹配的模板文件夹名
+- `reason: string` - 匹配原因
 
-        // 2. AI 匹配
-        return Mono.fromCallable(() -> ai.match(buildContext(userMessage, templates)))
-            .subscribeOn(Schedulers.boundedElastic());
-    }
-}
-```
+### Template
 
-### TemplateMatchResult.java
+模板数据模型，包含：
+- 文件夹名、应用名、描述
+- HTML 代码、JS 代码
 
-```java
-public class TemplateMatchResult {
-    private boolean matched;
-    private String templateName;  // 匹配的模板文件夹名
-    private String reason;         // 匹配原因
+### AI Prompt
 
-    // getters, setters
-}
-```
-
-### Template.java
-
-```java
-public class Template {
-    private String folderName;     // 文件夹名
-    private String name;           // 应用名
-    private String description;    // 应用描述
-    private String htmlCode;
-    private String jsCode;
-
-    // getters, setters
-}
-```
-
-## AI Prompt 设计
-
-**`prompts/template-match.txt`：**
-
-```
-You are a template matching expert. Your task is to find the best matching template for user requirements.
-
-Available templates:
-{{templates}}
-
-User requirement: {{requirement}}
-
-Output rules (strict):
-- Output must be structured output with exactly these fields:
-    - matched: boolean (true if a template matches, false otherwise)
-    - templateName: string (the exact folder name if matched, empty string otherwise)
-    - reason: string (brief explanation of why matched or why not)
-- Do NOT output explanations, markdown, or any extra text.
-
-Matching criteria:
-- Match based on semantic similarity, not exact keyword matching
-- Consider the core functionality and purpose of the app
-- If multiple templates could match, choose the closest one
-- If no template closely matches the requirement, return matched=false
-
-Examples:
-- User: "我想做个围棋游戏" → Matched: true, templateName: "围棋游戏_一个在线围棋对弈游戏"
-- User: "做一个计算器" → Matched: false (no calculator template)
-- User: "围棋对战" → Matched: true, templateName: "围棋游戏_一个在线围棋对弈游戏"
-```
+创建 `prompts/template-match.txt`，定义：
+- 匹配规则（语义相似度）
+- 输出格式（结构化 JSON）
+- 示例场景
 
 ## AppGenPipelineService 集成
 
-**修改 `execute()` 方法：**
+### 修改要点
 
 1. 在方法开始时启动异步模板匹配
 2. 在 `codeMono` 中等待模板匹配结果
 3. 根据匹配结果决定使用模板代码还是 AI 生成代码
 
-```java
-// 立即启动模板匹配（异步）
-Mono<TemplateMatchResult> templateMatchMono = templateMatcher.matchAsync(message).cache();
+### 集成位置
 
-// ... chatStream, planStream, appInfoStream ...
-
-// 代码生成：根据模板匹配结果决定
-Mono<ServerSentEvent<String>> codeMono = templateMatchMono.flatMap(matchResult -> {
-    if (matchResult.isMatched()) {
-        // 使用模板代码
-        return useTemplateCode(app, matchResult.getTemplateName());
-    } else {
-        // 使用 AI 生成代码
-        return useAIGeneratedCode(message, app.getName(), app.getDescription());
-    }
-});
+```
+AppGenPipelineService.execute()
+    ├── 立即启动 templateMatcher.matchAsync()
+    ├── chatStream, planStream, appInfoStream (并行)
+    └── codeMono 等待模板匹配结果后再执行
 ```
 
 ## 错误处理
@@ -176,8 +110,7 @@ Mono<ServerSentEvent<String>> codeMono = templateMatchMono.flatMap(matchResult -
 
 ## 配置
 
-**`application.yaml` 添加：**
-
+`application.yaml` 添加模板路径配置：
 ```yaml
 app:
   template-path: ${TEMPLATE_PATH:data/templates}

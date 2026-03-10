@@ -16,22 +16,9 @@
 | `message` | JSON 字符串 | `chatBeforeEdit` 内容（流式） |
 | `app_generated` | `{url, uuid, name, description}` | 编辑后的应用信息 |
 
-**示例：**
-```json
-// app_generated 事件
-{
-  "url": "/api/preview/{uuid}",
-  "uuid": "xxx-xxx-xxx",
-  "name": "应用名称",
-  "description": "应用描述"
-}
-```
-
 ## 需要修改的文件
 
-1. `apps/huawei/entry/src/main/ets/components/chat/ChatPanel.ets`
-   - 已处理 `message` 事件，无需修改
-   - 需要处理 `app_generated` 事件显示应用卡片
+`apps/huawei/entry/src/main/ets/components/chat/ChatPanel.ets`
 
 ## 前端实现要点
 
@@ -46,14 +33,7 @@
 
 ### 2. SSE 回调处理
 
-在 `ChatPanel.ets` 的 `send()` 方法中，确保 `app_generated` 回调正确处理：
-
-```typescript
-// 现有回调已处理
-(previewUrl: string, appName?: string, appDescription?: string, logoUrl?: string) => {
-  // 显示应用预览卡片
-}
-```
+确认 `app_generated` 事件回调能正确处理并显示应用预览卡片
 
 ### 3. 消息展示
 
@@ -63,9 +43,7 @@
 
 ### 4. 侧边栏会话列表
 
-确认 `SessionList.ets` 能显示：
-- 应用的 logo
-- 应用的名称
+确认 `SessionList.ets` 能显示应用的 logo 和名称
 
 ## 任务清单
 
@@ -97,8 +75,4 @@
 
 用户编辑应用后，聊天界面显示：
 1. AI 的回复内容（`chatBeforeEdit`）
-2. 应用预览卡片，包含：
-   - 应用 logo
-   - 应用名称
-   - 应用描述
-   - 点击可跳转预览页面
+2. 应用预览卡片，包含：应用 logo、名称、描述、点击可跳转预览页面

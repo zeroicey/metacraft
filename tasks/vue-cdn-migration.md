@@ -23,29 +23,17 @@
 
 ## 技术细节
 
-```html
-<!-- 本地 Vue 3 运行时引入示例 -->
-<script src="/public/js/vue.js"></script>
+**Vue 3 CDN 引入方式：**
+- 使用本地运行时：`/public/js/vue.js`
+- HTML 中挂载点：`<div id="app">`
+- JS 中使用 `Vue.createApp()` 和 Composition API
 
-<div id="app">{{ message }}</div>
-
-<script src="app.js"></script>
-```
-
-```javascript
-const { createApp, ref } = Vue;
-
-createApp({
-  setup() {
-    const message = ref('Hello vue!');
-    return {
-      message,
-    };
-  },
-}).mount('#app');
-```
+**代码结构要求：**
+- 保持 HTML + JS 双文件结构
+- HTML：包含 `#app` 挂载点和 Vue 运行时引用
+- JS：使用 `Vue.createApp()` + `setup()` 模式
 
 **备注：**
 - 保持 Tailwind CSS 本地服务器引入方式不变
-- 当前预览链路固定为 `index.html + app.js`，不适合迁移为 Vue SFC
+- 当前预览链路固定为 `index.html + app.js`
 - 已下载本地运行时：`/public/js/vue.js`
