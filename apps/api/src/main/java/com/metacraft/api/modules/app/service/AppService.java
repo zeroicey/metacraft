@@ -8,6 +8,11 @@ import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.javascript.jscomp.CompilationLevel;
+import com.google.javascript.jscomp.Compiler;
+import com.google.javascript.jscomp.CompilerOptions;
+import com.google.javascript.jscomp.Result;
+import com.google.javascript.jscomp.SourceFile;
 import com.metacraft.api.modules.ai.dto.AppCodeSnapshotDTO;
 import com.metacraft.api.modules.app.dto.AppCreateDTO;
 import com.metacraft.api.modules.app.dto.AppUpdateDTO;
@@ -68,10 +73,11 @@ public class AppService {
 
         // 3. 保存文件
         String formattedHtmlContent = prettyPrintHtml(htmlContent);
+        String formattedJsContent = prettyPrintJavaScript(jsContent);
         String relativePath = String.format("apps/%d/v%d/index.html", appId, nextVersion);
         String jsRelativePath = String.format("apps/%d/v%d/app.js", appId, nextVersion);
         storageService.saveTextFile(relativePath, formattedHtmlContent);
-        storageService.saveTextFile(jsRelativePath, jsContent);
+        storageService.saveTextFile(jsRelativePath, formattedJsContent);
 
         // 4. 创建版本记录
         AppVersionEntity version = AppVersionEntity.builder()
@@ -418,6 +424,38 @@ public class AppService {
         } catch (Exception exception) {
             log.warn("Failed to pretty print HTML before saving, using original content", exception);
             return htmlContent;
+        }
+    }
+
+    private String prettyPrintJavaScript(String jsContent) {
+        if (jsContent == null || jsContent.isBlank()) {
+            return jsContent;
+        }
+
+        try {
+            Compiler compiler = new Compiler();
+            CompilerOptions options = new CompilerOptions();
+            CompilationLevel.WHITESPACE_ONLY.setOptionsForCompilationLevel(options);
+            options.setPrettyPrint(true);
+            options.setLineBreak(true);
+            options.setPreferSingleQuotes(true);
+            options.setPreserveTypeAnnotations(true);
+
+            Result result = compiler.compile(
+                    List.of(),
+                    List.of(SourceFile.fromCode("app.js", jsContent)),
+                    options);
+
+            if (!result.success) {
+                log.warn("Failed to pretty print JavaScript before saving, using original content: {}",
+                        !result.errors.isEmpty() ? result.errors.get(0).getDescription() : "unknown error");
+                return jsContent;
+            }
+
+            return compiler.toSource();
+        } catch (Exception exception) {
+            log.warn("Failed to pretty print JavaScript before saving, using original content", exception);
+            return jsContent;
         }
     }
 }

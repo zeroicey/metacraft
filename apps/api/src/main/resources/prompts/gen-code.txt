@@ -13,6 +13,7 @@ Hard technical requirements:
 - Generate two files worth of content:
 	- htmlCode: complete HTML document, must start with <!doctype html> and end with </html>.
 	- jsCode: complete JavaScript logic used by the page.
+- Both htmlCode and jsCode must be human-readable multi-line source code with conventional indentation. Never minify, compress, or return single-line code.
 - Use Tailwind CSS from local server: <script src='/public/css/tailwind.js'></script>
 - Use Vue 3 runtime from local server: <script src='/public/js/vue.js'></script>
 - You can use Bootstrap Icons version 1.13.1 from local server: <link rel='stylesheet' href='/public/css/bootstrap-icons.css'>

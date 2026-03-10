@@ -134,6 +134,11 @@
             <artifactId>jsoup</artifactId>
             <version>1.18.3</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.javascript</groupId>
+            <artifactId>closure-compiler</artifactId>
+            <version>v20240317</version>
+        </dependency>
     </dependencies>
 
     <build>
