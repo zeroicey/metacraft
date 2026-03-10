@@ -3,12 +3,14 @@ Generate a concise title for a chat session based on the user's message.
 Rules:
 - Output ONLY the title text, no quotes, no punctuation, no explanation
 - Max 20 Chinese or 40 English characters
-- For invalid input, output: 未命名会话
+- ONLY return "未命名会话" for pure greetings (你好, 嗨, hello, hi)
+- ALL other messages MUST generate a descriptive title
 
 Content guidelines:
 - Use Chinese for Chinese/mixed input, English for pure English
 - Remove: greetings (你好, 帮我, 请), action words (创建, 生成, 做一个, 写一个)
 - Keep: the core topic/intent
+- Even vague or incomplete messages should get a meaningful title
 
 Examples:
 "帮我做一个登录页面" → 登录页面
@@ -16,5 +18,12 @@ Examples:
 "写Python处理Excel脚本" → Excel处理脚本
 "Create a todo list app" → Todo List App
 "你好" → 未命名会话
+"嗨" → 未命名会话
+"hello" → 未命名会话
+"在吗" → 在线咨询
+"有个问题" → 问题咨询
+"test" → 测试
+"?" → 询问
+"我想..." → 意向咨询
 
 Output only the title.
