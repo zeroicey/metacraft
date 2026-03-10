@@ -4,6 +4,7 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 
 import com.metacraft.api.modules.ai.agent.IntentAnalyzer;
+import com.metacraft.api.modules.ai.agent.SessionTitleGenerator;
 import com.metacraft.api.modules.ai.dto.AgentRequestDTO;
 import com.metacraft.api.modules.ai.dto.ChatMessageCreateDTO;
 import com.metacraft.api.modules.ai.dto.ChatSessionCreateDTO;
@@ -25,6 +26,7 @@ public class UnifiedOrchestrator {
     private static final int HISTORY_WINDOW_SIZE = 20;
 
     private final IntentAnalyzer intentAnalyzer;
+    private final SessionTitleGenerator sessionTitleGenerator;
     private final SseUtils sseUtils;
     private final ChatSessionService chatSessionService;
     private final ChatMessageService chatMessageService;
@@ -69,9 +71,14 @@ public class UnifiedOrchestrator {
                 .concatWithValues(doneEvent);
     }
 
+    private static final String DEFAULT_SESSION_TITLE = "未命名应用";
+
     private RequestContext prepareAndSaveUserMessage(AgentRequestDTO request, Long userId) {
         String sessionId = resolveSessionId(request, userId);
         String history = chatMessageService.buildRecentConversationHistory(userId, sessionId, HISTORY_WINDOW_SIZE);
+
+        // 如果会话标题是默认值，用第一条消息更新标题
+        updateSessionTitleIfNeeded(userId, sessionId, request.getMessage());
 
         ChatMessageCreateDTO userMessageDto = new ChatMessageCreateDTO();
         userMessageDto.setSessionId(sessionId);
@@ -81,6 +88,20 @@ public class UnifiedOrchestrator {
         log.info("Saved user message for session {}", sessionId);
 
         return new RequestContext(request.getMessage(), sessionId, history);
+    }
+
+    private void updateSessionTitleIfNeeded(Long userId, String sessionId, String firstMessage) {
+        try {
+            com.metacraft.api.modules.ai.vo.ChatSessionVO session = chatSessionService.getSession(userId, sessionId);
+            if (DEFAULT_SESSION_TITLE.equals(session.getTitle())) {
+                log.info("Updating default session title for session {}", sessionId);
+                com.metacraft.api.modules.ai.dto.ChatSessionUpdateDTO updateDto = new com.metacraft.api.modules.ai.dto.ChatSessionUpdateDTO();
+                updateDto.setTitle(toSessionTitle(firstMessage));
+                chatSessionService.updateSession(userId, sessionId, updateDto);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to update session title: {}", e.getMessage());
+        }
     }
 
     private String resolveSessionId(AgentRequestDTO request, Long userId) {
@@ -108,6 +129,15 @@ public class UnifiedOrchestrator {
     }
 
     private String toSessionTitle(String message) {
+        try {
+            String title = sessionTitleGenerator.generateTitle(message);
+            if (title != null && !title.isBlank()) {
+                return title;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to generate session title with AI, using fallback: {}", e.getMessage());
+        }
+        // Fallback: 简单截断
         return message.length() > 50 ? message.substring(0, 47) + "..." : message;
     }
 

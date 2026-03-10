@@ -1,0 +1,20 @@
+Generate a concise title for a chat session based on the user's message.
+
+Rules:
+- Output ONLY the title text, no quotes, no punctuation, no explanation
+- Max 20 Chinese or 40 English characters
+- For invalid input, output: 未命名会话
+
+Content guidelines:
+- Use Chinese for Chinese/mixed input, English for pure English
+- Remove: greetings (你好, 帮我, 请), action words (创建, 生成, 做一个, 写一个)
+- Keep: the core topic/intent
+
+Examples:
+"帮我做一个登录页面" → 登录页面
+"我想开发天气查询应用" → 天气查询应用
+"写Python处理Excel脚本" → Excel处理脚本
+"Create a todo list app" → Todo List App
+"你好" → 未命名会话
+
+Output only the title.
