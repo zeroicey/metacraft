@@ -216,7 +216,7 @@ Code generation prompt:
 Current constraints:
 
 - Local Tailwind usage
-- Native JavaScript only (no jQuery)
+- Local Vue 3 runtime usage via `/public/js/vue.js`
 - Local Bootstrap Icons usage via:
   - `/public/css/bootstrap-icons.css`
   - `/public/css/fonts/bootstrap-icons.woff2`

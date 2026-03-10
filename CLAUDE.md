@@ -118,7 +118,7 @@ public String saveApp(
 **Prompt Templates** (`src/main/resources/prompts/`):
 - `agent-system.txt` - Generic system prompt
 - `agent-chat.txt` - Chat mode system prompt
-- `agent-gen-app.txt` - App generation prompt (instructs AI to use Tailwind CSS, Alpine.js, call saveApp)
+- `agent-gen-app.txt` - App generation prompt (instructs AI to use Tailwind CSS, local Vue runtime, call saveApp)
 - `intent-classification.txt` - Intent recognition prompt
 - `image-logo-gen.txt` - Logo generation prompt
 

@@ -225,7 +225,7 @@ ohpm install
 当前约束：
 
 - 使用本地 Tailwind
-- 仅原生 JavaScript（不使用 jQuery）
+- 使用本地 Vue 3 运行时（`/public/js/vue.js`）
 - 使用本地 Bootstrap Icons（`/public/css/bootstrap-icons.css` + fonts）
 
 ## 安全说明

@@ -8,11 +8,11 @@
 
 版本: Tailwind CSS v4.2.1 (Browser Build)
 
-## Alpine.js v3
+## Vue 3
 
-文件位置: `js/alpine.js`
+文件位置: `js/vue.js`
 
-版本: Alpine.js v3.14.1
+版本: Vue v3.5.30 (Global Production Build)
 
 ## 访问方式
 
@@ -20,12 +20,12 @@
 
 ```
 http://localhost:8080/public/css/tailwind.js
-http://localhost:8080/public/js/alpine.js
+http://localhost:8080/public/js/vue.js
 ```
 
 ## 使用方法
 
-在HTML中引用本地的 Tailwind CSS 和 Alpine.js：
+在HTML中引用本地的 Tailwind CSS 和 Vue 3：
 
 ```html
 <!DOCTYPE html>
@@ -33,24 +33,29 @@ http://localhost:8080/public/js/alpine.js
 <head>
     <meta charset="UTF-8">
     <script src="/public/css/tailwind.js"></script>
-    <script defer src="/public/js/alpine.js"></script>
+    <script src="/public/js/vue.js"></script>
 </head>
 <body>
-    <div x-data="{ count: 0 }">
-        <h1 class="text-3xl font-bold text-blue-600">
-            Hello Tailwind CSS v4 & Alpine.js!
-        </h1>
-        <button @click="count++" class="px-4 py-2 bg-blue-500 text-white rounded">
-            点击次数: <span x-text="count"></span>
-        </button>
+    <div id="app" class="p-6">
+        <h1 class="text-3xl font-bold text-blue-600">{{ message }}</h1>
     </div>
+    <script>
+        const { createApp, ref } = Vue;
+
+        createApp({
+            setup() {
+                const message = ref('Hello Tailwind CSS v4 & Vue 3!');
+                return { message };
+            }
+        }).mount('#app');
+    </script>
 </body>
 </html>
 ```
 
 **重要说明**：
 - 在 MetaCraft 生成的应用中，应使用相对路径 `/public/...` 而不是完整的 URL
-- Alpine.js 需要使用 `defer` 属性以确保在 DOM 加载后执行
+- 生成应用时，推荐使用本地 Vue 运行时 `/public/js/vue.js`，避免依赖外网 CDN
 
 ## 配置说明
 
@@ -58,7 +63,7 @@ http://localhost:8080/public/js/alpine.js
 - **SecurityConfig**: 允许匿名访问 `/public/**` 路径
 - **文件来源**:
   - Tailwind CSS: https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4
-  - Alpine.js: https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js
+    - Vue 3: https://cdn.jsdelivr.net/npm/vue@3.5.30/dist/vue.global.prod.js
 
 ## 添加更多静态资源
 
