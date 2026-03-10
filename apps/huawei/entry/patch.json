@@ -1,7 +1,7 @@
 {
   "app": {
     "bundleName": "com.metacraft.huawei",
-    "patchVersionCode": 2000009,
+    "patchVersionCode": 2000011,
     "versionCode": 1000000
   },
   "module": {

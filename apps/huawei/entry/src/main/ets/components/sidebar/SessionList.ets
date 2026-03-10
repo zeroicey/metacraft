@@ -1,5 +1,6 @@
 import { ChatSession } from '../../model/chatSessionModel';
 import { chatSessionApi } from '../../api/chatSession';
+import { toApiUrl } from '../../utils/http/ApiConfig';
 
 @ComponentV2
 export struct SessionList {
@@ -12,6 +13,7 @@ export struct SessionList {
   @Local past30DaysSessions: ChatSession[] = [];
   @Local isLoading: boolean = false;
   @Local isEmpty: boolean = false;
+  @Local logoLoadFailedSessionIds: string[] = [];
 
   @Monitor('refreshSignal')
   onRefreshSignalChange() {
@@ -37,9 +39,13 @@ export struct SessionList {
   private groupSessions(sessions: ChatSession[]) {
     if (!sessions || sessions.length === 0) {
       this.isEmpty = true;
+      this.todaySessions = [];
+      this.yesterdaySessions = [];
+      this.past30DaysSessions = [];
       return;
     }
     this.isEmpty = false;
+    this.logoLoadFailedSessionIds = [];
 
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -67,10 +73,32 @@ export struct SessionList {
     this.past30DaysSessions = past30Days;
   }
 
+  private hasLogo(session: ChatSession): boolean {
+    return !!session.relatedAppId && !this.hasLogoLoadFailed(session.sessionId);
+  }
+
+  private hasLogoLoadFailed(sessionId: string): boolean {
+    return this.logoLoadFailedSessionIds.includes(sessionId);
+  }
+
+  private markLogoLoadFailed(sessionId: string) {
+    if (this.hasLogoLoadFailed(sessionId)) {
+      return;
+    }
+    this.logoLoadFailedSessionIds = [...this.logoLoadFailedSessionIds, sessionId];
+  }
+
+  private getLogoUrl(session: ChatSession): string {
+    if (!session.relatedAppId) {
+      return '';
+    }
+    return toApiUrl(`/api/logo/app/${session.relatedAppId}?t=${session.updatedAt}`);
+  }
+
   @Builder
   SessionGroup(title: string, sessions: ChatSession[]) {
     if (sessions.length > 0) {
-      Column({ space: 4 }) {
+      Column({ space: 2 }) {
         Text(title)
           .fontSize(12)
           .fontColor('#999999')
@@ -78,9 +106,33 @@ export struct SessionList {
           .width('100%')
           .textAlign(TextAlign.Start)
 
-        Column({ space: 4 }) {
+        Column({ space: 2 }) {
           ForEach(sessions, (item: ChatSession) => {
-            Row({ space: 12 }) {
+            Row({ space: 8 }) {
+              Stack() {
+                if (this.hasLogo(item)) {
+                  Image(this.getLogoUrl(item))
+                    .width(28)
+                    .height(28)
+                    .borderRadius(6)
+                    .objectFit(ImageFit.Cover)
+                    .onError(() => {
+                      this.markLogoLoadFailed(item.sessionId);
+                    });
+                } else {
+                  Row() {
+                    SymbolGlyph($r('sys.symbol.ellipsis_message'))
+                      .fontSize(18)
+                      .fontColor(['#666666'])
+                  }
+                  .width(28)
+                  .height(28)
+                  .justifyContent(FlexAlign.Center)
+                }
+              }
+              .width(28)
+              .height(28)
+
               Text(item.title)
                 .fontSize(14)
                 .fontWeight(this.selectedSessionId === item.sessionId ? FontWeight.Bold : FontWeight.Medium)
@@ -90,7 +142,7 @@ export struct SessionList {
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
             }
             .width('100%')
-            .padding({ top: 8, bottom: 8, left: 12, right: 12 })
+            .padding({ top: 6, bottom: 6, left: 12, right: 12 })
             .backgroundColor(this.selectedSessionId === item.sessionId ? '#F2F2F2' : Color.Transparent)
             .borderRadius(10)
             .onClick(() => {

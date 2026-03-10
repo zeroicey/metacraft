@@ -8,6 +8,7 @@ export interface ChatSession {
   title: string;
   createdAt: string; // ISO 8601 string
   updatedAt: string; // ISO 8601 string
+  relatedAppId?: number;
 }
 
 // 消息信息 VO
