@@ -8,10 +8,12 @@ import com.metacraft.api.modules.ai.agent.SessionTitleGenerator;
 import com.metacraft.api.modules.ai.dto.AgentRequestDTO;
 import com.metacraft.api.modules.ai.dto.ChatMessageCreateDTO;
 import com.metacraft.api.modules.ai.dto.ChatSessionCreateDTO;
+import com.metacraft.api.modules.ai.dto.ChatSessionUpdateDTO;
 import com.metacraft.api.modules.ai.service.pipeline.AppEditPipelineService;
 import com.metacraft.api.modules.ai.service.pipeline.AppGenPipelineService;
 import com.metacraft.api.modules.ai.service.pipeline.ChatPipelineService;
 import com.metacraft.api.modules.ai.util.SseUtils;
+import com.metacraft.api.modules.ai.vo.ChatSessionVO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,27 +45,27 @@ public class UnifiedOrchestrator {
                 .build();
 
         return Mono.fromCallable(() -> prepareAndSaveUserMessage(request, userId))
-            .subscribeOn(Schedulers.boundedElastic())
-            .flatMapMany(context -> Mono.fromCallable(() -> intentAnalyzer.analyze(context.message()))
                 .subscribeOn(Schedulers.boundedElastic())
-                .flatMapMany(intent -> {
-                    log.info("User {} intent {}", userId, intent);
+                .flatMapMany(context -> Mono.fromCallable(() -> intentAnalyzer.analyze(context.message()))
+                        .subscribeOn(Schedulers.boundedElastic())
+                        .flatMapMany(intent -> {
+                            log.info("User {} intent {}", userId, intent);
 
-                    ServerSentEvent<String> intentEvent = ServerSentEvent.<String>builder()
-                            .event("intent")
-                            .data(sseUtils.toIntentJson(intent.name()))
-                            .build();
+                            ServerSentEvent<String> intentEvent = ServerSentEvent.<String>builder()
+                                    .event("intent")
+                                    .data(sseUtils.toIntentJson(intent.name()))
+                                    .build();
 
-                    Flux<ServerSentEvent<String>> contentStream = switch (intent) {
-                        case CHAT -> chatPipelineService.execute(context.message(), context.history(), userId,
-                            context.sessionId());
-                        case GEN  -> appGenPipelineService.execute(context.message(), context.history(), userId,
-                            context.sessionId());
-                        case EDIT -> appEditPipelineService.execute(context.message());
-                    };
+                            Flux<ServerSentEvent<String>> contentStream = switch (intent) {
+                                case CHAT -> chatPipelineService.execute(context.message(), context.history(), userId,
+                                        context.sessionId());
+                                case GEN -> appGenPipelineService.execute(context.message(), context.history(), userId,
+                                        context.sessionId());
+                                case EDIT -> appEditPipelineService.execute(context.message());
+                            };
 
-                    return contentStream.startWith(intentEvent);
-                }))
+                            return contentStream.startWith(intentEvent);
+                        }))
                 .onErrorResume(e -> Flux.just(ServerSentEvent.<String>builder()
                         .event("error")
                         .data(sseUtils.toErrorJson(e.getMessage()))
@@ -71,7 +73,7 @@ public class UnifiedOrchestrator {
                 .concatWithValues(doneEvent);
     }
 
-    private static final String DEFAULT_SESSION_TITLE = "未命名应用";
+    private static final String DEFAULT_SESSION_TITLE = "未命名会话";
 
     private RequestContext prepareAndSaveUserMessage(AgentRequestDTO request, Long userId) {
         String sessionId = resolveSessionId(request, userId);
@@ -92,10 +94,10 @@ public class UnifiedOrchestrator {
 
     private void updateSessionTitleIfNeeded(Long userId, String sessionId, String firstMessage) {
         try {
-            com.metacraft.api.modules.ai.vo.ChatSessionVO session = chatSessionService.getSession(userId, sessionId);
+            ChatSessionVO session = chatSessionService.getSession(userId, sessionId);
             if (DEFAULT_SESSION_TITLE.equals(session.getTitle())) {
                 log.info("Updating default session title for session {}", sessionId);
-                com.metacraft.api.modules.ai.dto.ChatSessionUpdateDTO updateDto = new com.metacraft.api.modules.ai.dto.ChatSessionUpdateDTO();
+                ChatSessionUpdateDTO updateDto = new ChatSessionUpdateDTO();
                 updateDto.setTitle(toSessionTitle(firstMessage));
                 chatSessionService.updateSession(userId, sessionId, updateDto);
             }
@@ -132,6 +134,7 @@ public class UnifiedOrchestrator {
         try {
             String title = sessionTitleGenerator.generateTitle(message);
             if (title != null && !title.isBlank()) {
+                log.info("Created new session {} for user {}", title, message);
                 return title;
             }
         } catch (Exception e) {
