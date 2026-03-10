@@ -109,30 +109,6 @@ export struct SessionList {
         Column({ space: 2 }) {
           ForEach(sessions, (item: ChatSession) => {
             Row({ space: 8 }) {
-              Stack() {
-                if (this.hasLogo(item)) {
-                  Image(this.getLogoUrl(item))
-                    .width(28)
-                    .height(28)
-                    .borderRadius(6)
-                    .objectFit(ImageFit.Cover)
-                    .onError(() => {
-                      this.markLogoLoadFailed(item.sessionId);
-                    });
-                } else {
-                  Row() {
-                    SymbolGlyph($r('sys.symbol.ellipsis_message'))
-                      .fontSize(18)
-                      .fontColor(['#666666'])
-                  }
-                  .width(28)
-                  .height(28)
-                  .justifyContent(FlexAlign.Center)
-                }
-              }
-              .width(28)
-              .height(28)
-
               Text(item.title)
                 .fontSize(14)
                 .fontWeight(this.selectedSessionId === item.sessionId ? FontWeight.Bold : FontWeight.Medium)
@@ -140,6 +116,17 @@ export struct SessionList {
                 .layoutWeight(1)
                 .maxLines(1)
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
+
+              if (this.hasLogo(item)) {
+                Image(this.getLogoUrl(item))
+                  .width(28)
+                  .height(28)
+                  .borderRadius(6)
+                  .objectFit(ImageFit.Cover)
+                  .onError(() => {
+                    this.markLogoLoadFailed(item.sessionId);
+                  });
+              }
             }
             .width('100%')
             .padding({ top: 6, bottom: 6, left: 12, right: 12 })
