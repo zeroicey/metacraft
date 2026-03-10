@@ -3,9 +3,12 @@ package com.metacraft.api.modules.app.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.metacraft.api.modules.ai.dto.AppCodeSnapshotDTO;
 import com.metacraft.api.modules.app.dto.AppCreateDTO;
 import com.metacraft.api.modules.app.dto.AppUpdateDTO;
 import com.metacraft.api.modules.app.entity.AppEntity;
@@ -64,9 +67,10 @@ public class AppService {
                 .orElse(1);
 
         // 3. 保存文件
+        String formattedHtmlContent = prettyPrintHtml(htmlContent);
         String relativePath = String.format("apps/%d/v%d/index.html", appId, nextVersion);
         String jsRelativePath = String.format("apps/%d/v%d/app.js", appId, nextVersion);
-        storageService.saveTextFile(relativePath, htmlContent);
+        storageService.saveTextFile(relativePath, formattedHtmlContent);
         storageService.saveTextFile(jsRelativePath, jsContent);
 
         // 4. 创建版本记录
@@ -195,6 +199,24 @@ public class AppService {
         }
 
         return convertToVO(app);
+    }
+
+    public AppCodeSnapshotDTO getCurrentCode(Long userId, Long appId) {
+        AppVO app = getAppById(userId, appId);
+        if (app.getCurrentVersionId() == null) {
+            throw new IllegalArgumentException("App has no versions yet: " + appId);
+        }
+
+        AppVersionEntity currentVersion = appVersionRepository.findById(app.getCurrentVersionId())
+                .orElseThrow(() -> new IllegalArgumentException("Current version not found for app: " + appId));
+
+        String htmlContent = storageService.readTextFile(currentVersion.getStoragePath());
+        String jsContent = storageService.readTextFile(toJsPath(currentVersion.getStoragePath()));
+    return new AppCodeSnapshotDTO(
+        htmlContent,
+        jsContent,
+        currentVersion.getId(),
+        currentVersion.getVersionNumber());
     }
 
     /**
@@ -380,5 +402,22 @@ public class AppService {
         return htmlPath.endsWith("index.html")
                 ? htmlPath.substring(0, htmlPath.length() - "index.html".length()) + "app.js"
                 : htmlPath + "/app.js";
+    }
+
+    private String prettyPrintHtml(String htmlContent) {
+        if (htmlContent == null || htmlContent.isBlank()) {
+            return htmlContent;
+        }
+
+        try {
+            Document document = Jsoup.parse(htmlContent);
+            document.outputSettings()
+                    .prettyPrint(true)
+                    .indentAmount(2);
+            return document.outerHtml();
+        } catch (Exception exception) {
+            log.warn("Failed to pretty print HTML before saving, using original content", exception);
+            return htmlContent;
+        }
     }
 }

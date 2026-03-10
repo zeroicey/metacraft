@@ -61,7 +61,8 @@ public class UnifiedOrchestrator {
                                         context.sessionId());
                                 case GEN -> appGenPipelineService.execute(context.message(), context.history(), userId,
                                         context.sessionId());
-                                case EDIT -> appEditPipelineService.execute(context.message());
+                                case EDIT -> appEditPipelineService.execute(context.message(), context.history(), userId,
+                                    context.sessionId());
                             };
 
                             return contentStream.startWith(intentEvent);

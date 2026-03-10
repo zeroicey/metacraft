@@ -29,4 +29,14 @@ public interface ChatAgent {
             {{message}}
             """)
     Flux<String> chatBeforeGen(@V("message") String message, @V("history") String history);
+
+    @SystemMessage(fromResource = "prompts/edit-chat.txt")
+    @UserMessage("""
+            Conversation history:
+            {{history}}
+
+            Current user message:
+            {{message}}
+            """)
+    Flux<String> chatBeforeEdit(@V("message") String message, @V("history") String history);
 }

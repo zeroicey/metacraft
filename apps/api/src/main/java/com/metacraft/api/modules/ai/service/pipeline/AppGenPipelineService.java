@@ -101,12 +101,13 @@ public class AppGenPipelineService {
 
                                 relatedVersionIdRef.set(createdVersion.getId());
 
-                                return app.getUuid();
+                                return ServerSentEvent.<String>builder()
+                                                .event("app_generated")
+                                                .data(sseUtils.toAppGeneratedJson(app.getUuid(),
+                                                                createdVersion.getVersionNumber()))
+                                                .build();
                         })
-                                        .subscribeOn(Schedulers.boundedElastic())
-                                        .map(appUUID -> ServerSentEvent.<String>builder()
-                                                        .event("app_generated")
-                                                        .data(sseUtils.toAppGeneratedJson(appUUID)).build());
+                                        .subscribeOn(Schedulers.boundedElastic());
 
                         return Flux.merge(logoMono, codeMono);
 

@@ -94,20 +94,21 @@ public class SseUtils {
 
     /**
      * Create app_generated event data as a JSON object.
-     * Format: {"uuid":"..."}
+     * Format: {"uuid":"...", "version":1}
      *
      * @param uuid The app UUID
      * @return JSON object string representation
      */
-    public String toAppGeneratedJson(String uuid) {
+    public String toAppGeneratedJson(String uuid, Integer version) {
         try {
-            Map<String, String> data = new HashMap<>();
+            Map<String, Object> data = new HashMap<>();
             data.put("uuid", uuid != null ? uuid : "");
+            data.put("version", version);
             return objectMapper.writeValueAsString(data);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize app_generated data", e);
             // Fallback to minimal JSON object
-            return "{\"uuid\":\"\"}";
+            return "{\"uuid\":\"\",\"version\":null}";
         }
     }
 
