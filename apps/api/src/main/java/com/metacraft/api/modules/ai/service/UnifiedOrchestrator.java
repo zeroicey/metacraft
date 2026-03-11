@@ -33,7 +33,7 @@ public class UnifiedOrchestrator {
     private final ChatSessionService chatSessionService;
     private final ChatMessageService chatMessageService;
 
-    // 注入各个专门的流水线 Service
+    // GEN/EDIT 流水线当前仅保留占位实现，等待后续 TODO 恢复。
     private final ChatPipelineService chatPipelineService;
     private final AppGenPipelineService appGenPipelineService;
     private final AppEditPipelineService appEditPipelineService;
