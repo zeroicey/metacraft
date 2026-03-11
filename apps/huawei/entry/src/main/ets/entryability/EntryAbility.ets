@@ -1,7 +1,7 @@
 import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window, KeyboardAvoidMode } from '@kit.ArkUI';
-import { tokenService } from '../model/auth';
+import { tokenService } from '../features/auth/model/AuthModel';
 
 const DOMAIN = 0x0000;
 

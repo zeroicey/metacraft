@@ -1,12 +1,11 @@
+import { ExploreScreen } from '../features/app-center/pages/ExploreScreen';
+
 @Entry
 @Component
 struct ExplorePage {
   build() {
     Column() {
-      Text('ExplorePage 占位页')
-        .fontSize(20)
-        .fontWeight(FontWeight.Bold)
-        .margin(16)
+      ExploreScreen()
     }
     .width('100%')
     .height('100%')
