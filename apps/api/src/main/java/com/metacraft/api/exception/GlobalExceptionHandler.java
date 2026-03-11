@@ -1,7 +1,8 @@
 package com.metacraft.api.exception;
 
-import com.metacraft.api.response.ApiResponse;
-import com.metacraft.api.response.Response;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -9,10 +10,11 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.metacraft.api.response.ApiResponse;
+import com.metacraft.api.response.Response;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -46,6 +48,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ApiResponse<Void>> handleUnauthorizedException(UnauthorizedException ex) {
         return Response.error(ex.getMessage()).status(HttpStatus.UNAUTHORIZED.value()).build();
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResponseStatusException(ResponseStatusException ex) {
+        String message = ex.getReason() != null ? ex.getReason() : ex.getStatusCode().toString();
+        return Response.error(message).status(ex.getStatusCode().value()).build();
     }
 
     @ExceptionHandler(RuntimeException.class)
