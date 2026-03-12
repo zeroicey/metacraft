@@ -6,11 +6,11 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.DisposableBean;
 
 import com.metacraft.api.modules.ai.config.OpenCodeProperties;
 import com.metacraft.api.modules.ai.dto.opencode.OpenCodeDtos;
