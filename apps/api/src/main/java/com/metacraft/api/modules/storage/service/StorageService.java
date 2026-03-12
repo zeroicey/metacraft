@@ -160,4 +160,8 @@ public class StorageService {
         }
         return Files.exists(file);
     }
+
+    public Path getRootLocation() {
+        return rootLocation;
+    }
 }
