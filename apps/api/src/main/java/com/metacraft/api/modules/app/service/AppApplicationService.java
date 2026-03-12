@@ -6,6 +6,8 @@ import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.metacraft.api.modules.ai.service.opencode.OpenCodeClient;
+import com.metacraft.api.modules.ai.service.opencode.OpenCodeClientException;
 import com.metacraft.api.modules.app.dto.AppCreateDTO;
 import com.metacraft.api.modules.app.dto.AppUpdateDTO;
 import com.metacraft.api.modules.app.entity.AppEntity;
@@ -25,6 +27,7 @@ public class AppApplicationService {
     private final AppRepository appRepository;
     private final AppVersionRepository appVersionRepository;
     private final AppCodeAssetService appCodeAssetService;
+    private final OpenCodeClient openCodeClient;
 
     @Transactional
     public AppEntity createApp(Long userId, String name, String description) {
@@ -73,6 +76,15 @@ public class AppApplicationService {
         });
     }
 
+    @Transactional
+    public void bindOpenCodeSessionId(Long appId, String openCodeSessionId) {
+        appRepository.findById(Objects.requireNonNull(appId)).ifPresent(app -> {
+            app.setOpenCodeSessionId(openCodeSessionId);
+            appRepository.save(app);
+            log.info("Bound OpenCode session {} to app {}", openCodeSessionId, appId);
+        });
+    }
+
     public AppEntity getLatestAppByUserId(Long userId) {
         return appRepository.findTopByUserIdOrderByIdDesc(userId)
                 .orElse(null);
@@ -108,6 +120,7 @@ public class AppApplicationService {
     @Transactional
     public void deleteApp(Long userId, Long appId) {
         AppEntity app = getOwnedApp(userId, appId);
+        deleteOpenCodeSession(app);
         List<AppVersionEntity> versions = appVersionRepository.findByAppIdOrderByVersionNumberDesc(appId);
 
         for (AppVersionEntity version : versions) {
@@ -118,6 +131,26 @@ public class AppApplicationService {
         appRepository.delete(app);
 
         log.info("Deleted app {} and all its versions", appId);
+    }
+
+    private void deleteOpenCodeSession(AppEntity app) {
+        String openCodeSessionId = app.getOpenCodeSessionId();
+        if (openCodeSessionId == null || openCodeSessionId.isBlank()) {
+            return;
+        }
+
+        try {
+            openCodeClient.deleteSession(openCodeSessionId);
+            log.info("Deleted OpenCode session {} for app {}", openCodeSessionId, app.getId());
+        } catch (OpenCodeClientException exception) {
+            if (exception.getMessage() != null && exception.getMessage().contains("-> 404")) {
+                log.info("OpenCode session {} already missing for app {}", openCodeSessionId, app.getId());
+                return;
+            }
+            throw new IllegalStateException(
+                    "Failed to delete OpenCode session " + openCodeSessionId + " for app " + app.getId(),
+                    exception);
+        }
     }
 
     private AppEntity getOwnedApp(Long userId, Long appId) {

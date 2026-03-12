@@ -1,11 +1,21 @@
 package com.metacraft.api.modules.app.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import java.time.OffsetDateTime;
+
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
 
-import java.time.OffsetDateTime;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -34,6 +44,9 @@ public class AppEntity {
 
     @Column(name = "logo", length = 128)
     private String logo;
+
+    @Column(name = "open_code_session_id", length = 128)
+    private String openCodeSessionId;
 
     @Column(name = "is_public")
     @Builder.Default

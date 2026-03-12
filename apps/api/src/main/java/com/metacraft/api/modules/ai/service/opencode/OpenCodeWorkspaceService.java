@@ -14,10 +14,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OpenCodeWorkspaceService {
 
+    private static final String APPS_DIRECTORY = "apps";
+
     private final StorageService storageService;
 
     public Path ensureWorkspaceRoot() {
-        Path rootLocation = storageService.getRootLocation();
+        Path rootLocation = storageService.getRootLocation().resolve(APPS_DIRECTORY).normalize();
         try {
             Files.createDirectories(rootLocation);
         } catch (IOException exception) {
@@ -28,11 +30,11 @@ public class OpenCodeWorkspaceService {
     }
 
     public Path getWorkspaceRoot() {
-        return storageService.getRootLocation();
+        return storageService.getRootLocation().resolve(APPS_DIRECTORY).normalize();
     }
 
     public Path getAppDirectory(Long appId) {
-        return ensureWorkspaceRoot().resolve("apps").resolve(String.valueOf(appId)).normalize();
+        return ensureWorkspaceRoot().resolve(String.valueOf(appId)).normalize();
     }
 
     public Path getAppVersionDirectory(Long appId, Integer versionNumber) {

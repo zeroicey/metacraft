@@ -63,6 +63,10 @@ public class AppService {
         appApplicationService.updateAppLogo(appId, logo);
     }
 
+    public void bindOpenCodeSessionId(Long appId, String openCodeSessionId) {
+        appApplicationService.bindOpenCodeSessionId(appId, openCodeSessionId);
+    }
+
     /**
      * 获取用户最新创建的应用
      */
