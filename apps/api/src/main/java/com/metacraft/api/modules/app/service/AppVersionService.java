@@ -29,6 +29,11 @@ public class AppVersionService {
     }
 
     @Transactional
+    public AppVersionEntity createVersionFromSnapshot(Long appId, String htmlContent, String jsContent, String changeLog) {
+        return appCodeAssetService.createVersionFromSnapshot(appId, htmlContent, jsContent, changeLog);
+    }
+
+    @Transactional
     public void deleteVersion(Long userId, Long appId, Long versionId) {
         AppEntity app = getOwnedApp(userId, appId);
         AppVersionEntity version = appVersionRepository.findById(Objects.requireNonNull(versionId))

@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class OpenCodeClient {
 
-    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(60);
+    private static final Duration REQUEST_TIMEOUT = Duration.ofMinutes(30);
 
     private final ObjectMapper objectMapper;
     private final OpenCodeProperties properties;
@@ -49,7 +49,7 @@ public class OpenCodeClient {
     }
 
     public OpenCodeDtos.Session createSession(String title) {
-        return createSession(new OpenCodeDtos.CreateSessionRequest(title, null));
+        return createSession(new OpenCodeDtos.CreateSessionRequest(title));
     }
 
     public OpenCodeDtos.Session createSession(OpenCodeDtos.CreateSessionRequest request) {
@@ -69,9 +69,26 @@ public class OpenCodeClient {
         });
     }
 
-    public OpenCodeDtos.MessageEnvelope sendMessage(String sessionId, OpenCodeDtos.MessageRequest request) {
-        return sendRequest("POST", "/session/" + encodePath(sessionId) + "/message", request,
-                OpenCodeDtos.MessageEnvelope.class);
+    public boolean sendMessage(String sessionId, OpenCodeDtos.MessageRequest request) {
+        HttpRequest httpRequest = buildRequest("POST", "/session/" + encodePath(sessionId) + "/message", request);
+
+        try {
+            HttpResponse<Void> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.discarding());
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                throw new OpenCodeClientException(
+                        "OpenCode request failed: POST /session/" + encodePath(sessionId) + "/message -> "
+                                + response.statusCode());
+            }
+            return true;
+        } catch (IOException exception) {
+            throw new OpenCodeClientException("OpenCode request I/O failure: POST /session/" + encodePath(sessionId)
+                    + "/message", exception);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new OpenCodeClientException(
+                    "OpenCode request interrupted: POST /session/" + encodePath(sessionId) + "/message",
+                    exception);
+        }
     }
 
     private <T> T sendRequest(String method, String path, Object body, Class<T> responseType) {

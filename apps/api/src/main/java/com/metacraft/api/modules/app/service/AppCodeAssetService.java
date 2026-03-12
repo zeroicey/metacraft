@@ -35,6 +35,16 @@ public class AppCodeAssetService {
 
     @Transactional
     public AppVersionEntity createVersion(Long appId, String htmlContent, String jsContent, String changeLog) {
+        return createVersionInternal(appId, htmlContent, jsContent, changeLog, true);
+    }
+
+    @Transactional
+    public AppVersionEntity createVersionFromSnapshot(Long appId, String htmlContent, String jsContent, String changeLog) {
+        return createVersionInternal(appId, htmlContent, jsContent, changeLog, false);
+    }
+
+    private AppVersionEntity createVersionInternal(Long appId, String htmlContent, String jsContent, String changeLog,
+            boolean formatCode) {
         AppEntity app = appRepository.findById(Objects.requireNonNull(appId))
                 .orElseThrow(() -> new RuntimeException("App not found: " + appId));
 
@@ -42,8 +52,8 @@ public class AppCodeAssetService {
                 .map(version -> version.getVersionNumber() + 1)
                 .orElse(1);
 
-        String formattedHtmlContent = prettyPrintHtml(htmlContent);
-        String formattedJsContent = prettyPrintJavaScript(jsContent);
+        String formattedHtmlContent = formatCode ? prettyPrintHtml(htmlContent) : htmlContent;
+        String formattedJsContent = formatCode ? prettyPrintJavaScript(jsContent) : jsContent;
         String relativePath = String.format("apps/%d/v%d/index.html", appId, nextVersion);
         String jsRelativePath = toJsPath(relativePath);
 

@@ -8,6 +8,8 @@ import reactor.core.publisher.Flux;
 
 @AiService
 public interface ChatAgent {
+    String NO_HISTORY = "No conversation history.";
+
     @SystemMessage(fromResource = "prompts/chat.txt")
     @UserMessage("""
             Conversation history:
@@ -17,4 +19,24 @@ public interface ChatAgent {
             {{message}}
             """)
     Flux<String> chat(@V("message") String message, @V("history") String history);
+
+    @SystemMessage(fromResource = "prompts/gen-chat.txt")
+    @UserMessage("""
+            Conversation history:
+            {{history}}
+
+            Current user message:
+            {{message}}
+            """)
+    Flux<String> chatBeforeGen(@V("message") String message, @V("history") String history);
+
+    @SystemMessage(fromResource = "prompts/edit-chat.txt")
+    @UserMessage("""
+            Conversation history:
+            {{history}}
+
+            Current user message:
+            {{message}}
+            """)
+    Flux<String> chatBeforeEdit(@V("message") String message, @V("history") String history);
 }

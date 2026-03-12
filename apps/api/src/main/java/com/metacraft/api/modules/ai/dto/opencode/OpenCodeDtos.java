@@ -12,13 +12,10 @@ public final class OpenCodeDtos {
     public record HealthResponse(boolean healthy, String version) {
     }
 
-    public record Session(String id, String title, String parentID) {
+    public record Session(String id) {
     }
 
-    public record CreateSessionRequest(String title, String parentID) {
-    }
-
-    public record ModelRef(String providerID, String modelID) {
+    public record CreateSessionRequest(String title) {
     }
 
     public record TextPart(String type, String text) {
@@ -27,21 +24,9 @@ public final class OpenCodeDtos {
         }
     }
 
-    public record MessageRequest(
-            String messageID,
-            ModelRef model,
-            String agent,
-            Boolean noReply,
-            String system,
-            JsonNode tools,
-            List<TextPart> parts) {
-
-        public static MessageRequest text(String prompt, ModelRef model, String agent) {
-            return new MessageRequest(null, model, agent, null, null, null, List.of(TextPart.text(prompt)));
-        }
-
-        public static MessageRequest context(String prompt) {
-            return new MessageRequest(null, null, null, true, null, null, List.of(TextPart.text(prompt)));
+    public record MessageRequest(List<TextPart> parts) {
+        public static MessageRequest text(String prompt) {
+            return new MessageRequest(List.of(TextPart.text(prompt)));
         }
     }
 

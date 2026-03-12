@@ -40,4 +40,8 @@ public class OpenCodeWorkspaceService {
     public Path getAppVersionDirectory(Long appId, Integer versionNumber) {
         return getAppDirectory(appId).resolve("v" + versionNumber).normalize();
     }
+
+    public String getWorkspaceRelativeAppVersionDirectory(Long appId, Integer versionNumber) {
+        return String.valueOf(appId) + "/v" + versionNumber;
+    }
 }

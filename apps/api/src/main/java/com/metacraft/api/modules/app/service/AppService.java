@@ -41,6 +41,10 @@ public class AppService {
     public AppVersionEntity createVersion(Long appId, String htmlContent, String jsContent, String changeLog) {
         return appVersionService.createVersion(appId, htmlContent, jsContent, changeLog);
     }
+
+    public AppVersionEntity createVersionFromSnapshot(Long appId, String htmlContent, String jsContent, String changeLog) {
+        return appVersionService.createVersionFromSnapshot(appId, htmlContent, jsContent, changeLog);
+    }
     
     /**
      * 获取应用
