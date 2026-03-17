@@ -62,7 +62,8 @@ public class Template {
 public class TemplateMatchResult {
     private boolean matched;        // 是否匹配成功
     private String templateName;    // 匹配的模板文件夹名
-    private String reason;           // 匹配原因
+    private String reason;          // 匹配原因
+    private Template template;      // 匹配的模板对象（matched为true时包含完整模板内容）
 }
 ```
 
@@ -74,8 +75,29 @@ public class TemplateMatchResult {
 - 返回匹配结果
 
 **核心方法：**
-- `scanTemplates()`: 扫描并加载所有模板
-- `matchAsync(String userMessage)`: 异步匹配用户需求与模板
+
+```java
+@Service
+public class TemplateMatcher {
+    // 扫描并缓存所有模板（应用启动时加载一次）
+    public List<Template> scanTemplates();
+
+    // 异步匹配用户需求与模板（返回 Mono，可设置超时）
+    public Mono<TemplateMatchResult> matchAsync(String userMessage);
+
+    // 同步匹配（带超时保护）
+    public Mono<TemplateMatchResult> matchWithTimeout(String userMessage, Duration timeout);
+}
+```
+
+**超时配置：**
+- 模板匹配默认超时：3 秒
+- 可通过配置 `app.template-match-timeout` 调整
+
+**缓存策略：**
+- 模板列表在应用启动时扫描一次，使用内存缓存
+- 使用 `@PostConstruct` 初始化模板缓存
+- 线程安全：使用 `Collections.unmodifiableList()` 保护模板列表
 
 ---
 
@@ -84,18 +106,26 @@ public class TemplateMatchResult {
 ```
 AppGenPipelineService.execute()
     │
-    ├── [立即启动] templateMatcher.matchAsync(userMessage)  ──┐
-    │                                                        │
-    ├── chatAgent.chatBeforeGen()                            │
-    ├── planGenerator.generatePlan()                        │
-    ├── appInfoExtractor.extract()                          │
-    │                                                        │
-    └── generateCodeWithTemplate() ◄────────────────────────┘
+    ├── [立即启动] templateMatcher.matchAsync(userMessage)
+    │              .timeout(Duration.ofSeconds(3))
+    │              .onErrorReturn(TemplateMatchResult.noMatch())
+    │                                                      │
+    ├── chatAgent.chatBeforeGen() (并行)                   │
+    ├── planGenerator.generatePlan() (并行)                │
+    ├── appInfoExtractor.extract() (并行)                   │
+    │                                                      │
+    └── postAppInfoStream 中检查模板匹配结果
             │
             ├── 模板匹配成功 → 直接使用模板代码 → 保存版本
             │
-            └── 模板未匹配 → 调用 OpenCode 生成代码 → 保存版本
+            └── 模板未匹配/超时 → 调用 OpenCode 生成代码 → 保存版本
 ```
+
+**响应式集成说明：**
+- 使用 `Mono.cache()` 缓存模板匹配结果
+- 在 `postAppInfoStream` 阶段通过 `.flatMap()` 同步等待模板匹配结果
+- 设置超时保护，确保不会阻塞整体流程
+- 匹配超时视为"未匹配"，降级到 OpenCode 生成
 
 **时间优势：**
 - 模板匹配与 Chat/Plan/AppInfo 并行进行
@@ -122,6 +152,7 @@ AppGenPipelineService.execute()
 ```yaml
 app:
   template-path: ${TEMPLATE_PATH:data/templates}
+  template-match-timeout: ${TEMPLATE_MATCH_TIMEOUT:3}  # 秒
 ```
 
 ---
@@ -155,6 +186,10 @@ app:
 - 如果用户需求是创建某个具体应用，且模板能直接满足，返回 matched: true
 - 如果用户需求需要定制开发或模板无法满足，返回 matched: false
 - 不要过度匹配，避免给用户不相关的模板
+
+## 重要
+- 必须返回合法的 JSON 格式，不要返回其他内容
+- 如果无法确定匹配，返回 matched: false
 ```
 
 ---
@@ -165,7 +200,9 @@ app:
 |------|----------|
 | 模板目录不存在 | 创建空目录，记录日志，继续正常生成 |
 | 模板文件损坏（无法解析） | 记录日志，跳过该模板 |
-| AI 匹配失败 | 记录日志，返回未匹配，降级到 OpenCode 生成 |
+| AI 匹配超时 | 记录日志，返回未匹配，降级到 OpenCode 生成 |
+| AI 匹配失败（异常） | 记录日志，返回未匹配，降级到 OpenCode 生成 |
+| AI 返回无效 JSON | 记录日志，返回未匹配，降级到 OpenCode 生成 |
 | 模板代码无效（保存失败） | 记录日志，降级到 OpenCode 生成 |
 
 ---
@@ -193,15 +230,27 @@ app:
 ## 10. 测试计划
 
 ### 阶段 1：基础功能测试
-- 准备测试模板（围棋、象棋等）
-- 测试模板目录扫描功能
-- 测试 AI 匹配功能
+
+| 测试用例 | 预期结果 |
+|----------|----------|
+| 准备测试模板（围棋、象棋等） | 模板文件正确加载 |
+| 测试模板目录扫描功能 | 所有模板被正确识别 |
+| 测试 AI 匹配功能 - 用户请求"围棋游戏" | 匹配成功，返回模板名称 |
+| 测试 AI 匹配功能 - 用户请求"做一个五子棋" | 匹配失败，返回未匹配 |
 
 ### 阶段 2：集成测试
-- 测试模板匹配成功场景
-- 测试模板匹配失败降级到 OpenCode
+
+| 测试用例 | 预期结果 |
+|----------|----------|
+| 模板匹配成功场景 | 直接使用模板代码，跳过 OpenCode，响应时间短 |
+| 模板匹配失败降级 | 正常调用 OpenCode 生成代码 |
+| 模板匹配超时 | 降级到 OpenCode 生成，记录警告日志 |
 
 ### 阶段 3：边界测试
-- 模板目录不存在
-- 模板文件损坏
-- AI 服务不可用
+
+| 测试用例 | 预期结果 |
+|----------|----------|
+| 模板目录不存在 | 创建空目录，继续正常生成 |
+| 模板文件损坏（缺少 index.html） | 跳过损坏模板，记录日志 |
+| AI 服务不可用 | 降级到 OpenCode 生成，记录错误日志 |
+| 并发请求多个用户匹配 | 缓存模板列表，线程安全处理 |
