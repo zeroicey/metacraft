@@ -278,68 +278,15 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 
 ---
 
-### Task 4: TemplateMatchService AI 接口
-
-**Files:**
-- Create: `apps/api/src/main/java/com/metacraft/api/modules/ai/service/TemplateMatchService.java`
-- Test: `apps/api/src/test/java/com/metacraft/api/modules/ai/service/TemplateMatchServiceTest.java`
-
-- [ ] **Step 1: 先查看现有 AI 服务模式**
-
-Read: `apps/api/src/main/java/com/metacraft/api/modules/ai/agent/ChatAgent.java`
-
-- [ ] **Step 2: 写测试（模拟测试，不实际调用 AI）**
-
-```java
-package com.metacraft.api.modules.ai.service;
-
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
-class TemplateMatchServiceTest {
-
-    @Test
-    void testServiceExists() {
-        // 验证服务接口存在
-        assertNotNull(TemplateMatchService.class);
-    }
-}
-```
-
-- [ ] **Step 3: 实现 TemplateMatchService 接口**
-
-```java
-package com.metacraft.api.modules.ai.service;
-
-import org.springframework.stereotype.Service;
-import dev.langchain4j.service.AiService;
-import com.metacraft.api.modules.ai.service.pipeline.TemplateMatchService;
-import reactor.core.publisher.Flux;
-
-@AiService
-public interface TemplateMatchService {
-    @dev.langchain4j.service.SystemMessage(fromResource = "prompts/template-match.txt")
-    Flux<String> matchTemplates(@dev.langchain4j.service.UserMessage String prompt);
-}
-```
-
-注意：需要修复包路径，应该放在 agent 目录或其他合适位置。LangChain4j @AiService 需要一个实现类。
-
-- [ ] **Step 4: 提交**
-
-```bash
-git commit -m "feat: add TemplateMatchService interface
-
-Note: Will implement with actual AI client in TemplateMatcher
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
-```
-
----
-
 ## Chunk 3: TemplateMatcher 服务
 
-### Task 5: TemplateMatcher 服务类
+### Task 4: TemplateMatcher 服务类
+
+**Note:** LangChain4j @AiService 接口作为内部接口实现在 TemplateMatcher 中，不需要单独创建文件。
+
+**Files:**
+- Create: `apps/api/src/main/java/com/metacraft/api/modules/ai/service/TemplateMatcher.java`
+- Test: `apps/api/src/test/java/com/metacraft/api/modules/ai/service/TemplateMatcherTest.java`
 
 **Files:**
 - Create: `apps/api/src/main/java/com/metacraft/api/modules/ai/service/TemplateMatcher.java`
@@ -616,7 +563,7 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 
 ## Chunk 4: 集成到 AppGenPipelineService
 
-### Task 6: 添加配置项
+### Task 5: 添加配置项
 
 **Files:**
 - Modify: `apps/api/src/main/resources/application.yaml`
@@ -631,6 +578,7 @@ Read: `apps/api/src/main/resources/application.yaml` (前 50 行)
 app:
   template-path: ${TEMPLATE_PATH:data/templates}
   template-match-timeout: ${TEMPLATE_MATCH_TIMEOUT:3}
+  template-match-model: ${TEMPLATE_MATCH_MODEL:qwen-turbo}
 ```
 
 - [ ] **Step 3: 提交**
@@ -644,7 +592,7 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 
 ---
 
-### Task 7: 集成到 AppGenPipelineService
+### Task 6: 集成到 AppGenPipelineService
 
 **Files:**
 - Modify: `apps/api/src/main/java/com/metacraft/api/modules/ai/service/pipeline/AppGenPipelineService.java`
@@ -757,7 +705,7 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 
 ## Chunk 5: 测试模板
 
-### Task 8: 创建测试模板
+### Task 7: 创建测试模板
 
 **Files:**
 - Create: `data/templates/围棋游戏_一个在线围棋对弈游戏/index.html`
@@ -789,15 +737,15 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 
 ## 总结
 
-此计划包含 8 个任务，分布在 5 个 Chunk 中：
+此计划包含 7 个任务，分布在 5 个 Chunk 中：
 
 | Chunk | 任务 | 说明 |
 |-------|------|------|
 | 1 | Task 1-2 | 数据模型和 DTO |
-| 2 | Task 3-4 | Prompt 和 AI 服务接口 |
-| 3 | Task 5 | TemplateMatcher 服务 |
-| 4 | Task 6-7 | 配置和集成 |
-| 5 | Task 8 | 测试模板 |
+| 2 | Task 3 | Prompt 文件 |
+| 3 | Task 4 | TemplateMatcher 服务 |
+| 4 | Task 5-6 | 配置和集成 |
+| 5 | Task 7 | 测试模板 |
 
 计划完成后，所有文件变更:
 - 新增: 5 个 Java 文件, 1 个 prompt 文件, 测试模板
