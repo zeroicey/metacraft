@@ -74,13 +74,30 @@ public class TemplateMatchResult {
 - 调用 AI 进行语义匹配
 - 返回匹配结果
 
+**AI 集成方式：**
+使用项目中现有的 LangChain4j `@AiService` 模式，创建专门的匹配服务接口：
+
+```java
+@AiService
+public interface TemplateMatchService {
+    @SystemMessage(fromResource = "prompts/template-match.txt")
+    Flux<String> matchTemplates(@UserMessage String prompt);
+}
+```
+
 **核心方法：**
 
 ```java
 @Service
 public class TemplateMatcher {
+    private final TemplateMatchService templateMatchService;
+    private final StorageService storageService;
+
+    private List<Template> templateCache;  // 模板缓存
+
     // 扫描并缓存所有模板（应用启动时加载一次）
-    public List<Template> scanTemplates();
+    @PostConstruct
+    public void init() { ... }
 
     // 异步匹配用户需求与模板（返回 Mono，可设置超时）
     public Mono<TemplateMatchResult> matchAsync(String userMessage);
@@ -90,6 +107,10 @@ public class TemplateMatcher {
 }
 ```
 
+**AI 模型配置：**
+- 使用较轻量的模型（如 qwen-turbo）进行模板匹配，降低成本和延迟
+- 可通过配置 `app.template-match-model` 指定模型名称
+
 **超时配置：**
 - 模板匹配默认超时：3 秒
 - 可通过配置 `app.template-match-timeout` 调整
@@ -98,6 +119,7 @@ public class TemplateMatcher {
 - 模板列表在应用启动时扫描一次，使用内存缓存
 - 使用 `@PostConstruct` 初始化模板缓存
 - 线程安全：使用 `Collections.unmodifiableList()` 保护模板列表
+- v1 限制：不支持热重载，需重启应用刷新模板
 
 ---
 
@@ -141,9 +163,37 @@ AppGenPipelineService.execute()
 修改 `apps/api/src/main/java/com/metacraft/api/modules/ai/service/pipeline/AppGenPipelineService.java`：
 
 1. 注入 `TemplateMatcher`
-2. 在 `execute()` 开始时启动异步模板匹配
-3. 新增 `generateCodeWithTemplate()` 方法处理模板匹配逻辑
+2. 在 `execute()` 开始时启动异步模板匹配（使用 `Mono.cache()` 缓存结果）
+3. 在 `postAppInfoStream` 中检查模板匹配结果
 4. 匹配成功时直接保存模板代码，跳过 OpenCode 调用
+
+**变量传递机制：**
+
+使用 `AtomicReference<TemplateMatchResult>` 传递模板匹配结果，与现有的 `relatedAppIdRef`、`relatedVersionIdRef` 模式一致：
+
+```java
+AtomicReference<TemplateMatchResult> templateMatchRef = new AtomicReference<>();
+
+// 启动异步模板匹配
+Mono<TemplateMatchResult> templateMatchMono = Mono.fromCallable(() ->
+    templateMatcher.matchWithTimeout(message, Duration.ofSeconds(3))
+).subscribeOn(Schedulers.boundedElastic())
+ .cache();  // 缓存匹配结果供后续使用
+
+// 在 postAppInfoStream 中等待结果
+Flux<ServerSentEvent<String>> postAppInfoStream = appInfoMono.flatMapMany(app -> {
+    return templateMatchMono.flatMapMany(matchResult -> {
+        templateMatchRef.set(matchResult);
+        if (matchResult.isMatched()) {
+            // 使用模板代码
+            return useTemplateCode(app, matchResult.getTemplate());
+        } else {
+            // 降级到 OpenCode 生成
+            return useOpenCode(app, history, message);
+        }
+    });
+});
+```
 
 ### 6.2 配置项
 
@@ -153,7 +203,11 @@ AppGenPipelineService.execute()
 app:
   template-path: ${TEMPLATE_PATH:data/templates}
   template-match-timeout: ${TEMPLATE_MATCH_TIMEOUT:3}  # 秒
+  template-match-model: ${TEMPLATE_MATCH_MODEL:qwen-turbo}  # AI 模型
 ```
+
+**路径安全：**
+使用 `StorageService` 的路径验证机制，防止目录遍历攻击。
 
 ---
 
