@@ -1,6 +1,9 @@
 app:
   storage:
     path: ${APP_STORAGE_PATH:data}
+  template-path: ${TEMPLATE_PATH:data/templates}
+  template-match-timeout: ${TEMPLATE_MATCH_TIMEOUT:3}
+  template-match-model: ${TEMPLATE_MATCH_MODEL:qwen-turbo}
 opencode:
   enabled: ${OPENCODE_ENABLED:true}
   command: ${OPENCODE_COMMAND:opencode}

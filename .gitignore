@@ -11,3 +11,8 @@ data/
 .VSCodeCounter/
 apps/nanobot/
 .venv/
+.opencode/
+
+# Allow data/templates for pre-generated app templates
+!data/
+data/templates/

@@ -1,5 +1,6 @@
 package com.metacraft.api.modules.ai.service.pipeline;
 
+import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -11,9 +12,11 @@ import com.metacraft.api.modules.ai.agent.ChatAgent;
 import com.metacraft.api.modules.ai.agent.PlanGenerator;
 import com.metacraft.api.modules.ai.dto.AppInfoDTO;
 import com.metacraft.api.modules.ai.dto.ChatMessageCreateDTO;
+import com.metacraft.api.modules.ai.dto.TemplateMatchResult;
 import com.metacraft.api.modules.ai.dto.opencode.OpenCodeDtos;
 import com.metacraft.api.modules.ai.service.ChatMessageService;
 import com.metacraft.api.modules.ai.service.ChatSessionService;
+import com.metacraft.api.modules.ai.service.TemplateMatcher;
 import com.metacraft.api.modules.ai.service.opencode.OpenCodeClient;
 import com.metacraft.api.modules.ai.service.opencode.OpenCodePromptService;
 import com.metacraft.api.modules.ai.service.opencode.OpenCodeTemplateService;
@@ -42,6 +45,7 @@ public class AppGenPipelineService {
     private final ImageService imageService;
     private final ChatSessionService chatSessionService;
     private final ChatMessageService chatMessageService;
+    private final TemplateMatcher templateMatcher;
     private final OpenCodeClient openCodeClient;
     private final OpenCodePromptService openCodePromptService;
     private final OpenCodeTemplateService openCodeTemplateService;
@@ -83,14 +87,42 @@ public class AppGenPipelineService {
                     .subscribeOn(Schedulers.boundedElastic())
                     .flux();
 
-            Mono<ServerSentEvent<String>> codeStream = Mono.fromCallable(() -> {
-                AppVersionEntity createdVersion = generateInitialVersionWithOpenCode(app, history, message);
-                relatedVersionIdRef.set(createdVersion.getId());
-                return ServerSentEvent.<String>builder()
-                        .event("app_generated")
-                        .data(sseUtils.toAppGeneratedJson(app.getUuid(), createdVersion.getVersionNumber()))
-                        .build();
-            }).subscribeOn(Schedulers.boundedElastic());
+            // 模板匹配 - 立即启动，与其他流程并行
+            Mono<TemplateMatchResult> templateMatchMono = Mono.fromCallable(() ->
+                    templateMatcher.matchWithTimeout(message, Duration.ofSeconds(3))
+                ).subscribeOn(Schedulers.boundedElastic())
+                .cache();
+
+            // 检查模板匹配结果
+            Flux<ServerSentEvent<String>> codeStream = templateMatchMono.flatMapMany(matchResult -> {
+                if (matchResult.isMatched()) {
+                    // 使用模板代码
+                    return Mono.fromCallable(() -> {
+                        AppVersionEntity version = appService.createVersion(
+                            app.getId(),
+                            matchResult.getTemplate().getHtmlContent(),
+                            matchResult.getTemplate().getJsContent(),
+                            "使用模板: " + matchResult.getTemplateName()
+                        );
+                        relatedVersionIdRef.set(version.getId());
+                        log.info("Using template {} for app {}", matchResult.getTemplateName(), app.getId());
+                        return ServerSentEvent.<String>builder()
+                            .event("app_generated")
+                            .data(sseUtils.toAppGeneratedJson(app.getUuid(), version.getVersionNumber()))
+                            .build();
+                    }).subscribeOn(Schedulers.boundedElastic()).flux();
+                } else {
+                    // 降级到 OpenCode 生成
+                    return Mono.fromCallable(() -> {
+                        AppVersionEntity createdVersion = generateInitialVersionWithOpenCode(app, history, message);
+                        relatedVersionIdRef.set(createdVersion.getId());
+                        return ServerSentEvent.<String>builder()
+                            .event("app_generated")
+                            .data(sseUtils.toAppGeneratedJson(app.getUuid(), createdVersion.getVersionNumber()))
+                            .build();
+                    }).subscribeOn(Schedulers.boundedElastic()).flux();
+                }
+            });
 
             return Flux.merge(logoStream, codeStream);
         });
