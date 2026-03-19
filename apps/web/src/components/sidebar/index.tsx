@@ -1,4 +1,4 @@
-import { SettingsIcon, CircleUserIcon, } from "lucide-react"
+import { SettingsIcon, CircleUserIcon, ChevronRightIcon } from "lucide-react"
 
 import {
   Sidebar,
@@ -12,6 +12,8 @@ import { YuanChuangSidebarContent, YuanMengSidebarContent } from "@/components/s
 
 export function AppSidebar() {
   const currentPage = useAppStore((state) => state.currentPage)
+  const selectedSessionId = useAppStore((state) => state.selectedSessionId)
+  const setSelectedSessionId = useAppStore((state) => state.setSelectedSessionId)
 
   return (
     <Sidebar>
@@ -23,12 +25,18 @@ export function AppSidebar() {
             </div>
             <span className="text-lg font-bold text-gray-800">元创</span>
           </div>
+          <button className="h-6 w-6 p-0 flex items-center justify-center">
+            <ChevronRightIcon className="h-4 w-4 text-gray-400" />
+          </button>
         </div>
       </SidebarHeader>
 
       <SidebarContent className="flex-1">
         {currentPage === "yuanchuang" ? (
-          <YuanChuangSidebarContent />
+          <YuanChuangSidebarContent
+            selectedSessionId={selectedSessionId}
+            onSessionSelect={setSelectedSessionId}
+          />
         ) : (
           <YuanMengSidebarContent />
         )}
