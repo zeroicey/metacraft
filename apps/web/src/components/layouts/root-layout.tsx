@@ -2,7 +2,7 @@ import QueryProvider from "@/providers/QueryProvider";
 import { Outlet } from "react-router";
 import { Toaster } from "sonner";
 import { SidebarProvider } from "../ui/sidebar";
-import { AppSidebar } from "../app-sidebar";
+import { AppSidebar } from "@/components/sidebar";
 import Navbar from "@/components/navbar";
 
 export default function RootLayout() {

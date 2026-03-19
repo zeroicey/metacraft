@@ -107,12 +107,6 @@ function ResourceBar({
   value: number
   showValue?: boolean
 }) {
-  const getColor = (v: number) => {
-    if (v < 60) return "bg-green-500"
-    if (v < 80) return "bg-yellow-500"
-    return "bg-red-500"
-  }
-
   return (
     <div className="px-3 py-2">
       <div className="flex items-center gap-2 mb-1">

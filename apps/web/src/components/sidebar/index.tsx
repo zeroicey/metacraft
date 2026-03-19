@@ -1,16 +1,12 @@
-import { SearchIcon, FolderIcon, SettingsIcon, CircleUserIcon, ChevronRightIcon, PlusIcon, AppWindowIcon } from "lucide-react"
+import { SettingsIcon, CircleUserIcon, } from "lucide-react"
 
 import {
   Sidebar,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarHeader,
-  SidebarMenu,
   SidebarFooter,
   SidebarRail,
   SidebarContent,
 } from "@/components/ui/sidebar"
-import { Separator } from "@/components/ui/separator"
 import { useAppStore } from "@/stores/app-store"
 import { YuanChuangSidebarContent, YuanMengSidebarContent } from "@/components/sidebar/sidebar-content"
 
