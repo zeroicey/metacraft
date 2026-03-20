@@ -1,6 +1,6 @@
 import { useSearchParams, useNavigate } from "react-router";
 import { ArrowLeftIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function PreviewPage() {
   const [searchParams] = useSearchParams();
@@ -22,24 +22,13 @@ export default function PreviewPage() {
 
   return (
     <div className="flex flex-col h-screen bg-white">
-      {/* Header */}
-      <div className="flex items-center h-12 px-4 border-b border-gray-100">
-        <button
-          onClick={handleBack}
-          className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100"
-        >
-          <ArrowLeftIcon className="w-5 h-5" />
-        </button>
-        <span className="ml-2 text-base font-medium">{appName}</span>
-        {logoUrl && !logoLoadFailed && (
-          <img
-            src={logoUrl}
-            alt="Logo"
-            className="w-6 h-6 ml-2 rounded-md object-cover"
-            onError={() => setLogoLoadFailed(true)}
-          />
-        )}
-      </div>
+      {/* Floating Back Button */}
+      <button
+        onClick={handleBack}
+        className="absolute left-4 top-4 z-50 flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-md hover:bg-gray-100"
+      >
+        <ArrowLeftIcon className="w-5 h-5" />
+      </button>
 
       {/* Iframe Preview */}
       {resolvedUrl ? (

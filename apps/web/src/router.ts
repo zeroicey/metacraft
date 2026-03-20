@@ -1,6 +1,7 @@
 import { lazy } from "react";
 import { createBrowserRouter } from "react-router";
 import RootLayout from "@/components/layouts/root-layout";
+import PreviewLayout from "@/components/layouts/preview-layout";
 
 const YuanChuangPage = lazy(() => import("@/pages/yuanchuang"));
 const YuanMengPage = lazy(() => import("@/pages/yuanmeng"));
@@ -18,8 +19,15 @@ const router = createBrowserRouter([
             { index: true, Component: YuanChuangPage },
             { path: "yuanchuang", Component: YuanChuangPage },
             { path: "yuanmeng", Component: YuanMengPage },
-            { path: "preview", Component: PreviewPage },
             { path: "*", Component: NotFoundPage },
+        ],
+    },
+    {
+        path: "/preview",
+        Component: PreviewLayout,
+        ErrorBoundary: ErrorPage,
+        children: [
+            { index: true, Component: PreviewPage },
         ],
     },
 ]);
