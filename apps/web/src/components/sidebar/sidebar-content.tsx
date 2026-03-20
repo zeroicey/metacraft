@@ -3,7 +3,7 @@ import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from "@/c
 import { SessionList } from "./session-list"
 import { useUserSessions, useCreateSession } from "@/hooks/useChatSession"
 import { getSessionMessages } from "@/api/session"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 // 获取会话消息的辅助函数
 const getSessionMessagesById = async (sessionId: string) => {
@@ -25,6 +25,17 @@ export function YuanChuangSidebarContent({ selectedSessionId, onSessionSelect }:
   const { open, setOpen, toggleSidebar } = useSidebar()
   const { data: sessions = [] } = useUserSessions()
   const createSession = useCreateSession()
+
+  // 自动选择最新的会话
+  useEffect(() => {
+    if (!selectedSessionId && sessions.length > 0) {
+      // 按 updatedAt 排序，取最新的
+      const sorted = [...sessions].sort((a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      )
+      onSessionSelect(sorted[0].sessionId)
+    }
+  }, [sessions, selectedSessionId, onSessionSelect])
 
   const DEFAULT_TITLE = "未命名会话"
 
