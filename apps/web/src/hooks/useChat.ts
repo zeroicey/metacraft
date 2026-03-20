@@ -82,8 +82,6 @@ export function useChat(sessionId: string): UseChatReturn {
     // SSE 解析（按 \n\n 分割）
     // 处理单个事件
     const handleEvent = useCallback((eventName: string, eventData: string) => {
-        console.log("[SSE] Event:", eventName, "Data:", eventData);
-
         let parsed: Record<string, unknown> = {};
         try {
             parsed = JSON.parse(eventData);
@@ -120,7 +118,6 @@ export function useChat(sessionId: string): UseChatReturn {
             }
             case "plan": {
                 const plan = (parsed.plan as string) || eventData;
-                console.log("[SSE] Plan received:", plan);
                 if (plan && streamingMessageIdRef.current) {
                     setMessages((prev) =>
                         prev.map((m) =>
@@ -135,7 +132,6 @@ export function useChat(sessionId: string): UseChatReturn {
             case "app_info": {
                 const name = (parsed.name as string) || "";
                 const description = (parsed.description as string) || "";
-                console.log("[SSE] AppInfo received:", name, description);
                 if (streamingMessageIdRef.current) {
                     setMessages((prev) =>
                         prev.map((m) =>
@@ -151,7 +147,6 @@ export function useChat(sessionId: string): UseChatReturn {
                 const uuid = parsed.uuid as string;
                 if (uuid && streamingMessageIdRef.current) {
                     const logoUrl = `http://100.101.157.4:8080/api/logo/${uuid}`;
-                    console.log("[SSE] Logo generated:", logoUrl);
                     setMessages((prev) =>
                         prev.map((m) =>
                             m.id === streamingMessageIdRef.current
@@ -166,7 +161,6 @@ export function useChat(sessionId: string): UseChatReturn {
                 const uuid = parsed.uuid as string;
                 if (uuid && streamingMessageIdRef.current) {
                     const previewUrl = `http://100.101.157.4:8080/api/preview/${uuid}`;
-                    console.log("[SSE] App generated:", previewUrl);
                     setMessages((prev) =>
                         prev.map((m) =>
                             m.id === streamingMessageIdRef.current
@@ -178,7 +172,6 @@ export function useChat(sessionId: string): UseChatReturn {
                 break;
             }
             case "done": {
-                console.log("[SSE] Done");
                 if (streamingMessageIdRef.current) {
                     setMessages((prev) =>
                         prev.map((m) =>
