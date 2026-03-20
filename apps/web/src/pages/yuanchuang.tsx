@@ -110,7 +110,8 @@ export default function YuanChuangPage() {
       },
       onDone: async () => {
         // 保存当前滚动位置
-        const scrollTop = messagesEndRef.current?.parentElement?.scrollTop || 0
+        const scrollContainer = messagesEndRef.current?.parentElement
+        const scrollTop = scrollContainer?.scrollTop || 0
 
         setStreamingContent("")
         setCurrentIntent(null)
@@ -118,13 +119,16 @@ export default function YuanChuangPage() {
         setAppInfo(null)
         setLogoData(null)
         setAppGeneratedData(null)
+        setLocalMessages([])
 
         await refetch()
 
         // 恢复滚动位置
-        setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({ behavior: "instant" })
-        }, 0)
+        requestAnimationFrame(() => {
+          if (scrollContainer) {
+            scrollContainer.scrollTop = scrollTop
+          }
+        })
       },
       onError: (errorMsg) => {
         toast.error(errorMsg)
