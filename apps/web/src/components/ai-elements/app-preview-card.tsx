@@ -22,16 +22,14 @@ export function AppPreviewCard({
   };
 
   return (
-    <div className="mt-2 rounded-xl border border-[#EEEEEE] bg-[#F5F7FA] p-2.5">
-      <div className="mb-2.5 flex items-center justify-end">
-        <button
-          onClick={handleOpenNewWindow}
-          className="flex h-7 w-7 items-center justify-center rounded-full bg-[#007AFF] text-white transition hover:bg-[#0056CC]"
-          title="在新窗口打开"
-        >
-          <Maximize2Icon className="h-4 w-4" />
-        </button>
-      </div>
+    <div className="mt-2 relative">
+      <button
+        onClick={handleOpenNewWindow}
+        className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-[#007AFF] text-white transition hover:bg-[#0056CC]"
+        title="在新窗口打开"
+      >
+        <Maximize2Icon className="h-4 w-4" />
+      </button>
       {resolvedUrl ? (
         <div className="relative h-[210px] overflow-hidden rounded-lg bg-white">
           <iframe
