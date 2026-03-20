@@ -1,14 +1,72 @@
 import { ChevronRightIcon, SearchIcon, FolderIcon, PlusIcon, AppWindowIcon } from "lucide-react"
-import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar"
+import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from "@/components/ui/sidebar"
 import { SessionList } from "./session-list"
+import { useUserSessions, useCreateSession } from "@/hooks/useChatSession"
+import { getSessionMessages } from "@/api/session"
+import { useState } from "react"
 
-// ============ 源创侧边栏内容 ============
+// 获取会话消息的辅助函数
+const getSessionMessagesById = async (sessionId: string) => {
+  try {
+    return await getSessionMessages(sessionId)
+  } catch {
+    return []
+  }
+}
+
+// 源创侧边栏内容
 export interface YuanChuangSidebarProps {
   selectedSessionId: string
   onSessionSelect: (sessionId: string) => void
 }
 
 export function YuanChuangSidebarContent({ selectedSessionId, onSessionSelect }: YuanChuangSidebarProps) {
+  const [isCreating, setIsCreating] = useState(false)
+  const { open, setOpen, toggleSidebar } = useSidebar()
+  const { data: sessions = [] } = useUserSessions()
+  const createSession = useCreateSession()
+
+  const DEFAULT_TITLE = "未命名会话"
+
+  // 检查会话是否为空（没有消息）
+  const checkAndCreateSession = async () => {
+    if (isCreating) return
+    setIsCreating(true)
+
+    try {
+      // 查找是否有已存在的空会话
+      let targetSessionId = ""
+
+      for (const session of sessions) {
+        if (session.title === DEFAULT_TITLE) {
+          // 获取该会话的消息
+          const messages = await getSessionMessagesById(session.sessionId)
+          if (messages.length === 0) {
+            targetSessionId = session.sessionId
+            break
+          }
+        }
+      }
+
+      if (targetSessionId) {
+        // 使用已存在的空会话
+        onSessionSelect(targetSessionId)
+        toggleSidebar()
+      } else {
+        // 创建新会话
+        const newSession = await createSession.mutateAsync({ title: DEFAULT_TITLE })
+        if (newSession) {
+          onSessionSelect(newSession.sessionId)
+          toggleSidebar()
+        }
+      }
+    } catch (error) {
+      console.error("[YuanChuangSidebar] Failed to create session:", error)
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
   const navItems = [
     { icon: AppWindowIcon, label: "我的元应用" },
     { icon: SearchIcon, label: "元应用商店" },
@@ -20,7 +78,11 @@ export function YuanChuangSidebarContent({ selectedSessionId, onSessionSelect }:
       {/* Create New App Button */}
       <div className="px-3 py-2">
         <SidebarMenuButton asChild>
-          <button className="w-full h-10 bg-[#F2F2F2] hover:bg-[#E5E5E5] text-gray-800 rounded-lg flex items-center justify-center gap-2">
+          <button
+            className="w-full h-10 bg-[#F2F2F2] hover:bg-[#E5E5E5] text-gray-800 rounded-lg flex items-center justify-center gap-2"
+            onClick={checkAndCreateSession}
+            disabled={isCreating}
+          >
             <PlusIcon className="h-4 w-4" />
             <span className="text-sm">创建新应用</span>
           </button>
