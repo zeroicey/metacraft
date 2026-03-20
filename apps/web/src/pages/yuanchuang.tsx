@@ -33,7 +33,7 @@ export default function YuanChuangPage() {
 
   // 计算 Logo URL
   const logoUrl = logoData
-    ? `http://100.101.157.4:8080/api/apps/logo/${logoData.uuid}.${logoData.ext}`
+    ? `http://localhost:8080/api/logo/${logoData.uuid}`
     : undefined;
 
   // 计算 Preview URL
@@ -181,8 +181,8 @@ export default function YuanChuangPage() {
                       plan=""
                       appName={message.relatedAppName}
                       appDescription={message.relatedAppDescription}
-                      logoUrl={message.relatedAppLogo ? `http://100.101.157.4:8080/api/apps/logo/${message.relatedAppLogo}` : undefined}
-                      previewUrl={`http://100.101.157.4:8080/api/preview/${message.relatedAppUuid}`}
+                      logoUrl={message.relatedAppLogo ? `http://localhost:8080/api/logo/${message.relatedAppLogo.replace(/\.[^/.]+$/, '')}` : undefined}
+                      previewUrl={`http://localhost:8080/api/preview/${message.relatedAppUuid}`}
                       isStreaming={false}
                     />
                   ) : (
