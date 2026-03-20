@@ -5,6 +5,7 @@ import RootLayout from "@/components/layouts/root-layout";
 const YuanChuangPage = lazy(() => import("@/pages/yuanchuang"));
 const YuanMengPage = lazy(() => import("@/pages/yuanmeng"));
 const IndexPage = lazy(() => import("@/pages/index"));
+const PreviewPage = lazy(() => import("@/pages/preview"));
 const NotFoundPage = lazy(() => import("@/pages/404"));
 const ErrorPage = lazy(() => import("@/pages/error"));
 
@@ -17,6 +18,7 @@ const router = createBrowserRouter([
             { index: true, Component: YuanChuangPage },
             { path: "yuanchuang", Component: YuanChuangPage },
             { path: "yuanmeng", Component: YuanMengPage },
+            { path: "preview", Component: PreviewPage },
             { path: "*", Component: NotFoundPage },
         ],
     },

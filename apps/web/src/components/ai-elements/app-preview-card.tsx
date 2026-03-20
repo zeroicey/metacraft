@@ -1,5 +1,6 @@
 import { Maximize2Icon } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 interface AppPreviewCardProps {
   previewUrl: string;
@@ -13,12 +14,23 @@ export function AppPreviewCard({
   logoUrl,
 }: AppPreviewCardProps) {
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
   const resolvedUrl = previewUrl.startsWith("/")
     ? `http://100.101.157.4:8080${previewUrl}`
     : previewUrl;
 
+  // 提取 UUID 用于预览页面
+  const uuid = resolvedUrl.includes("/preview/")
+    ? resolvedUrl.split("/preview/")[1]?.split("?")[0]
+    : "";
+
   const handleOpenNewWindow = () => {
-    window.open(resolvedUrl, "_blank");
+    // 跳转到全屏预览页面
+    const params = new URLSearchParams();
+    params.set("url", resolvedUrl);
+    if (appName) params.set("appName", appName);
+    if (logoUrl) params.set("logoUrl", logoUrl);
+    navigate(`/preview?${params.toString()}`);
   };
 
   return (
