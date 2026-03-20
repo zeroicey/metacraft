@@ -11,3 +11,4 @@ data/
 .VSCodeCounter/
 apps/nanobot/
 .venv/
+.worktrees/
