@@ -107,7 +107,7 @@ export function YuanChuangSidebarContent({ selectedSessionId, onSessionSelect }:
       </div>
 
       {/* Session List */}
-      <div className="flex-1 px-3 py-4 overflow-y-auto">
+      <div className="flex-1 px-3 py-4 overflow-y-auto no-scrollbar">
         <SessionList
           selectedSessionId={selectedSessionId}
           onSessionSelect={onSessionSelect}

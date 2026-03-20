@@ -70,9 +70,8 @@ interface SessionItemProps {
 function SessionItem({ session, isSelected, onSelect }: SessionItemProps) {
   return (
     <div
-      className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors ${
-        isSelected ? "bg-gray-200" : "hover:bg-gray-100"
-      }`}
+      className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors ${isSelected ? "bg-gray-200" : "hover:bg-gray-100"
+        }`}
       onClick={() => onSelect(session.sessionId)}
     >
       <MessageSquareIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />

@@ -15,7 +15,7 @@ export const getMessages = async (sessionId: string) => {
 };
 
 /**
- * SSE 流式发送消息
+ * SSE 流式发送消息 - 使用原生 fetch
  * @param message 消息内容
  * @param sessionId 会话 ID
  * @param signal AbortSignal
@@ -25,10 +25,15 @@ export const sendMessageStream = async (
     sessionId: string,
     signal?: AbortSignal
 ): Promise<Response> => {
-    return await http.post("ai/agent/unified", {
-        json: { message, sessionId },
-        headers: { Accept: "text/event-stream" },
+    const token = localStorage.getItem("token");
+    return await fetch("http://100.101.157.4:8080/api/ai/agent/unified", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "text/event-stream",
+            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ message, sessionId }),
         signal,
-        stream: true,
     });
 };

@@ -27,8 +27,6 @@ export function useCreateSession() {
     return useMutation<ChatSession, Error, ChatSessionCreateRequest>({
         mutationFn: createSession,
         onSuccess: () => {
-            toast.success("Session created successfully!");
-            // 刷新会话列表
             queryClient.invalidateQueries({ queryKey: ["chat-sessions"] });
         },
         onError: (error) => {
