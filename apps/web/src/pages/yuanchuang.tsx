@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import type { ChatMessage } from "@/types/session"
-import type { AppInfo, LogoData, AppGeneratedData, SSEIntent } from "@/hooks/useChatStream"
+import type { AppInfo, SSEIntent } from "@/hooks/useChatStream"
 import { code } from '@streamdown/code';
 import { mermaid } from '@streamdown/mermaid';
 import { math } from '@streamdown/math';
@@ -28,18 +28,8 @@ export default function YuanChuangPage() {
   const [currentIntent, setCurrentIntent] = useState<SSEIntent | null>(null);
   const [planContent, setPlanContent] = useState("");
   const [appInfo, setAppInfo] = useState<{ name: string; description: string } | null>(null);
-  const [logoData, setLogoData] = useState<{ uuid: string; ext: string } | null>(null);
-  const [appGeneratedData, setAppGeneratedData] = useState<{ uuid: string; version: number } | null>(null);
-
-  // 计算 Logo URL
-  const logoUrl = logoData
-    ? `http://100.101.157.4:8080/api/logo/${logoData.uuid}`
-    : undefined;
-
-  // 计算 Preview URL
-  const previewUrl = appGeneratedData
-    ? `/api/preview/${appGeneratedData.uuid}`
-    : undefined;
+  const [logoUrl, setLogoUrl] = useState<string>("");
+  const [previewUrl, setPreviewUrl] = useState<string>("");
 
   const { data: messages = [], isLoading, refetch } = useSessionMessages(selectedSessionId)
   const { sendMessage, isStreaming, error } = useChatStream()
@@ -54,8 +44,8 @@ export default function YuanChuangPage() {
     setCurrentIntent(null)
     setPlanContent("")
     setAppInfo(null)
-    setLogoData(null)
-    setAppGeneratedData(null)
+    setLogoUrl("")
+    setPreviewUrl("")
   }, [selectedSessionId])
 
   // 自动滚动到底部
@@ -102,23 +92,41 @@ export default function YuanChuangPage() {
       onAppInfo: (info) => {
         setAppInfo(info)
       },
-      onLogoGenerated: (data) => {
-        setLogoData(data)
+      onLogoGenerated: (url) => {
+        setLogoUrl(url)
       },
-      onAppGenerated: (data) => {
-        setAppGeneratedData(data)
+      onAppGenerated: (url) => {
+        setPreviewUrl(url)
       },
-      onDone: () => {
-        // 流式结束，清除临时状态
-        // 注意：不调用 refetch() 避免页面滚动
-        // 下次进入会话时会自动刷新消息
-        setStreamingContent("")
+      onDone: async () => {
+        // 保持滚动位置的引用
+        const scrollContainer = messagesEndRef.current?.parentElement
+        const scrollBefore = scrollContainer?.scrollTop || 0
+        const scrollHeight = scrollContainer?.scrollHeight || 0
+
+        // 清除流式状态，但保留内容用于显示
         setCurrentIntent(null)
         setPlanContent("")
         setAppInfo(null)
-        setLogoData(null)
-        setAppGeneratedData(null)
-        setLocalMessages([])
+        setLogoUrl("")
+        setPreviewUrl("")
+
+        // refetch 获取服务器完整消息
+        await refetch()
+
+        // 流式内容在服务器消息返回后清除
+        setTimeout(() => {
+          setStreamingContent("")
+          setLocalMessages([])
+        }, 100)
+
+        // 恢复滚动位置
+        requestAnimationFrame(() => {
+          if (scrollContainer) {
+            const newScrollHeight = scrollContainer.scrollHeight
+            scrollContainer.scrollTop = scrollBefore + (newScrollHeight - scrollHeight)
+          }
+        })
       },
       onError: (errorMsg) => {
         toast.error(errorMsg)

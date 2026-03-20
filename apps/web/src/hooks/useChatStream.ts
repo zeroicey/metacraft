@@ -1,9 +1,15 @@
 import { useState, useCallback, useRef } from "react";
-import { parseServerSentEvents } from "parse-sse";
 import http from "@/lib/http";
 
 /** SSE 事件类型 */
 export type SSEIntent = "chat" | "gen" | "edit";
+
+/** 流式状态 */
+export interface StreamState {
+    isStreaming: boolean;
+    intent: SSEIntent | null;
+    error: string | null;
+}
 
 /** 应用信息 */
 export interface AppInfo {
@@ -23,13 +29,6 @@ export interface AppGeneratedData {
     version: number;
 }
 
-/** 流式状态 */
-export interface StreamState {
-    isStreaming: boolean;
-    intent: SSEIntent | null;
-    error: string | null;
-}
-
 /** 发送消息选项 */
 export interface SendMessageOptions {
     message: string;
@@ -47,6 +46,7 @@ export interface SendMessageOptions {
 /**
  * SSE 流式聊天 Hook
  * 处理消息发送和 SSE 事件解析
+ * 使用自定义解析器，支持并行事件流
  */
 export function useChatStream() {
     const [state, setState] = useState<StreamState>({
@@ -55,6 +55,9 @@ export function useChatStream() {
         error: null,
     });
     const abortControllerRef = useRef<AbortController | null>(null);
+
+    // 存储临时状态
+    const appInfoRef = useRef<{ name: string; description: string } | null>(null);
 
     /**
      * 发送消息并接收 SSE 流式响应
@@ -68,6 +71,9 @@ export function useChatStream() {
         }
 
         abortControllerRef.current = new AbortController();
+
+        // 重置临时状态
+        appInfoRef.current = null;
 
         setState({
             isStreaming: true,
@@ -88,113 +94,43 @@ export function useChatStream() {
                 stream: true,
             });
 
-            // 使用 parseServerSentEvents 解析 SSE 流
-            const eventStream = parseServerSentEvents(response);
-
-            for await (const event of eventStream) {
-                console.log("[SSE] Event:", event.type, event.data);
-                const eventType = event.type || "message";
-
-                if (eventType === "intent") {
-                    const data = event.data;
-                    if (typeof data === "string" && (data === "chat" || data === "gen" || data === "edit")) {
-                        const intent = data as SSEIntent;
+            // 使用自定义 SSE 解析器
+            await parseSSEResponse(response, {
+                onIntent: (intent) => {
+                    if (intent === "chat" || intent === "gen" || intent === "edit") {
                         setState((prev) => ({ ...prev, intent }));
                         onIntent?.(intent);
                     }
-                } else if (eventType === "message") {
-                    const data = event.data;
-                    try {
-                        const parsed = JSON.parse(data);
-                        if (parsed && typeof parsed.content === "string") {
-                            onMessage?.(parsed.content);
-                        }
-                    } catch {
-                        // 如果不是 JSON，直接使用原始数据
-                        if (data && typeof data === "string") {
-                            onMessage?.(data);
-                        }
-                    }
-                } else if (eventType === "plan") {
-                    const data = event.data;
-                    try {
-                        const parsed = JSON.parse(data);
-                        if (parsed && typeof parsed.plan === "string") {
-                            onPlan?.(parsed.plan);
-                        }
-                    } catch {
-                        if (data && typeof data === "string") {
-                            onPlan?.(data);
-                        }
-                    }
-                } else if (eventType === "app_info") {
-                    const data = event.data;
-                    try {
-                        const parsed = JSON.parse(data);
-                        if (parsed && typeof parsed.name === "string" && typeof parsed.description === "string") {
-                            const info: AppInfo = {
-                                name: parsed.name,
-                                description: parsed.description,
-                            };
-                            onAppInfo?.(info);
-                        }
-                    } catch (e) {
-                        console.error("Failed to parse app_info:", e);
-                    }
-                } else if (eventType === "logo_generated") {
-                    const data = event.data;
-                    try {
-                        const parsed = JSON.parse(data);
-                        if (parsed && typeof parsed.uuid === "string" && typeof parsed.ext === "string") {
-                            const logoInfo: LogoData = {
-                                uuid: parsed.uuid,
-                                ext: parsed.ext,
-                            };
-                            onLogoGenerated?.(logoInfo);
-                        }
-                    } catch (e) {
-                        console.error("Failed to parse logo_generated:", e);
-                    }
-                } else if (eventType === "app_generated") {
-                    const data = event.data;
-                    try {
-                        const parsed = JSON.parse(data);
-                        if (parsed && typeof parsed.uuid === "string" && typeof parsed.version === "number") {
-                            const appData: AppGeneratedData = {
-                                uuid: parsed.uuid,
-                                version: parsed.version,
-                            };
-                            onAppGenerated?.(appData);
-                        }
-                    } catch (e) {
-                        console.error("Failed to parse app_generated:", e);
-                    }
-                } else if (eventType === "error") {
-                    const data = event.data;
-                    try {
-                        const parsed = JSON.parse(data);
-                        if (parsed && typeof parsed.error === "string") {
-                            const errorMsg = parsed.error;
-                            setState((prev) => ({ ...prev, error: errorMsg }));
-                            onError?.(errorMsg);
-                        }
-                    } catch {
-                        if (data && typeof data === "string") {
-                            setState((prev) => ({ ...prev, error: data }));
-                            onError?.(data);
-                        }
-                    }
-                } else if (eventType === "done") {
+                },
+                onMessage: (content) => {
+                    onMessage?.(content);
+                },
+                onPlan: (plan) => {
+                    onPlan?.(plan);
+                },
+                onAppInfo: (name, description) => {
+                    appInfoRef.current = { name, description };
+                    onAppInfo?.({ name, description });
+                },
+                onLogoGenerated: (logoUrl) => {
+                    onLogoGenerated?.(logoUrl);
+                },
+                onAppGenerated: (previewUrl) => {
+                    onAppGenerated?.(previewUrl);
+                },
+                onDone: () => {
                     onDone?.();
-                }
-                // 其他事件 (plan, app_generated 等) 暂不处理
-            }
+                },
+                onError: (errorMsg) => {
+                    setState((prev) => ({ ...prev, error: errorMsg }));
+                    onError?.(errorMsg);
+                },
+            });
 
             setState((prev) => ({ ...prev, isStreaming: false }));
         } catch (error: unknown) {
             const err = error instanceof Error ? error : new Error(String(error));
             if (err.name === "AbortError") {
-                // 用户取消请求，正常情况
                 setState((prev) => ({ ...prev, isStreaming: false }));
                 return;
             }
@@ -219,4 +155,195 @@ export function useChatStream() {
         sendMessage,
         cancel,
     };
+}
+
+/**
+ * SSE 解析状态
+ */
+interface SSEState {
+    currentEvent: string;
+    dataBuffer: string;
+}
+
+/**
+ * 自定义 SSE 解析器 - 按行处理
+ */
+async function parseSSEResponse(
+    response: Response,
+    callbacks: {
+        onIntent?: (intent: string) => void;
+        onMessage?: (content: string) => void;
+        onPlan?: (plan: string) => void;
+        onAppInfo?: (name: string, description: string) => void;
+        onLogoGenerated?: (logoUrl: string) => void;
+        onAppGenerated?: (previewUrl: string) => void;
+        onDone?: () => void;
+        onError?: (error: string) => void;
+    }
+): Promise<void> {
+    if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+        throw new Error("Response body is null");
+    }
+
+    const decoder = new TextDecoder("utf-8");
+    let buffer = "";
+    let state: SSEState = { currentEvent: "", dataBuffer: "" };
+
+    try {
+        while (true) {
+            const { done, value } = await reader.read();
+
+            if (done) {
+                // 处理剩余的 buffer
+                if (buffer.trim()) {
+                    processLine(buffer, state, callbacks);
+                }
+                break;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+
+            // 按换行符分割
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+
+            for (const line of lines) {
+                processLine(line, state, callbacks);
+            }
+        }
+    } finally {
+        reader.releaseLock();
+    }
+}
+
+/**
+ * 处理单行 SSE 数据
+ */
+function processLine(
+    line: string,
+    state: SSEState,
+    callbacks: {
+        onIntent?: (intent: string) => void;
+        onMessage?: (content: string) => void;
+        onPlan?: (plan: string) => void;
+        onAppInfo?: (name: string, description: string) => void;
+        onLogoGenerated?: (logoUrl: string) => void;
+        onAppGenerated?: (previewUrl: string) => void;
+        onDone?: () => void;
+        onError?: (error: string) => void;
+    }
+): void {
+    const trimmedLine = line.trim();
+    if (!trimmedLine) return;
+
+    if (trimmedLine.startsWith("event:")) {
+        // 更新当前事件类型
+        state.currentEvent = trimmedLine.substring(6).trim();
+    } else if (trimmedLine.startsWith("data:")) {
+        // 提取数据
+        let data = trimmedLine.substring(5);
+        if (data.startsWith(" ")) {
+            data = data.substring(1);
+        }
+
+        // 根据当前事件类型处理数据
+        handleData(state.currentEvent, data, callbacks);
+
+        // 重置事件类型（根据 SSE 规范，data 行后事件类型应清空）
+        // 但为了支持多行数据，我们保持状态到下一个 event 行
+    }
+}
+
+/**
+ * 处理数据
+ */
+function handleData(
+    eventType: string,
+    data: string,
+    callbacks: {
+        onIntent?: (intent: string) => void;
+        onMessage?: (content: string) => void;
+        onPlan?: (plan: string) => void;
+        onAppInfo?: (name: string, description: string) => void;
+        onLogoGenerated?: (logoUrl: string) => void;
+        onAppGenerated?: (previewUrl: string) => void;
+        onDone?: () => void;
+        onError?: (error: string) => void;
+    }
+): void {
+    if (!data) return;
+
+    // 尝试解析 JSON
+    let parsed: Record<string, unknown> = {};
+    try {
+        parsed = JSON.parse(data);
+    } catch {
+        // 不是 JSON，直接使用原始数据
+    }
+
+    // 根据事件类型调用回调
+    switch (eventType) {
+        case "intent": {
+            const intent = parsed.intent as string || data;
+            if (intent) callbacks.onIntent?.(intent);
+            break;
+        }
+        case "message": {
+            const content = parsed.content as string || data;
+            if (content) callbacks.onMessage?.(content);
+            break;
+        }
+        case "plan": {
+            const plan = parsed.plan as string || data;
+            if (plan) callbacks.onPlan?.(plan);
+            break;
+        }
+        case "app_info": {
+            const name = parsed.name as string || "";
+            const description = parsed.description as string || "";
+            if (name || description) callbacks.onAppInfo?.(name, description);
+            break;
+        }
+        case "logo_generated": {
+            const uuid = parsed.uuid as string;
+            if (uuid) {
+                const logoUrl = `http://localhost:8080/api/logo/${uuid}`;
+                callbacks.onLogoGenerated?.(logoUrl);
+            }
+            break;
+        }
+        case "app_generated": {
+            const uuid = parsed.uuid as string;
+            if (uuid) {
+                const previewUrl = `http://localhost:8080/api/preview/${uuid}`;
+                callbacks.onAppGenerated?.(previewUrl);
+            }
+            break;
+        }
+        case "done": {
+            callbacks.onDone?.();
+            break;
+        }
+        case "error": {
+            const error = parsed.error as string || data;
+            if (error) callbacks.onError?.(error);
+            break;
+        }
+        default:
+            // 没有事件类型时，作为 message 处理
+            if (data) {
+                const content = (parsed as Record<string, unknown>).content as string;
+                if (content) {
+                    callbacks.onMessage?.(content);
+                } else {
+                    callbacks.onMessage?.(data);
+                }
+            }
+            break;
+    }
 }
