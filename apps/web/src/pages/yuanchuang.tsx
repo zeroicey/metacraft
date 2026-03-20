@@ -2,12 +2,14 @@ import { Streamdown } from "streamdown"
 import { useAppStore } from "@/stores/app-store"
 import { useSessionMessages } from "@/hooks/useChatSession"
 import { useChatStream } from "@/hooks/useChatStream"
+import { GenMessageCard } from "@/components/ai-elements/gen-message-card"
 import { SendIcon, UserIcon, Loader2Icon } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import type { ChatMessage } from "@/types/session"
+import type { AppInfo, LogoData, AppGeneratedData, SSEIntent } from "@/hooks/useChatStream"
 import { code } from '@streamdown/code';
 import { mermaid } from '@streamdown/mermaid';
 import { math } from '@streamdown/math';
@@ -22,6 +24,23 @@ export default function YuanChuangPage() {
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  // SSE 事件相关状态
+  const [currentIntent, setCurrentIntent] = useState<SSEIntent | null>(null);
+  const [planContent, setPlanContent] = useState("");
+  const [appInfo, setAppInfo] = useState<{ name: string; description: string } | null>(null);
+  const [logoData, setLogoData] = useState<{ uuid: string; ext: string } | null>(null);
+  const [appGeneratedData, setAppGeneratedData] = useState<{ uuid: string; version: number } | null>(null);
+
+  // 计算 Logo URL
+  const logoUrl = logoData
+    ? `http://localhost:8080/api/apps/logo/${logoData.uuid}.${logoData.ext}`
+    : undefined;
+
+  // 计算 Preview URL
+  const previewUrl = appGeneratedData
+    ? `/api/preview/${appGeneratedData.uuid}`
+    : undefined;
+
   const { data: messages = [], isLoading, refetch } = useSessionMessages(selectedSessionId)
   const { sendMessage, isStreaming, error } = useChatStream()
 
@@ -32,6 +51,11 @@ export default function YuanChuangPage() {
   useEffect(() => {
     setLocalMessages([])
     setStreamingContent("")
+    setCurrentIntent(null)
+    setPlanContent("")
+    setAppInfo(null)
+    setLogoData(null)
+    setAppGeneratedData(null)
   }, [selectedSessionId])
 
   // 自动滚动到底部
@@ -70,11 +94,27 @@ export default function YuanChuangPage() {
         setStreamingContent((prev) => prev + content)
       },
       onIntent: (intent) => {
-        console.log("Intent:", intent)
+        setCurrentIntent(intent)
+      },
+      onPlan: (plan) => {
+        setPlanContent((prev) => prev + plan)
+      },
+      onAppInfo: (info) => {
+        setAppInfo(info)
+      },
+      onLogoGenerated: (data) => {
+        setLogoData(data)
+      },
+      onAppGenerated: (data) => {
+        setAppGeneratedData(data)
       },
       onDone: async () => {
         setStreamingContent("")
-        // 清除本地消息，刷新服务器消息
+        setCurrentIntent(null)
+        setPlanContent("")
+        setAppInfo(null)
+        setLogoData(null)
+        setAppGeneratedData(null)
         setLocalMessages([])
         await refetch()
       },
@@ -141,21 +181,48 @@ export default function YuanChuangPage() {
 
             {/* 流式输出的内容 */}
             {streamingContent && (
-              <Streamdown
-                animated={{
-                  animation: "blurIn",  // "fadeIn" | "blurIn" | "slideUp" | custom string
-                  duration: 200,         // milliseconds (default: 150)
-                  easing: "ease-out",    // CSS timing function (default: "ease")
-                  sep: "word",           // "word" | "char" (default: "word")
-                }}
-                //caret="block"
-                plugins={{
-                  code: code,
-                  mermaid: mermaid,
-                  math: math,
-                  cjk: cjk,
-                }}
-                isAnimating={isStreaming}>{streamingContent}</Streamdown>
+              <div>
+                {/* 意图指示器 */}
+                {currentIntent && (
+                  <div className="mb-2 flex items-center gap-2">
+                    <span className="rounded-full bg-[#2F5DFF] px-2 py-0.5 text-xs text-white">
+                      {currentIntent === "gen" ? "生成应用" : currentIntent === "edit" ? "编辑应用" : "对话"}
+                    </span>
+                  </div>
+                )}
+
+                {/* 生成模式：显示 GenMessageCard */}
+                {currentIntent === "gen" || currentIntent === "edit" ? (
+                  <GenMessageCard
+                    chatBeforeGen={streamingContent}
+                    plan={planContent}
+                    appName={appInfo?.name}
+                    appDescription={appInfo?.description}
+                    logoUrl={logoUrl}
+                    previewUrl={previewUrl}
+                    isStreaming={isStreaming}
+                  />
+                ) : (
+                  /* 对话模式：显示普通消息 */
+                  <Streamdown
+                    animated={{
+                      animation: "blurIn",
+                      duration: 200,
+                      easing: "ease-out",
+                      sep: "word",
+                    }}
+                    plugins={{
+                      code,
+                      mermaid,
+                      math,
+                      cjk,
+                    }}
+                    isAnimating={isStreaming}
+                  >
+                    {streamingContent}
+                  </Streamdown>
+                )}
+              </div>
             )}
 
             <div ref={messagesEndRef} />
