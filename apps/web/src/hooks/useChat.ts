@@ -47,7 +47,22 @@ export function useChat(sessionId: string): UseChatReturn {
         setError(null);
         try {
             const data = await getMessages(sid);
-            setMessages(data);
+            // 映射后端字段到前端字段
+            const mapped = data.map((m: any) => ({
+                id: m.id,
+                sessionId: m.sessionId,
+                role: m.role,
+                content: m.content,
+                createdAt: m.createdAt,
+                // 映射后端的 relatedApp* 字段
+                appName: m.relatedAppName,
+                appDescription: m.relatedAppDescription,
+                logoUrl: m.relatedAppLogo ? `http://100.101.157.4:8080/api/logo/${m.relatedAppLogo.replace(/\.[^/.]+$/, '')}` : undefined,
+                previewUrl: m.relatedAppUuid ? `http://100.101.157.4:8080/api/preview/${m.relatedAppUuid}` : undefined,
+                plan: undefined, // 历史消息没有 plan
+                isStreaming: false,
+            }));
+            setMessages(mapped);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to load messages");
         } finally {
@@ -110,7 +125,7 @@ export function useChat(sessionId: string): UseChatReturn {
                     setMessages((prev) =>
                         prev.map((m) =>
                             m.id === streamingMessageIdRef.current
-                                ? { ...m, plan }
+                                ? { ...m, plan: (m.plan || "") + plan }
                                 : m
                         )
                     );
