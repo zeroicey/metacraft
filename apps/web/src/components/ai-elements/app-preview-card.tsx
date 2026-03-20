@@ -14,7 +14,7 @@ export function AppPreviewCard({
 }: AppPreviewCardProps) {
   const [isLoading, setIsLoading] = useState(true);
   const resolvedUrl = previewUrl.startsWith("/")
-    ? `http://localhost:8080${previewUrl}`
+    ? `http://100.101.157.4:8080${previewUrl}`
     : previewUrl;
 
   const handleOpenNewWindow = () => {

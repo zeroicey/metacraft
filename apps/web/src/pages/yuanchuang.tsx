@@ -33,7 +33,7 @@ export default function YuanChuangPage() {
 
   // 计算 Logo URL
   const logoUrl = logoData
-    ? `http://localhost:8080/api/logo/${logoData.uuid}`
+    ? `http://100.101.157.4:8080/api/logo/${logoData.uuid}`
     : undefined;
 
   // 计算 Preview URL
@@ -109,14 +109,22 @@ export default function YuanChuangPage() {
         setAppGeneratedData(data)
       },
       onDone: async () => {
+        // 保存当前滚动位置
+        const scrollTop = messagesEndRef.current?.parentElement?.scrollTop || 0
+
         setStreamingContent("")
         setCurrentIntent(null)
         setPlanContent("")
         setAppInfo(null)
         setLogoData(null)
         setAppGeneratedData(null)
-        setLocalMessages([])
+
         await refetch()
+
+        // 恢复滚动位置
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "instant" })
+        }, 0)
       },
       onError: (errorMsg) => {
         toast.error(errorMsg)
@@ -181,8 +189,8 @@ export default function YuanChuangPage() {
                       plan=""
                       appName={message.relatedAppName}
                       appDescription={message.relatedAppDescription}
-                      logoUrl={message.relatedAppLogo ? `http://localhost:8080/api/logo/${message.relatedAppLogo.replace(/\.[^/.]+$/, '')}` : undefined}
-                      previewUrl={`http://localhost:8080/api/preview/${message.relatedAppUuid}`}
+                      logoUrl={message.relatedAppLogo ? `http://100.101.157.4:8080/api/logo/${message.relatedAppLogo.replace(/\.[^/.]+$/, '')}` : undefined}
+                      previewUrl={`http://100.101.157.4:8080/api/preview/${message.relatedAppUuid}`}
                       isStreaming={false}
                     />
                   ) : (
