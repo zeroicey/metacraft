@@ -65,6 +65,147 @@ export function useChat(sessionId: string): UseChatReturn {
     }, [sessionId, loadHistory]);
 
     // SSE 解析（按 \n\n 分割）
+    // 处理单个事件
+    const handleEvent = useCallback((eventName: string, eventData: string) => {
+        console.log("[SSE] Event:", eventName, "Data:", eventData);
+
+        let parsed: Record<string, unknown> = {};
+        try {
+            parsed = JSON.parse(eventData);
+        } catch {
+            // 非 JSON
+        }
+
+        switch (eventName) {
+            case "intent": {
+                const intent = (parsed.intent as string) || eventData;
+                if (intent && streamingMessageIdRef.current) {
+                    setMessages((prev) =>
+                        prev.map((m) =>
+                            m.id === streamingMessageIdRef.current
+                                ? { ...m, intent: intent as SSEIntent }
+                                : m
+                        )
+                    );
+                }
+                break;
+            }
+            case "message": {
+                const content = (parsed.content as string) || eventData;
+                if (content && streamingMessageIdRef.current) {
+                    setMessages((prev) =>
+                        prev.map((m) =>
+                            m.id === streamingMessageIdRef.current
+                                ? { ...m, content: m.content + content }
+                                : m
+                        )
+                    );
+                }
+                break;
+            }
+            case "plan": {
+                const plan = (parsed.plan as string) || eventData;
+                console.log("[SSE] Plan received:", plan);
+                if (plan && streamingMessageIdRef.current) {
+                    setMessages((prev) =>
+                        prev.map((m) =>
+                            m.id === streamingMessageIdRef.current
+                                ? { ...m, plan }
+                                : m
+                        )
+                    );
+                }
+                break;
+            }
+            case "app_info": {
+                const name = (parsed.name as string) || "";
+                const description = (parsed.description as string) || "";
+                console.log("[SSE] AppInfo received:", name, description);
+                if (streamingMessageIdRef.current) {
+                    setMessages((prev) =>
+                        prev.map((m) =>
+                            m.id === streamingMessageIdRef.current
+                                ? { ...m, appName: name, appDescription: description }
+                                : m
+                        )
+                    );
+                }
+                break;
+            }
+            case "logo_generated": {
+                const uuid = parsed.uuid as string;
+                if (uuid && streamingMessageIdRef.current) {
+                    const logoUrl = `http://100.101.157.4:8080/api/logo/${uuid}`;
+                    console.log("[SSE] Logo generated:", logoUrl);
+                    setMessages((prev) =>
+                        prev.map((m) =>
+                            m.id === streamingMessageIdRef.current
+                                ? { ...m, logoUrl }
+                                : m
+                        )
+                    );
+                }
+                break;
+            }
+            case "app_generated": {
+                const uuid = parsed.uuid as string;
+                if (uuid && streamingMessageIdRef.current) {
+                    const previewUrl = `http://100.101.157.4:8080/api/preview/${uuid}`;
+                    console.log("[SSE] App generated:", previewUrl);
+                    setMessages((prev) =>
+                        prev.map((m) =>
+                            m.id === streamingMessageIdRef.current
+                                ? { ...m, previewUrl, isStreaming: false }
+                                : m
+                        )
+                    );
+                }
+                break;
+            }
+            case "done": {
+                console.log("[SSE] Done");
+                if (streamingMessageIdRef.current) {
+                    setMessages((prev) =>
+                        prev.map((m) =>
+                            m.id === streamingMessageIdRef.current
+                                ? { ...m, isStreaming: false }
+                                : m
+                        )
+                    );
+                }
+                setIsStreaming(false);
+                break;
+            }
+            case "error": {
+                const errMsg = (parsed.error as string) || eventData;
+                console.log("[SSE] Error:", errMsg);
+                if (streamingMessageIdRef.current) {
+                    setMessages((prev) =>
+                        prev.map((m) =>
+                            m.id === streamingMessageIdRef.current
+                                ? { ...m, error: errMsg, isStreaming: false }
+                                : m
+                        )
+                    );
+                }
+                setError(errMsg);
+                setIsStreaming(false);
+                break;
+            }
+            default:
+                // 没有事件类型时作为 message 处理
+                if (eventData && streamingMessageIdRef.current) {
+                    setMessages((prev) =>
+                        prev.map((m) =>
+                            m.id === streamingMessageIdRef.current
+                                ? { ...m, content: m.content + eventData }
+                                : m
+                        )
+                    );
+                }
+        }
+    }, []);
+
     const parseSSE = useCallback(async (response: Response) => {
         const reader = response.body?.getReader();
         if (!reader) throw new Error("No reader");
@@ -113,140 +254,7 @@ export function useChat(sessionId: string): UseChatReturn {
         } finally {
             reader.releaseLock();
         }
-    }, []);
-
-    // 处理单个事件
-    const handleEvent = useCallback((eventName: string, eventData: string) => {
-        let parsed: Record<string, unknown> = {};
-        try {
-            parsed = JSON.parse(eventData);
-        } catch {
-            // 非 JSON
-        }
-
-        switch (eventName) {
-            case "intent": {
-                const intent = (parsed.intent as string) || eventData;
-                if (intent && streamingMessageIdRef.current) {
-                    setMessages((prev) =>
-                        prev.map((m) =>
-                            m.id === streamingMessageIdRef.current
-                                ? { ...m, intent: intent as SSEIntent }
-                                : m
-                        )
-                    );
-                }
-                break;
-            }
-            case "message": {
-                const content = (parsed.content as string) || eventData;
-                if (content && streamingMessageIdRef.current) {
-                    setMessages((prev) =>
-                        prev.map((m) =>
-                            m.id === streamingMessageIdRef.current
-                                ? { ...m, content: m.content + content }
-                                : m
-                        )
-                    );
-                }
-                break;
-            }
-            case "plan": {
-                const plan = (parsed.plan as string) || eventData;
-                if (plan && streamingMessageIdRef.current) {
-                    setMessages((prev) =>
-                        prev.map((m) =>
-                            m.id === streamingMessageIdRef.current
-                                ? { ...m, plan }
-                                : m
-                        )
-                    );
-                }
-                break;
-            }
-            case "app_info": {
-                const name = (parsed.name as string) || "";
-                const description = (parsed.description as string) || "";
-                if (streamingMessageIdRef.current) {
-                    setMessages((prev) =>
-                        prev.map((m) =>
-                            m.id === streamingMessageIdRef.current
-                                ? { ...m, appName: name, appDescription: description }
-                                : m
-                        )
-                    );
-                }
-                break;
-            }
-            case "logo_generated": {
-                const uuid = parsed.uuid as string;
-                if (uuid && streamingMessageIdRef.current) {
-                    const logoUrl = `http://100.101.157.4:8080/api/logo/${uuid}`;
-                    setMessages((prev) =>
-                        prev.map((m) =>
-                            m.id === streamingMessageIdRef.current
-                                ? { ...m, logoUrl }
-                                : m
-                        )
-                    );
-                }
-                break;
-            }
-            case "app_generated": {
-                const uuid = parsed.uuid as string;
-                if (uuid && streamingMessageIdRef.current) {
-                    const previewUrl = `http://100.101.157.4:8080/api/preview/${uuid}`;
-                    setMessages((prev) =>
-                        prev.map((m) =>
-                            m.id === streamingMessageIdRef.current
-                                ? { ...m, previewUrl, isStreaming: false }
-                                : m
-                        )
-                    );
-                }
-                break;
-            }
-            case "done": {
-                if (streamingMessageIdRef.current) {
-                    setMessages((prev) =>
-                        prev.map((m) =>
-                            m.id === streamingMessageIdRef.current
-                                ? { ...m, isStreaming: false }
-                                : m
-                        )
-                    );
-                }
-                setIsStreaming(false);
-                break;
-            }
-            case "error": {
-                const errMsg = (parsed.error as string) || eventData;
-                if (streamingMessageIdRef.current) {
-                    setMessages((prev) =>
-                        prev.map((m) =>
-                            m.id === streamingMessageIdRef.current
-                                ? { ...m, error: errMsg, isStreaming: false }
-                                : m
-                        )
-                    );
-                }
-                setError(errMsg);
-                setIsStreaming(false);
-                break;
-            }
-            default:
-                // 没有事件类型时作为 message 处理
-                if (eventData && streamingMessageIdRef.current) {
-                    setMessages((prev) =>
-                        prev.map((m) =>
-                            m.id === streamingMessageIdRef.current
-                                ? { ...m, content: m.content + eventData }
-                                : m
-                        )
-                    );
-                }
-        }
-    }, []);
+    }, [handleEvent]);
 
     // sendMessage 函数
     const sendMessage = useCallback(async (content: string) => {

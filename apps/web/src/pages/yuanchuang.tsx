@@ -1,148 +1,45 @@
-import { Streamdown } from "streamdown"
-import { useAppStore } from "@/stores/app-store"
-import { useSessionMessages } from "@/hooks/useChatSession"
-import { useChatStream } from "@/hooks/useChatStream"
-import { GenMessageCard, AppInfoCard, AppPreviewCard } from "@/components/ai-elements"
-import { SendIcon, UserIcon, Loader2Icon } from "lucide-react"
-import { useState, useRef, useEffect } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
-import type { ChatMessage } from "@/types/session"
-import type { AppInfo, SSEIntent } from "@/hooks/useChatStream"
-import { code } from '@streamdown/code';
-import { mermaid } from '@streamdown/mermaid';
-import { math } from '@streamdown/math';
-import { cjk } from '@streamdown/cjk';
+import { useState, useRef, useEffect } from "react";
+import { useAppStore } from "@/stores/app-store";
+import { useChat, type ChatMessage } from "@/hooks/useChat";
+import { GenMessageCard } from "@/components/ai-elements";
+import { SendIcon, UserIcon, Loader2Icon } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Streamdown } from "streamdown";
+import { code } from "@streamdown/code";
+import { mermaid } from "@streamdown/mermaid";
+import { math } from "@streamdown/math";
+import { cjk } from "@streamdown/cjk";
 import "streamdown/styles.css";
 
-
 export default function YuanChuangPage() {
-  const selectedSessionId = useAppStore((state) => state.selectedSessionId)
-  const [inputText, setInputText] = useState("")
-  const [streamingContent, setStreamingContent] = useState("")
-  const [localMessages, setLocalMessages] = useState<ChatMessage[]>([])
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const selectedSessionId = useAppStore((state) => state.selectedSessionId);
+  const [inputText, setInputText] = useState("");
 
-  // SSE 事件相关状态
-  const [currentIntent, setCurrentIntent] = useState<SSEIntent | null>(null);
-  const [planContent, setPlanContent] = useState("");
-  const [appInfo, setAppInfo] = useState<{ name: string; description: string } | null>(null);
-  const [logoUrl, setLogoUrl] = useState<string>("");
-  const [previewUrl, setPreviewUrl] = useState<string>("");
-
-  const { data: messages = [], isLoading, refetch } = useSessionMessages(selectedSessionId)
-  const { sendMessage, isStreaming, error } = useChatStream()
-
-  // 合并本地消息和服务器消息（本地消息显示在最后）
-  const allMessages = [...messages, ...localMessages]
-
-  // 切换会话时清除本地消息
-  useEffect(() => {
-    setLocalMessages([])
-    setStreamingContent("")
-    setCurrentIntent(null)
-    setPlanContent("")
-    setAppInfo(null)
-    setLogoUrl("")
-    setPreviewUrl("")
-  }, [selectedSessionId])
+  const { messages, isLoading, isStreaming, sendMessage } = useChat(selectedSessionId);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 自动滚动到底部
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [allMessages, streamingContent])
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  // 处理发送消息
+  // 发送消息
   const handleSendMessage = async () => {
-    if (!inputText.trim() || !selectedSessionId || isStreaming) return
+    if (!inputText.trim() || isStreaming) return;
+    const text = inputText.trim();
+    setInputText("");
+    await sendMessage(text);
+  };
 
-    const messageText = inputText.trim()
-    setInputText("")
-    setStreamingContent("")
-
-    // 立即添加用户消息到本地列表（乐观更新）
-    const tempUserMessage: ChatMessage = {
-      id: Date.now(),
-      sessionId: selectedSessionId,
-      role: "user",
-      content: messageText,
-      createdAt: new Date().toISOString(),
-    }
-
-    // 先更新 UI，让用户消息立即显示
-    setLocalMessages((prev) => [...prev, tempUserMessage])
-
-    // 强制刷新 UI
-    await new Promise((resolve) => setTimeout(resolve, 0))
-
-    // 然后发送消息
-    sendMessage({
-      message: messageText,
-      sessionId: selectedSessionId,
-      onMessage: (content) => {
-        setStreamingContent((prev) => prev + content)
-      },
-      onIntent: (intent) => {
-        setCurrentIntent(intent)
-      },
-      onPlan: (plan) => {
-        setPlanContent((prev) => prev + plan)
-      },
-      onAppInfo: (info) => {
-        setAppInfo(info)
-      },
-      onLogoGenerated: (url) => {
-        setLogoUrl(url)
-      },
-      onAppGenerated: (url) => {
-        setPreviewUrl(url)
-      },
-      onDone: async () => {
-        // 保持滚动位置的引用
-        const scrollContainer = messagesEndRef.current?.parentElement
-        const scrollBefore = scrollContainer?.scrollTop || 0
-        const scrollHeight = scrollContainer?.scrollHeight || 0
-
-        // 清除流式状态，但保留内容用于显示
-        setCurrentIntent(null)
-        setPlanContent("")
-        setAppInfo(null)
-        setLogoUrl("")
-        setPreviewUrl("")
-
-        // refetch 获取服务器完整消息
-        await refetch()
-
-        // 流式内容在服务器消息返回后清除
-        setTimeout(() => {
-          setStreamingContent("")
-          setLocalMessages([])
-        }, 100)
-
-        // 恢复滚动位置
-        requestAnimationFrame(() => {
-          if (scrollContainer) {
-            const newScrollHeight = scrollContainer.scrollHeight
-            scrollContainer.scrollTop = scrollBefore + (newScrollHeight - scrollHeight)
-          }
-        })
-      },
-      onError: (errorMsg) => {
-        toast.error(errorMsg)
-        // 发送失败时移除本地消息
-        setLocalMessages((prev) => prev.filter((m) => m.id !== tempUserMessage.id))
-      },
-    })
-  }
-
-  // 处理键盘事件
+  // 键盘事件
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && inputText.trim() && !isStreaming) {
-      handleSendMessage()
+      handleSendMessage();
     }
-  }
+  };
 
+  // 未选择会话
   if (!selectedSessionId) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -151,103 +48,72 @@ export default function YuanChuangPage() {
           <p className="text-gray-500 mt-2">请选择一个会话开始聊天</p>
         </div>
       </div>
-    )
+    );
   }
 
+  // 加载中
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-gray-400">加载中...</div>
       </div>
-    )
+    );
   }
+
+  // 渲染消息
+  const renderMessage = (msg: ChatMessage) => {
+    if (msg.role === "user") {
+      return (
+        <div key={msg.id} className="flex gap-3 flex-row-reverse">
+          <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+            <UserIcon className="h-4 w-4 text-white" />
+          </div>
+          <div className="max-w-[80%] rounded-lg px-4 py-2 bg-blue-500 text-white text-sm whitespace-pre-wrap">
+            {msg.content}
+          </div>
+        </div>
+      );
+    }
+
+    // assistant 消息 - 有 app 信息时显示 GenMessageCard
+    if (msg.appName || msg.previewUrl) {
+      return (
+        <GenMessageCard
+          key={msg.id}
+          chatBeforeGen={msg.content}
+          plan={msg.plan}
+          appName={msg.appName}
+          appDescription={msg.appDescription}
+          logoUrl={msg.logoUrl}
+          previewUrl={msg.previewUrl}
+          isStreaming={msg.isStreaming}
+        />
+      );
+    }
+
+    // 普通对话
+    return (
+      <Streamdown
+        key={msg.id}
+        plugins={{ code, mermaid, math, cjk }}
+        isAnimating={msg.isStreaming}
+      >
+        {msg.content}
+      </Streamdown>
+    );
+  };
 
   return (
     <div className="flex flex-col h-full">
       {/* 消息列表 */}
       <div className="flex-1 overflow-y-auto px-4 py-4">
-        {allMessages.length === 0 && !streamingContent ? (
+        {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-gray-400">
             开始你的对话
           </div>
         ) : (
           <div className="space-y-3">
-            {allMessages.map((message) => (
-              <div key={message.id}>
-                {message.role === "user" ? (
-                  <div className="flex gap-3 flex-row-reverse">
-                    <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                      <UserIcon className="h-4 w-4 text-white" />
-                    </div>
-                    <div className="max-w-[80%] rounded-lg px-4 py-2 bg-blue-500 text-white text-sm whitespace-pre-wrap">
-                      {message.content}
-                    </div>
-                  </div>
-                ) : (
-                  // 有应用信息时显示 GenMessageCard，否则显示普通消息
-                  message.relatedAppUuid ? (
-                    <GenMessageCard
-                      chatBeforeGen={message.content}
-                      plan=""
-                      appName={message.relatedAppName}
-                      appDescription={message.relatedAppDescription}
-                      logoUrl={message.relatedAppLogo ? `http://100.101.157.4:8080/api/logo/${message.relatedAppLogo.replace(/\.[^/.]+$/, '')}` : undefined}
-                      previewUrl={`http://100.101.157.4:8080/api/preview/${message.relatedAppUuid}`}
-                      isStreaming={false}
-                    />
-                  ) : (
-                    <Streamdown>{message.content}</Streamdown>
-                  )
-                )}
-              </div>
-            ))}
-
-            {/* 流式输出的内容 */}
-            {(streamingContent || planContent || previewUrl) && (
-              <div>
-                {/* 意图指示器 */}
-                {currentIntent && (
-                  <div className="mb-2 flex items-center gap-2">
-                    <span className="rounded-full bg-[#2F5DFF] px-2 py-0.5 text-xs text-white">
-                      {currentIntent === "gen" ? "生成应用" : currentIntent === "edit" ? "编辑应用" : "对话"}
-                    </span>
-                  </div>
-                )}
-
-                {/* 生成模式：显示 GenMessageCard */}
-                {currentIntent === "gen" || currentIntent === "edit" ? (
-                  <GenMessageCard
-                    chatBeforeGen={streamingContent}
-                    plan={planContent}
-                    appName={appInfo?.name}
-                    appDescription={appInfo?.description}
-                    logoUrl={logoUrl}
-                    previewUrl={previewUrl}
-                    isStreaming={isStreaming}
-                  />
-                ) : (
-                  /* 对话模式：显示普通消息 */
-                  <Streamdown
-                    animated={{
-                      animation: "blurIn",
-                      duration: 200,
-                      easing: "ease-out",
-                      sep: "word",
-                    }}
-                    plugins={{
-                      code,
-                      mermaid,
-                      math,
-                      cjk,
-                    }}
-                    isAnimating={isStreaming}
-                  >
-                    {streamingContent}
-                  </Streamdown>
-                )}
-              </div>
-            )}
-
+            {messages.map((msg) => renderMessage(msg))}
             <div ref={messagesEndRef} />
           </div>
         )}
@@ -264,7 +130,11 @@ export default function YuanChuangPage() {
             onKeyDown={handleKeyDown}
             disabled={isStreaming}
           />
-          <Button size="icon" onClick={handleSendMessage} disabled={isStreaming || !inputText.trim()}>
+          <Button
+            size="icon"
+            onClick={handleSendMessage}
+            disabled={isStreaming || !inputText.trim()}
+          >
             {isStreaming ? (
               <Loader2Icon className="h-8 w-8 animate-spin" />
             ) : (
@@ -274,5 +144,5 @@ export default function YuanChuangPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
