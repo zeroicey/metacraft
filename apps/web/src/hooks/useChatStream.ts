@@ -5,6 +5,24 @@ import http from "@/lib/http";
 /** SSE 事件类型 */
 export type SSEIntent = "chat" | "gen" | "edit";
 
+/** 应用信息 */
+export interface AppInfo {
+    name: string;
+    description: string;
+}
+
+/** Logo 生成数据 */
+export interface LogoData {
+    uuid: string;
+    ext: string;
+}
+
+/** 应用生成数据 */
+export interface AppGeneratedData {
+    uuid: string;
+    version: number;
+}
+
 /** 流式状态 */
 export interface StreamState {
     isStreaming: boolean;
@@ -18,6 +36,10 @@ export interface SendMessageOptions {
     sessionId: string;
     onMessage?: (content: string) => void;
     onIntent?: (intent: SSEIntent) => void;
+    onPlan?: (plan: string) => void;
+    onAppInfo?: (info: AppInfo) => void;
+    onLogoGenerated?: (data: LogoData) => void;
+    onAppGenerated?: (data: AppGeneratedData) => void;
     onDone?: () => void;
     onError?: (error: string) => void;
 }
@@ -38,7 +60,7 @@ export function useChatStream() {
      * 发送消息并接收 SSE 流式响应
      */
     const sendMessage = useCallback(async (options: SendMessageOptions) => {
-        const { message, sessionId, onMessage, onIntent, onDone, onError } = options;
+        const { message, sessionId, onMessage, onIntent, onPlan, onAppInfo, onLogoGenerated, onAppGenerated, onDone, onError } = options;
 
         // 取消之前的请求
         if (abortControllerRef.current) {
@@ -90,6 +112,55 @@ export function useChatStream() {
                         if (data) {
                             onMessage?.(data);
                         }
+                    }
+                } else if (eventType === "plan") {
+                    const data = event.data;
+                    try {
+                        const parsed = JSON.parse(data);
+                        const plan = parsed.plan as string;
+                        if (plan) {
+                            onPlan?.(plan);
+                        }
+                    } catch {
+                        if (data) {
+                            onPlan?.(data);
+                        }
+                    }
+                } else if (eventType === "app_info") {
+                    const data = event.data;
+                    try {
+                        const parsed = JSON.parse(data);
+                        const info: AppInfo = {
+                            name: parsed.name as string,
+                            description: parsed.description as string,
+                        };
+                        onAppInfo?.(info);
+                    } catch (e) {
+                        console.error("Failed to parse app_info:", e);
+                    }
+                } else if (eventType === "logo_generated") {
+                    const data = event.data;
+                    try {
+                        const parsed = JSON.parse(data);
+                        const logoInfo: LogoData = {
+                            uuid: parsed.uuid as string,
+                            ext: parsed.ext as string,
+                        };
+                        onLogoGenerated?.(logoInfo);
+                    } catch (e) {
+                        console.error("Failed to parse logo_generated:", e);
+                    }
+                } else if (eventType === "app_generated") {
+                    const data = event.data;
+                    try {
+                        const parsed = JSON.parse(data);
+                        const appData: AppGeneratedData = {
+                            uuid: parsed.uuid as string,
+                            version: parsed.version as number,
+                        };
+                        onAppGenerated?.(appData);
+                    } catch (e) {
+                        console.error("Failed to parse app_generated:", e);
                     }
                 } else if (eventType === "error") {
                     const data = event.data;
