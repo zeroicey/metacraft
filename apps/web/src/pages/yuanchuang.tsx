@@ -108,11 +108,10 @@ export default function YuanChuangPage() {
       onAppGenerated: (data) => {
         setAppGeneratedData(data)
       },
-      onDone: async () => {
-        // 保存当前滚动位置
-        const scrollContainer = messagesEndRef.current?.parentElement
-        const scrollTop = scrollContainer?.scrollTop || 0
-
+      onDone: () => {
+        // 流式结束，清除临时状态
+        // 注意：不调用 refetch() 避免页面滚动
+        // 下次进入会话时会自动刷新消息
         setStreamingContent("")
         setCurrentIntent(null)
         setPlanContent("")
@@ -120,15 +119,6 @@ export default function YuanChuangPage() {
         setLogoData(null)
         setAppGeneratedData(null)
         setLocalMessages([])
-
-        await refetch()
-
-        // 恢复滚动位置
-        requestAnimationFrame(() => {
-          if (scrollContainer) {
-            scrollContainer.scrollTop = scrollTop
-          }
-        })
       },
       onError: (errorMsg) => {
         toast.error(errorMsg)
