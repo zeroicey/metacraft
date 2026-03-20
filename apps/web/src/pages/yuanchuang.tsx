@@ -2,7 +2,7 @@ import { Streamdown } from "streamdown"
 import { useAppStore } from "@/stores/app-store"
 import { useSessionMessages } from "@/hooks/useChatSession"
 import { useChatStream } from "@/hooks/useChatStream"
-import { GenMessageCard } from "@/components/ai-elements/gen-message-card"
+import { GenMessageCard, AppInfoCard, AppPreviewCard } from "@/components/ai-elements"
 import { SendIcon, UserIcon, Loader2Icon } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import { Input } from "@/components/ui/input"
@@ -33,7 +33,7 @@ export default function YuanChuangPage() {
 
   // 计算 Logo URL
   const logoUrl = logoData
-    ? `http://localhost:8080/api/apps/logo/${logoData.uuid}.${logoData.ext}`
+    ? `http://100.101.157.4:8080/api/apps/logo/${logoData.uuid}.${logoData.ext}`
     : undefined;
 
   // 计算 Preview URL
@@ -174,13 +174,26 @@ export default function YuanChuangPage() {
                     </div>
                   </div>
                 ) : (
-                  <Streamdown>{message.content}</Streamdown>
+                  // 有应用信息时显示 GenMessageCard，否则显示普通消息
+                  message.relatedAppUuid ? (
+                    <GenMessageCard
+                      chatBeforeGen={message.content}
+                      plan=""
+                      appName={message.relatedAppName}
+                      appDescription={message.relatedAppDescription}
+                      logoUrl={message.relatedAppLogo ? `http://100.101.157.4:8080/api/apps/logo/${message.relatedAppLogo}` : undefined}
+                      previewUrl={`http://100.101.157.4:8080/api/preview/${message.relatedAppUuid}`}
+                      isStreaming={false}
+                    />
+                  ) : (
+                    <Streamdown>{message.content}</Streamdown>
+                  )
                 )}
               </div>
             ))}
 
             {/* 流式输出的内容 */}
-            {streamingContent && (
+            {(streamingContent || planContent || previewUrl) && (
               <div>
                 {/* 意图指示器 */}
                 {currentIntent && (

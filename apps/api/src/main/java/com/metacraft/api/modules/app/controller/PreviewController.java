@@ -34,6 +34,8 @@ public class PreviewController {
 
         return ResponseEntity.ok()
             .contentType(Objects.requireNonNull(resource.mediaType()))
+            .header("X-Frame-Options", "ALLOW-FROM *")
+            .header("Content-Security-Policy", "frame-ancestors *")
                 .body(htmlWithBase);
     }
 
@@ -52,6 +54,8 @@ public class PreviewController {
 
         return ResponseEntity.ok()
             .contentType(Objects.requireNonNull(resource.mediaType()))
+            .header("X-Frame-Options", "ALLOW-FROM *")
+            .header("Content-Security-Policy", "frame-ancestors *")
                 .body(htmlWithBase);
     }
 
@@ -87,6 +91,8 @@ public class PreviewController {
 
         return ResponseEntity.ok()
             .contentType(Objects.requireNonNull(resource.mediaType()))
+            .header("X-Frame-Options", "ALLOW-FROM *")
+            .header("Content-Security-Policy", "frame-ancestors *")
             .body(resource.content());
     }
 

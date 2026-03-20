@@ -12,7 +12,7 @@ export interface ApiResponse<T = unknown> {
 }
 
 const http = ky.extend({
-    prefixUrl: `http://localhost:8080/api`,
+    prefixUrl: `http://100.101.157.4:8080/api`,
     timeout: 5000,
     hooks: {
         beforeRequest: [
