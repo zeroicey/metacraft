@@ -96,20 +96,22 @@ export function useChatStream() {
                 const eventType = event.type || "message";
 
                 if (eventType === "intent") {
-                    const data = event.data as SSEIntent;
-                    setState((prev) => ({ ...prev, intent: data }));
-                    onIntent?.(data);
+                    const data = event.data;
+                    if (typeof data === "string" && (data === "chat" || data === "gen" || data === "edit")) {
+                        const intent = data as SSEIntent;
+                        setState((prev) => ({ ...prev, intent }));
+                        onIntent?.(intent);
+                    }
                 } else if (eventType === "message") {
                     const data = event.data;
                     try {
                         const parsed = JSON.parse(data);
-                        const content = parsed.content as string;
-                        if (content) {
-                            onMessage?.(content);
+                        if (parsed && typeof parsed.content === "string") {
+                            onMessage?.(parsed.content);
                         }
                     } catch {
                         // 如果不是 JSON，直接使用原始数据
-                        if (data) {
+                        if (data && typeof data === "string") {
                             onMessage?.(data);
                         }
                     }
@@ -117,12 +119,11 @@ export function useChatStream() {
                     const data = event.data;
                     try {
                         const parsed = JSON.parse(data);
-                        const plan = parsed.plan as string;
-                        if (plan) {
-                            onPlan?.(plan);
+                        if (parsed && typeof parsed.plan === "string") {
+                            onPlan?.(parsed.plan);
                         }
                     } catch {
-                        if (data) {
+                        if (data && typeof data === "string") {
                             onPlan?.(data);
                         }
                     }
@@ -130,11 +131,13 @@ export function useChatStream() {
                     const data = event.data;
                     try {
                         const parsed = JSON.parse(data);
-                        const info: AppInfo = {
-                            name: parsed.name as string,
-                            description: parsed.description as string,
-                        };
-                        onAppInfo?.(info);
+                        if (parsed && typeof parsed.name === "string" && typeof parsed.description === "string") {
+                            const info: AppInfo = {
+                                name: parsed.name,
+                                description: parsed.description,
+                            };
+                            onAppInfo?.(info);
+                        }
                     } catch (e) {
                         console.error("Failed to parse app_info:", e);
                     }
@@ -142,11 +145,13 @@ export function useChatStream() {
                     const data = event.data;
                     try {
                         const parsed = JSON.parse(data);
-                        const logoInfo: LogoData = {
-                            uuid: parsed.uuid as string,
-                            ext: parsed.ext as string,
-                        };
-                        onLogoGenerated?.(logoInfo);
+                        if (parsed && typeof parsed.uuid === "string" && typeof parsed.ext === "string") {
+                            const logoInfo: LogoData = {
+                                uuid: parsed.uuid,
+                                ext: parsed.ext,
+                            };
+                            onLogoGenerated?.(logoInfo);
+                        }
                     } catch (e) {
                         console.error("Failed to parse logo_generated:", e);
                     }
@@ -154,11 +159,13 @@ export function useChatStream() {
                     const data = event.data;
                     try {
                         const parsed = JSON.parse(data);
-                        const appData: AppGeneratedData = {
-                            uuid: parsed.uuid as string,
-                            version: parsed.version as number,
-                        };
-                        onAppGenerated?.(appData);
+                        if (parsed && typeof parsed.uuid === "string" && typeof parsed.version === "number") {
+                            const appData: AppGeneratedData = {
+                                uuid: parsed.uuid,
+                                version: parsed.version,
+                            };
+                            onAppGenerated?.(appData);
+                        }
                     } catch (e) {
                         console.error("Failed to parse app_generated:", e);
                     }
@@ -166,12 +173,16 @@ export function useChatStream() {
                     const data = event.data;
                     try {
                         const parsed = JSON.parse(data);
-                        const errorMsg = parsed.error as string;
-                        setState((prev) => ({ ...prev, error: errorMsg }));
-                        onError?.(errorMsg);
+                        if (parsed && typeof parsed.error === "string") {
+                            const errorMsg = parsed.error;
+                            setState((prev) => ({ ...prev, error: errorMsg }));
+                            onError?.(errorMsg);
+                        }
                     } catch {
-                        setState((prev) => ({ ...prev, error: data }));
-                        onError?.(data);
+                        if (data && typeof data === "string") {
+                            setState((prev) => ({ ...prev, error: data }));
+                            onError?.(data);
+                        }
                     }
                 } else if (eventType === "done") {
                     onDone?.();
@@ -181,7 +192,7 @@ export function useChatStream() {
 
             setState((prev) => ({ ...prev, isStreaming: false }));
         } catch (error: unknown) {
-            const err = error as Error;
+            const err = error instanceof Error ? error : new Error(String(error));
             if (err.name === "AbortError") {
                 // 用户取消请求，正常情况
                 setState((prev) => ({ ...prev, isStreaming: false }));
