@@ -11,4 +11,5 @@ data/
 .VSCodeCounter/
 apps/nanobot/
 .venv/
-.worktrees/.claude/worktrees/
+.worktrees/
+.claude/worktrees/
