@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { getMessages, sendMessageStream } from "@/api/chat";
+import { API_BASE_URL } from "@/lib/config";
 
 /** SSE 事件类型 */
 export type SSEIntent = "chat" | "gen" | "edit";
@@ -57,8 +58,8 @@ export function useChat(sessionId: string): UseChatReturn {
                 // 映射后端的 relatedApp* 字段
                 appName: m.relatedAppName,
                 appDescription: m.relatedAppDescription,
-                logoUrl: m.relatedAppLogo ? `http://100.101.157.4:8080/api/logo/${m.relatedAppLogo.replace(/\.[^/.]+$/, '')}` : undefined,
-                previewUrl: m.relatedAppUuid ? `http://100.101.157.4:8080/api/preview/${m.relatedAppUuid}` : undefined,
+                logoUrl: m.relatedAppLogo ? `${API_BASE_URL}/api/logo/${m.relatedAppLogo.replace(/\.[^/.]+$/, '')}` : undefined,
+                previewUrl: m.relatedAppUuid ? `${API_BASE_URL}/api/preview/${m.relatedAppUuid}` : undefined,
                 plan: undefined, // 历史消息没有 plan
                 isStreaming: false,
             }));
@@ -146,7 +147,7 @@ export function useChat(sessionId: string): UseChatReturn {
             case "logo_generated": {
                 const uuid = parsed.uuid as string;
                 if (uuid && streamingMessageIdRef.current) {
-                    const logoUrl = `http://100.101.157.4:8080/api/logo/${uuid}`;
+                    const logoUrl = `${API_BASE_URL}/api/logo/${uuid}`;
                     setMessages((prev) =>
                         prev.map((m) =>
                             m.id === streamingMessageIdRef.current
@@ -160,7 +161,7 @@ export function useChat(sessionId: string): UseChatReturn {
             case "app_generated": {
                 const uuid = parsed.uuid as string;
                 if (uuid && streamingMessageIdRef.current) {
-                    const previewUrl = `http://100.101.157.4:8080/api/preview/${uuid}`;
+                    const previewUrl = `${API_BASE_URL}/api/preview/${uuid}`;
                     setMessages((prev) =>
                         prev.map((m) =>
                             m.id === streamingMessageIdRef.current

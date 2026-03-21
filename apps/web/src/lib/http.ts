@@ -1,5 +1,6 @@
 import ky from "ky";
 import { useAuthStore } from "@/stores/auth-store";
+import { API_PREFIX_URL } from "./config";
 
 /**
  * API response wrapper
@@ -12,7 +13,7 @@ export interface ApiResponse<T = unknown> {
 }
 
 const http = ky.extend({
-    prefixUrl: `http://100.101.157.4:8080/api`,
+    prefixUrl: API_PREFIX_URL,
     timeout: 5000,
     hooks: {
         beforeRequest: [

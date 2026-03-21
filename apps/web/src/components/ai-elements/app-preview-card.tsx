@@ -1,6 +1,7 @@
 import { Maximize2Icon } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { API_BASE_URL } from "@/lib/config";
 
 interface AppPreviewCardProps {
   previewUrl: string;
@@ -16,7 +17,7 @@ export function AppPreviewCard({
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const resolvedUrl = previewUrl.startsWith("/")
-    ? `http://100.101.157.4:8080${previewUrl}`
+    ? `${API_BASE_URL}${previewUrl}`
     : previewUrl;
 
   // 提取 UUID 用于预览页面

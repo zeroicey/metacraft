@@ -1,4 +1,5 @@
 import http, { type ApiResponse } from "@/lib/http";
+import { API_PREFIX_URL } from "@/lib/config";
 
 /**
  * 获取会话消息
@@ -26,7 +27,7 @@ export const sendMessageStream = async (
     signal?: AbortSignal
 ): Promise<Response> => {
     const token = localStorage.getItem("token");
-    return await fetch("http://100.101.157.4:8080/api/ai/agent/unified", {
+    return await fetch(`${API_PREFIX_URL}/ai/agent/unified`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

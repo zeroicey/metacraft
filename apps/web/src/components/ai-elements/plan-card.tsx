@@ -1,14 +1,26 @@
 import { Streamdown } from "streamdown";
+import "streamdown/styles.css";
 import { code } from "@streamdown/code";
 import { mermaid } from "@streamdown/mermaid";
 import { math } from "@streamdown/math";
 import { cjk } from "@streamdown/cjk";
+import { useRef, useEffect } from "react";
 
 interface PlanCardProps {
   plan: string;
+  isAnimating?: boolean;
 }
 
-export function PlanCard({ plan }: PlanCardProps) {
+export function PlanCard({ plan, isAnimating }: PlanCardProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // 流式输出时自动滚动到底部
+  useEffect(() => {
+    if (isAnimating && scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [plan, isAnimating]);
+
   return (
     <div className="mt-2 rounded-xl border border-[#D9E5FF] bg-[#F6F9FF] p-3">
       <div className="mb-2 flex items-center justify-between">
@@ -16,7 +28,7 @@ export function PlanCard({ plan }: PlanCardProps) {
         <span className="text-xs text-[#7C8AA5]">PLAN</span>
       </div>
       {plan ? (
-        <div className="max-h-[220px] overflow-y-auto">
+        <div ref={scrollRef} className="max-h-[220px] overflow-y-auto">
           <Streamdown
             plugins={{
               code,
@@ -24,6 +36,8 @@ export function PlanCard({ plan }: PlanCardProps) {
               math,
               cjk,
             }}
+            animated
+            isAnimating={isAnimating}
           >
             {plan}
           </Streamdown>

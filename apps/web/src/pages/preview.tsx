@@ -1,6 +1,7 @@
 import { useSearchParams, useNavigate } from "react-router";
 import { ArrowLeftIcon } from "lucide-react";
 import { useState } from "react";
+import { API_BASE_URL } from "@/lib/config";
 
 export default function PreviewPage() {
   const [searchParams] = useSearchParams();
@@ -13,7 +14,7 @@ export default function PreviewPage() {
   const [logoLoadFailed, setLogoLoadFailed] = useState(false);
 
   const resolvedUrl = url.startsWith("/")
-    ? `http://100.101.157.4:8080${url}`
+    ? `${API_BASE_URL}${url}`
     : url;
 
   const handleBack = () => {

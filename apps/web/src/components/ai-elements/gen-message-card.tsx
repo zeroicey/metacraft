@@ -1,4 +1,5 @@
 import { Streamdown } from "streamdown";
+import "streamdown/styles.css";
 import { code } from "@streamdown/code";
 import { mermaid } from "@streamdown/mermaid";
 import { math } from "@streamdown/math";
@@ -38,6 +39,7 @@ export function GenMessageCard({
               math,
               cjk,
             }}
+            animated
             isAnimating={isStreaming}
           >
             {chatBeforeGen}
@@ -46,7 +48,7 @@ export function GenMessageCard({
       )}
 
       {/* 计划 */}
-      {plan && plan.length > 0 && <PlanCard plan={plan} />}
+      {plan && plan.length > 0 && <PlanCard plan={plan} isAnimating={isStreaming} />}
 
       {/* 应用信息 */}
       {(appName || appDescription || logoUrl) && (

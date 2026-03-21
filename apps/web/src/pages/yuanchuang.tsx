@@ -96,6 +96,7 @@ export default function YuanChuangPage() {
       <Streamdown
         key={msg.id}
         plugins={{ code, mermaid, math, cjk }}
+        animated
         isAnimating={msg.isStreaming}
       >
         {msg.content}

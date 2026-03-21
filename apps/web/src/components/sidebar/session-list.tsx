@@ -1,7 +1,8 @@
-import { useMemo } from "react"
-import { MessageSquareIcon } from "lucide-react"
+import { useMemo, useState } from "react"
+import { MessageSquareIcon, AppWindowIcon } from "lucide-react"
 import { useUserSessions } from "@/hooks/useChatSession"
 import type { ChatSession } from "@/types/session"
+import { API_PREFIX_URL } from "@/lib/config"
 
 // 时间分组
 interface SessionGroup {
@@ -68,13 +69,31 @@ interface SessionItemProps {
 }
 
 function SessionItem({ session, isSelected, onSelect }: SessionItemProps) {
+  const hasApp = !!session.relatedAppId
+  const [logoError, setLogoError] = useState(false)
+
+  const logoUrl = hasApp
+    ? `${API_PREFIX_URL}/logo/app/${session.relatedAppId}`
+    : null
+
   return (
     <div
       className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors ${isSelected ? "bg-gray-200" : "hover:bg-gray-100"
         }`}
       onClick={() => onSelect(session.sessionId)}
     >
-      <MessageSquareIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+      {hasApp && logoUrl && !logoError ? (
+        <img
+          src={logoUrl}
+          alt=""
+          className="h-5 w-5 rounded object-cover flex-shrink-0"
+          onError={() => setLogoError(true)}
+        />
+      ) : hasApp ? (
+        <AppWindowIcon className="h-4 w-4 text-[#2F5DFF] flex-shrink-0" />
+      ) : (
+        <MessageSquareIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+      )}
       <span className="flex-1 text-sm text-gray-700 truncate">{session.title}</span>
       <span className="text-xs text-gray-400 flex-shrink-0">
         {formatSessionTime(session.updatedAt)}
