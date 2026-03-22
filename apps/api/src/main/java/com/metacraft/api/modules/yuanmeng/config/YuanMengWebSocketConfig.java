@@ -1,28 +1,28 @@
-package com.metacraft.api.modules.yuanclaw.config;
+package com.metacraft.api.modules.yuanmeng.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
-import com.metacraft.api.modules.yuanclaw.ws.YuanClawClientWebSocketHandler;
-import com.metacraft.api.modules.yuanclaw.ws.YuanClawNanobotWebSocketHandler;
+import com.metacraft.api.modules.yuanmeng.ws.YuanMengClientWebSocketHandler;
+import com.metacraft.api.modules.yuanmeng.ws.YuanMengNanobotWebSocketHandler;
 
 import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSocket
 @RequiredArgsConstructor
-public class YuanClawWebSocketConfig implements WebSocketConfigurer {
+public class YuanMengWebSocketConfig implements WebSocketConfigurer {
 
-    private final YuanClawClientWebSocketHandler clientHandler;
-    private final YuanClawNanobotWebSocketHandler nanobotHandler;
+    private final YuanMengClientWebSocketHandler clientHandler;
+    private final YuanMengNanobotWebSocketHandler nanobotHandler;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(clientHandler, "/ws/yuanclaw/client")
+        registry.addHandler(clientHandler, "/ws/yuanmeng/client")
                 .setAllowedOriginPatterns("*");
-        registry.addHandler(nanobotHandler, "/ws/yuanclaw/nanobot")
+        registry.addHandler(nanobotHandler, "/ws/yuanmeng/nanobot")
                 .setAllowedOriginPatterns("*");
     }
 }

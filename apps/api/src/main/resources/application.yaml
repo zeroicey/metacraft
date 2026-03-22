@@ -60,6 +60,6 @@ langchain4j:
 zhipu:
   api-key: ${ZHIPU_API_KEY}
 
-yuanclaw:
-  shared-room: ${YUANCLAW_SHARED_ROOM:shared}
-  nanobot-token: ${YUANCLAW_NANOBOT_TOKEN:123456}
+yuanmeng:
+  shared-room: ${YUANMENG_SHARED_ROOM:shared}
+  nanobot-token: ${YUANMENG_NANOBOT_TOKEN:123456}

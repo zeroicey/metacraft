@@ -1,4 +1,4 @@
-package com.metacraft.api.modules.yuanclaw.dto;
+package com.metacraft.api.modules.yuanmeng.dto;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class YuanClawWsMessage {
+public class YuanMengWsMessage {
     private String type;
     private String chatId;
     private String senderId;

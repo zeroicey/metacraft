@@ -1,4 +1,4 @@
-package com.metacraft.api.modules.yuanclaw.ws;
+package com.metacraft.api.modules.yuanmeng.ws;
 
 import java.io.IOException;
 
@@ -9,8 +9,8 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.metacraft.api.modules.yuanclaw.dto.YuanClawWsMessage;
-import com.metacraft.api.modules.yuanclaw.service.YuanClawBridgeService;
+import com.metacraft.api.modules.yuanmeng.dto.YuanMengWsMessage;
+import com.metacraft.api.modules.yuanmeng.service.YuanMengBridgeService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,15 +18,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class YuanClawNanobotWebSocketHandler extends TextWebSocketHandler {
+public class YuanMengNanobotWebSocketHandler extends TextWebSocketHandler {
 
     private final ObjectMapper objectMapper;
-    private final YuanClawBridgeService bridgeService;
+    private final YuanMengBridgeService bridgeService;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         bridgeService.registerNanobot(session);
-        bridgeService.sendToSession(session, YuanClawWsMessage.builder()
+        bridgeService.sendToSession(session, YuanMengWsMessage.builder()
                 .type("hello")
                 .chatId(bridgeService.getSharedRoom())
                 .build());
@@ -35,17 +35,17 @@ public class YuanClawNanobotWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        YuanClawWsMessage payload = objectMapper.readValue(message.getPayload(), YuanClawWsMessage.class);
+        YuanMengWsMessage payload = objectMapper.readValue(message.getPayload(), YuanMengWsMessage.class);
         if ("auth".equals(payload.getType())) {
             if (!bridgeService.validateNanobotToken(payload.getContent())) {
-                bridgeService.sendToSession(session, YuanClawWsMessage.builder()
+                bridgeService.sendToSession(session, YuanMengWsMessage.builder()
                         .type("error")
                         .content("invalid nanobot token")
                         .build());
                 session.close(CloseStatus.NOT_ACCEPTABLE.withReason("invalid token"));
                 return;
             }
-            bridgeService.sendToSession(session, YuanClawWsMessage.builder()
+            bridgeService.sendToSession(session, YuanMengWsMessage.builder()
                     .type("auth_ok")
                     .chatId(bridgeService.getSharedRoom())
                     .build());
@@ -57,7 +57,7 @@ public class YuanClawNanobotWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        log.warn("YuanClaw nanobot transport error {}: {}", session.getId(), exception.getMessage());
+        log.warn("YuanMeng nanobot transport error {}: {}", session.getId(), exception.getMessage());
         closeQuietly(session);
     }
 
