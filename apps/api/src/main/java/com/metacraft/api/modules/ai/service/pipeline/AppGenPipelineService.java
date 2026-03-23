@@ -60,7 +60,7 @@ public class AppGenPipelineService {
         AtomicReference<String> matchedTemplateRef = new AtomicReference<>();
 
         // Template matching - runs in parallel
-        Mono<String> templateMatchMono = Mono.fromCallable(() -> templateMatcherService.matchTemplate(message))
+        Mono<String> templateMatchMono = templateMatcherService.matchTemplate(message)
                 .subscribeOn(Schedulers.boundedElastic())
                 .doOnNext(matchedTemplateRef::set)
                 .cache();
