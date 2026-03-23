@@ -1,7 +1,7 @@
 import { lazy } from "react";
 import { createHashRouter } from "react-router";
 import RootLayout from "@/components/layouts/root-layout";
-import PreviewLayout from "@/components/layouts/preview-layout";
+import StandaloneLayout from "@/components/layouts/standalone-layout";
 
 const YuanChuangPage = lazy(() => import("@/pages/yuanchuang"));
 const YuanMengPage = lazy(() => import("@/pages/yuanmeng"));
@@ -20,16 +20,23 @@ const router = createHashRouter([
             { index: true, Component: YuanChuangPage },
             { path: "yuanchuang", Component: YuanChuangPage },
             { path: "yuanmeng", Component: YuanMengPage },
-            { path: "myapps", Component: MyAppsPage },
             { path: "*", Component: NotFoundPage },
         ],
     },
     {
         path: "/preview",
-        Component: PreviewLayout,
+        Component: StandaloneLayout,
         ErrorBoundary: ErrorPage,
         children: [
             { index: true, Component: PreviewPage },
+        ],
+    },
+    {
+        path: "/myapps",
+        Component: StandaloneLayout,
+        ErrorBoundary: ErrorPage,
+        children: [
+            { index: true, Component: MyAppsPage },
         ],
     },
 ]);
