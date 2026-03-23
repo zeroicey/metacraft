@@ -1,6 +1,8 @@
-import ky from "ky";
+import http from "ky";
 import { useAuthStore } from "@/stores/auth-store";
-import { API_PREFIX_URL } from "./config";
+import {
+    API_PREFIX_URL,
+} from "./config";
 
 /**
  * API response wrapper
@@ -12,7 +14,7 @@ export interface ApiResponse<T = unknown> {
     error?: unknown;
 }
 
-const http = ky.extend({
+const httpInstance = http.extend({
     prefixUrl: API_PREFIX_URL,
     timeout: 5000,
     hooks: {
@@ -27,7 +29,6 @@ const http = ky.extend({
         afterResponse: [
             (_request, _options, response) => {
                 if (response.status === 401 || response.status === 403) {
-                    // 打开登录弹窗而不是跳转页面
                     const openLoginDrawer = useAuthStore.getState().openLoginDrawer;
                     openLoginDrawer();
                 }
@@ -36,4 +37,4 @@ const http = ky.extend({
     }
 });
 
-export default http;
+export default httpInstance;
