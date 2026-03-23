@@ -14,26 +14,12 @@ import { cjk } from "@streamdown/cjk";
 import "streamdown/styles.css";
 
 export default function YuanChuangPage() {
-  const [selectedSessionId, setSelectedSessionId] = useAppStore((state) => [
-    state.selectedSessionId,
-    state.setSelectedSessionId,
-  ]);
+  const selectedSessionId = useAppStore((state) => state.selectedSessionId);
   const [inputText, setInputText] = useState("");
 
   const { data: sessions } = useUserSessions();
   const { messages, isLoading, isStreaming, sendMessage } = useChat(selectedSessionId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // 页面加载时自动选择最新的会话
-  useEffect(() => {
-    if (!selectedSessionId && sessions && sessions.length > 0) {
-      // 按 updatedAt 降序排序，获取最新的会话
-      const sortedSessions = [...sessions].sort(
-        (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-      );
-      setSelectedSessionId(sortedSessions[0].sessionId);
-    }
-  }, [sessions, selectedSessionId, setSelectedSessionId]);
 
   // 自动滚动到底部
   useEffect(() => {
