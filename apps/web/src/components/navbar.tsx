@@ -3,11 +3,13 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { NetworkIcon } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import { useAppStore } from "@/stores/app-store"
+import { useYuanMengStore } from "@/stores/yuanmeng-store"
 
 export default function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
   const setCurrentPage = useAppStore((state) => state.setCurrentPage)
+  const connectionStatus = useYuanMengStore((state) => state.connectionStatus)
   const [slidePos, setSlidePos] = useState(0)
   const yuanChuangRef = useRef<HTMLButtonElement>(null)
   const yuanMengRef = useRef<HTMLButtonElement>(null)
@@ -24,6 +26,15 @@ export default function Navbar() {
       setCurrentPage("yuanmeng")
     }
   }, [isYuanChuang, isYuanMeng, setCurrentPage])
+
+  // 连接状态配置
+  const statusConfig = {
+    connecting: { color: "bg-yellow-500", text: "连接中" },
+    connected: { color: "bg-green-500", text: "已连接" },
+    disconnected: { color: "bg-gray-400", text: "未连接" },
+    error: { color: "bg-red-500", text: "连接错误" },
+  }
+  const status = statusConfig[connectionStatus]
 
   return (
     <header className="flex items-center justify-between border-b px-4 h-16">
@@ -66,8 +77,15 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* 右侧：详情按钮 */}
-      <div className="flex items-center">
+      {/* 右侧：连接状态 + 详情按钮 */}
+      <div className="flex items-center gap-3">
+        {/* 元梦连接状态 */}
+        {isYuanMeng && (
+          <div className="flex items-center gap-1.5 text-xs text-gray-500">
+            <span className={`w-2 h-2 rounded-full ${status.color}`} />
+            <span>{status.text}</span>
+          </div>
+        )}
         <button className="h-8 w-8 p-0 flex items-center justify-center hover:bg-gray-100 rounded-md">
           <NetworkIcon className="h-5 w-5 text-gray-600" />
         </button>
