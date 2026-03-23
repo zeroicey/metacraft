@@ -10,29 +10,6 @@ import { math } from "@streamdown/math";
 import { cjk } from "@streamdown/cjk";
 import "streamdown/styles.css";
 
-// 连接状态指示器
-const ConnectionIndicator = ({
-    status,
-}: {
-    status: "connecting" | "connected" | "disconnected" | "error";
-}) => {
-    const statusConfig = {
-        connecting: { color: "bg-yellow-500", text: "连接中..." },
-        connected: { color: "bg-green-500", text: "已连接" },
-        disconnected: { color: "bg-gray-400", text: "已断开" },
-        error: { color: "bg-red-500", text: "连接错误" },
-    };
-
-    const config = statusConfig[status];
-
-    return (
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-            <span className={`w-2 h-2 rounded-full ${config.color}`} />
-            <span>{config.text}</span>
-        </div>
-    );
-};
-
 // 格式化时间
 const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -122,10 +99,10 @@ export default function YuanMengPage() {
             </div>
 
             {/* 输入框 */}
-            <div className="px-4 py-3 border-t border-gray-200">
+            <div className="px-4 py-2">
                 <div className="flex gap-2">
                     <Input
-                        className="p-4"
+                        className="p-3"
                         placeholder="输入消息..."
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
@@ -143,9 +120,6 @@ export default function YuanMengPage() {
                             <SendIcon className="h-5 w-5" />
                         )}
                     </Button>
-                </div>
-                <div className="mt-2">
-                    <ConnectionIndicator status={connectionStatus} />
                 </div>
             </div>
         </div>

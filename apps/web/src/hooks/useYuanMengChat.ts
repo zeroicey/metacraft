@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { API_BASE_URL } from "@/lib/config";
+import { useYuanMengStore, type YuanMengConnectionStatus } from "@/stores/yuanmeng-store";
 
 /** 消息类型 */
 export interface YuanMengMessage {
@@ -110,7 +111,7 @@ export function useYuanMengChat(): UseYuanMengChatReturn {
         [readyState, wsSendMessage]
     );
 
-    const connectionStatus =
+    const connectionStatus: YuanMengConnectionStatus =
         readyState === ReadyState.OPEN
             ? "connected"
             : readyState === ReadyState.CONNECTING
@@ -118,6 +119,11 @@ export function useYuanMengChat(): UseYuanMengChatReturn {
             : readyState === ReadyState.CLOSED || readyState === ReadyState.CLOSING
             ? "disconnected"
             : "error";
+
+    // Sync connection status to store
+    useEffect(() => {
+        useYuanMengStore.getState().setConnectionStatus(connectionStatus);
+    }, [connectionStatus]);
 
     return {
         messages,
