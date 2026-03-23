@@ -4,7 +4,7 @@
  */
 
 /** API 基础地址（不含 /api 后缀） */
-export const API_BASE_URL = "http://localhost:8080"
+export const API_BASE_URL = "http://36.151.146.122:8080"
 
 /** API 前缀地址（包含 /api 后缀） */
 export const API_PREFIX_URL = `${API_BASE_URL}/api`

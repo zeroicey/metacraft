@@ -35,7 +35,7 @@ export function AppPreviewCard({
   };
 
   return (
-    <div className="mt-2 relative max-w-2xl">
+    <div className="mt-2 relative max-w-lg">
       <button
         onClick={handleOpenNewWindow}
         className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-[#007AFF] text-white transition hover:bg-[#0056CC]"
@@ -44,7 +44,7 @@ export function AppPreviewCard({
         <Maximize2Icon className="h-4 w-4" />
       </button>
       {resolvedUrl ? (
-        <div className="relative h-[210px] overflow-hidden rounded-lg bg-white">
+        <div className="relative h-[400px] overflow-hidden rounded-lg bg-white">
           <iframe
             src={resolvedUrl}
             className="h-full w-full border-0"
@@ -59,7 +59,7 @@ export function AppPreviewCard({
           )}
         </div>
       ) : (
-        <div className="flex h-[210px] items-center justify-center rounded-lg bg-white">
+        <div className="flex h-[400px] items-center justify-center rounded-lg bg-white">
           <span className="text-sm text-gray-400">预览加载中...</span>
         </div>
       )}

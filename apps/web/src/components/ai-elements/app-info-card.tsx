@@ -19,7 +19,7 @@ export function AppInfoCard({
   }
 
   return (
-    <div className="mt-2 max-w-2xl rounded-xl border border-[#E5E5E5] bg-white p-4">
+    <div className="mt-2 max-w-lg rounded-xl border border-[#E5E5E5] bg-white p-4">
       <div className="flex items-start gap-3">
         {logoUrl ? (
           <img

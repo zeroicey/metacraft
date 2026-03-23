@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useAppStore } from "@/stores/app-store";
 import { useChat, type ChatMessage } from "@/hooks/useChat";
-import { useUserSessions } from "@/hooks/useChatSession";
 import { GenMessageCard } from "@/components/ai-elements";
 import { SendIcon, UserIcon, Loader2Icon } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -17,7 +16,6 @@ export default function YuanChuangPage() {
   const selectedSessionId = useAppStore((state) => state.selectedSessionId);
   const [inputText, setInputText] = useState("");
 
-  const { data: sessions } = useUserSessions();
   const { messages, isLoading, isStreaming, sendMessage } = useChat(selectedSessionId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
