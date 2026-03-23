@@ -20,7 +20,7 @@ export default function YuanChuangPage() {
   ]);
   const [inputText, setInputText] = useState("");
 
-  const { data: sessions, isLoading: isSessionsLoading } = useUserSessions();
+  const { data: sessions } = useUserSessions();
   const { messages, isLoading, isStreaming, sendMessage } = useChat(selectedSessionId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
