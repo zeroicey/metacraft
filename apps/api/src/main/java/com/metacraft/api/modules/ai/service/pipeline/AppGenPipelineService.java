@@ -14,6 +14,8 @@ import com.metacraft.api.modules.ai.dto.ChatMessageCreateDTO;
 import com.metacraft.api.modules.ai.dto.opencode.OpenCodeDtos;
 import com.metacraft.api.modules.ai.service.ChatMessageService;
 import com.metacraft.api.modules.ai.service.ChatSessionService;
+import com.metacraft.api.modules.ai.service.TemplateFileService;
+import com.metacraft.api.modules.ai.service.TemplateMatcherService;
 import com.metacraft.api.modules.ai.service.opencode.OpenCodeClient;
 import com.metacraft.api.modules.ai.service.opencode.OpenCodePromptService;
 import com.metacraft.api.modules.ai.service.opencode.OpenCodeTemplateService;
@@ -47,12 +49,21 @@ public class AppGenPipelineService {
     private final OpenCodeTemplateService openCodeTemplateService;
     private final OpenCodeWorkspaceService openCodeWorkspaceService;
     private final SseUtils sseUtils;
+    private final TemplateMatcherService templateMatcherService;
+    private final TemplateFileService templateFileService;
 
     public Flux<ServerSentEvent<String>> execute(String message, String history, Long userId, String sessionId) {
         StringBuffer chatBeforeGenBuffer = new StringBuffer();
         StringBuffer planBuffer = new StringBuffer();
         AtomicReference<Long> relatedAppIdRef = new AtomicReference<>();
         AtomicReference<Long> relatedVersionIdRef = new AtomicReference<>();
+        AtomicReference<String> matchedTemplateRef = new AtomicReference<>();
+
+        // Template matching - runs in parallel
+        Mono<String> templateMatchMono = Mono.fromCallable(() -> templateMatcherService.matchTemplate(message))
+                .subscribeOn(Schedulers.boundedElastic())
+                .doOnNext(matchedTemplateRef::set)
+                .cache();
 
         Flux<ServerSentEvent<String>> chatStream = chatAgent.chatBeforeGen(message, history)
                 .doOnNext(chatBeforeGenBuffer::append)
@@ -84,7 +95,18 @@ public class AppGenPipelineService {
                     .flux();
 
             Mono<ServerSentEvent<String>> codeStream = Mono.fromCallable(() -> {
-                AppVersionEntity createdVersion = generateInitialVersionWithOpenCode(app, history, message);
+                // Check if template matched
+                String matchedTemplate = matchedTemplateRef.get();
+                AppVersionEntity createdVersion;
+
+                if (matchedTemplate != null) {
+                    // Use template - copy files
+                    createdVersion = createVersionFromTemplate(app, matchedTemplate);
+                } else {
+                    // Fallback to OpenCode
+                    createdVersion = generateInitialVersionWithOpenCode(app, history, message);
+                }
+
                 relatedVersionIdRef.set(createdVersion.getId());
                 return ServerSentEvent.<String>builder()
                         .event("app_generated")
@@ -148,6 +170,26 @@ public class AppGenPipelineService {
 
         log.info("Generated app {} version {} in OpenCode session {}", app.getId(), version.getVersionNumber(),
                 openCodeSession.id());
+        return version;
+    }
+
+    private AppVersionEntity createVersionFromTemplate(AppEntity app, String templateName) {
+        // First create an empty version
+        AppVersionEntity version = appService.createVersion(
+                app.getId(),
+                "", // Empty content, will be copied from template
+                "",
+                "Created from template: " + templateName);
+
+        // Copy template files
+        boolean success = templateFileService.copyTemplateFiles(templateName, app.getId(), version.getVersionNumber());
+
+        if (!success) {
+            log.warn("Failed to copy template files for template: {}", templateName);
+        } else {
+            log.info("Created app {} version {} from template {}", app.getId(), version.getVersionNumber(), templateName);
+        }
+
         return version;
     }
 
