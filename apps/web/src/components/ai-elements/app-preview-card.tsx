@@ -35,7 +35,7 @@ export function AppPreviewCard({
   };
 
   return (
-    <div className="mt-2 relative">
+    <div className="mt-2 relative max-w-2xl">
       <button
         onClick={handleOpenNewWindow}
         className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-[#007AFF] text-white transition hover:bg-[#0056CC]"
