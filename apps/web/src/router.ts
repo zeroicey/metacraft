@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { createBrowserRouter } from "react-router";
+import { createHashRouter } from "react-router";
 import RootLayout from "@/components/layouts/root-layout";
 import PreviewLayout from "@/components/layouts/preview-layout";
 
@@ -10,7 +10,7 @@ const PreviewPage = lazy(() => import("@/pages/preview"));
 const NotFoundPage = lazy(() => import("@/pages/404"));
 const ErrorPage = lazy(() => import("@/pages/error"));
 
-const router = createBrowserRouter([
+const router = createHashRouter([
     {
         path: "/",
         Component: RootLayout,
