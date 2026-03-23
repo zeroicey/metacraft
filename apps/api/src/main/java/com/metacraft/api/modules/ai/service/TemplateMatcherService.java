@@ -12,19 +12,24 @@ import org.springframework.stereotype.Service;
 
 import com.metacraft.api.modules.ai.agent.TemplateMatcherAgent;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class TemplateMatcherService {
 
     private final TemplateMatcherAgent templateMatcherAgent;
+    private String templatesPath;
+
+    public TemplateMatcherService(TemplateMatcherAgent templateMatcherAgent) {
+        this.templateMatcherAgent = templateMatcherAgent;
+    }
 
     @Value("${app.templates.path:data/templates}")
-    private String templatesPath;
+    public void setTemplatesPath(String templatesPath) {
+        this.templatesPath = templatesPath;
+    }
 
     public Mono<String> matchTemplate(String userMessage) {
         List<String> templateNames = scanTemplateDirectories();
