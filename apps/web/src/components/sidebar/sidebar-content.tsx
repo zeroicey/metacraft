@@ -5,6 +5,7 @@ import { SessionList } from "./session-list"
 import { useUserSessions, useCreateSession } from "@/hooks/useChatSession"
 import { getSessionMessages } from "@/api/session"
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router"
 
 // 获取会话消息的辅助函数
 const getSessionMessagesById = async (sessionId: string) => {
@@ -24,6 +25,7 @@ export interface YuanChuangSidebarProps {
 export function YuanChuangSidebarContent({ selectedSessionId, onSessionSelect }: YuanChuangSidebarProps) {
   const [isCreating, setIsCreating] = useState(false)
   const { toggleSidebar } = useSidebar()
+  const navigate = useNavigate()
   const { data: sessions = [] } = useUserSessions()
   const createSession = useCreateSession()
 
@@ -80,7 +82,7 @@ export function YuanChuangSidebarContent({ selectedSessionId, onSessionSelect }:
   }
 
   const navItems = [
-    { icon: AppWindowIcon, label: "我的元应用" },
+    { icon: AppWindowIcon, label: "我的元应用", onClick: () => navigate("/myapps") },
     { icon: SearchIcon, label: "元应用商店" },
     { icon: FolderIcon, label: "元数据中心" },
   ]
@@ -107,7 +109,10 @@ export function YuanChuangSidebarContent({ selectedSessionId, onSessionSelect }:
           {navItems.map((item) => (
             <SidebarMenuItem key={item.label}>
               <SidebarMenuButton asChild>
-                <button className="flex items-center gap-2 w-full">
+                <button
+                  className="flex items-center gap-2 w-full"
+                  onClick={item.onClick}
+                >
                   <item.icon className="h-4 w-4 text-gray-500" />
                   <span className="flex-1 text-sm text-gray-700">{item.label}</span>
                   <ChevronRightIcon className="h-4 w-4 text-gray-400" />

@@ -5,6 +5,7 @@ import PreviewLayout from "@/components/layouts/preview-layout";
 
 const YuanChuangPage = lazy(() => import("@/pages/yuanchuang"));
 const YuanMengPage = lazy(() => import("@/pages/yuanmeng"));
+const MyAppsPage = lazy(() => import("@/pages/myapps"));
 // const IndexPage = lazy(() => import("@/pages/index"));
 const PreviewPage = lazy(() => import("@/pages/preview"));
 const NotFoundPage = lazy(() => import("@/pages/404"));
@@ -19,6 +20,7 @@ const router = createHashRouter([
             { index: true, Component: YuanChuangPage },
             { path: "yuanchuang", Component: YuanChuangPage },
             { path: "yuanmeng", Component: YuanMengPage },
+            { path: "myapps", Component: MyAppsPage },
             { path: "*", Component: NotFoundPage },
         ],
     },
