@@ -12,6 +12,30 @@ export interface YuanMengMessage {
     tokenCount?: number;
 }
 
+const STORAGE_KEY = "yuanmeng_messages";
+
+/** 从 localStorage 加载消息 */
+const loadMessagesFromStorage = (): YuanMengMessage[] => {
+    try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            return JSON.parse(stored);
+        }
+    } catch (e) {
+        console.error("Failed to load messages from localStorage:", e);
+    }
+    return [];
+};
+
+/** 保存消息到 localStorage */
+const saveMessagesToStorage = (messages: YuanMengMessage[]) => {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    } catch (e) {
+        console.error("Failed to save messages to localStorage:", e);
+    }
+};
+
 interface UseYuanMengChatReturn {
     messages: YuanMengMessage[];
     isConnected: boolean;
@@ -20,8 +44,13 @@ interface UseYuanMengChatReturn {
 }
 
 export function useYuanMengChat(): UseYuanMengChatReturn {
-    const [messages, setMessages] = useState<YuanMengMessage[]>([]);
+    const [messages, setMessages] = useState<YuanMengMessage[]>(() => loadMessagesFromStorage());
     const senderIdRef = useRef(`client-${Math.random().toString(36).substring(2, 9)}`);
+
+    // 消息更新时保存到 localStorage
+    useEffect(() => {
+        saveMessagesToStorage(messages);
+    }, [messages]);
 
     const { sendMessage: wsSendMessage, lastMessage, readyState } = useWebSocket(
         `${API_BASE_URL.replace("http", "ws")}/ws/yuanmeng/client`,
