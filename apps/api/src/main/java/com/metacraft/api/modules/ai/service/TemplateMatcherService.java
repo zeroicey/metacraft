@@ -42,7 +42,7 @@ public class TemplateMatcherService {
         String templatesList = String.join("\n", templateNames);
         log.info("Matching user message against templates: {}", templateNames);
 
-        return Mono.from(templateMatcherAgent.matchTemplates(templatesList, userMessage))
+        return Mono.fromCallable(() -> templateMatcherAgent.matchTemplates(templatesList, userMessage))
                 .timeout(java.time.Duration.ofSeconds(10))
                 .onErrorResume(e -> {
                     log.warn("Template matching error, fallback to OpenCode: {}", e.getMessage());
