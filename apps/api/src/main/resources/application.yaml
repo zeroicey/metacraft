@@ -1,6 +1,8 @@
 app:
   storage:
     path: ${APP_STORAGE_PATH:data}
+  templates:
+    path: ${APP_TEMPLATES_PATH:data/templates}
 opencode:
   enabled: ${OPENCODE_ENABLED:true}
   command: ${OPENCODE_COMMAND:opencode}
