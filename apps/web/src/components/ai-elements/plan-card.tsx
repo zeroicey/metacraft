@@ -22,7 +22,7 @@ export function PlanCard({ plan, isAnimating }: PlanCardProps) {
   }, [plan, isAnimating]);
 
   return (
-    <div className="mt-2 rounded-xl border border-[#D9E5FF] bg-[#F6F9FF] p-3">
+    <div className="mt-2 max-w-lg rounded-xl border border-[#D9E5FF] bg-[#F6F9FF] p-3">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-sm font-bold text-[#2F5DFF]">应用计划</span>
         <span className="text-xs text-[#7C8AA5]">PLAN</span>
