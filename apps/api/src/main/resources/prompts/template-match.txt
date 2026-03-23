@@ -6,10 +6,16 @@ Available templates:
 
 User request: {{message}}
 
-Respond with ONLY the template folder name (no quotes, no extra text).
+Respond with ONLY the full template folder name EXACTLY as shown in the list above (no quotes, no extra text).
 If no template matches, respond with exactly: NONE
-Trim any whitespace from your response.
+Trim any whitespace from your response. Do NOT partial match or truncate.
+
+Important:
+- You MUST respond with the COMPLETE template name from the list above
+- Do NOT respond with just one character or partial name
+- The template names contain underscores and descriptive text - include ALL of it
 
 Example:
-- User wants a chess game → Respond: "象棋游戏_中国象棋对弈"
-- User wants a weather app → Respond: "NONE"
+- Available: ["待办工具_一个简易的待办工具", "计算器_基础计算器"]
+- User wants todo app → Respond: "待办工具_一个简易的待办工具" (complete name with underscore)
+- User wants chess → Respond: "NONE"
