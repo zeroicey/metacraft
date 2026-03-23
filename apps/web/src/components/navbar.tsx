@@ -1,6 +1,5 @@
 import { useNavigate, useLocation } from "react-router"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Separator } from "@/components/ui/separator"
 import { NetworkIcon } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import { useAppStore } from "@/stores/app-store"

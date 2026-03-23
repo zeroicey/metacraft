@@ -16,7 +16,7 @@ function groupSessionsByTime(sessions: ChatSession[]): SessionGroup[] {
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000)
   const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
-  const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
+  // const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
 
   const groups: SessionGroup[] = [
     { label: "今天", sessions: [] },

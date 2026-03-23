@@ -5,7 +5,7 @@ import PreviewLayout from "@/components/layouts/preview-layout";
 
 const YuanChuangPage = lazy(() => import("@/pages/yuanchuang"));
 const YuanMengPage = lazy(() => import("@/pages/yuanmeng"));
-const IndexPage = lazy(() => import("@/pages/index"));
+// const IndexPage = lazy(() => import("@/pages/index"));
 const PreviewPage = lazy(() => import("@/pages/preview"));
 const NotFoundPage = lazy(() => import("@/pages/404"));
 const ErrorPage = lazy(() => import("@/pages/error"));

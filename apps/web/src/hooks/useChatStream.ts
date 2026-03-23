@@ -91,8 +91,7 @@ export function useChatStream() {
                     Accept: "text/event-stream",
                 },
                 signal: abortControllerRef.current.signal,
-                stream: true,
-            });
+            }) as unknown as Response;
 
             // 使用自定义 SSE 解析器
             await parseSSEResponse(response, {
@@ -112,11 +111,13 @@ export function useChatStream() {
                     appInfoRef.current = { name, description };
                     onAppInfo?.({ name, description });
                 },
-                onLogoGenerated: (logoUrl) => {
-                    onLogoGenerated?.(logoUrl);
+                onLogoGenerated: (logoUrl: string) => {
+                    const uuid = logoUrl.split("/").pop() || "";
+                    onLogoGenerated?.({ uuid, ext: "png" });
                 },
-                onAppGenerated: (previewUrl) => {
-                    onAppGenerated?.(previewUrl);
+                onAppGenerated: (previewUrl: string) => {
+                    const uuid = previewUrl.split("/").pop() || "";
+                    onAppGenerated?.({ uuid, version: 1 });
                 },
                 onDone: () => {
                     onDone?.();

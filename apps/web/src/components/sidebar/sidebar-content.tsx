@@ -1,5 +1,6 @@
 import { ChevronRightIcon, SearchIcon, FolderIcon, PlusIcon, AppWindowIcon } from "lucide-react"
-import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from "@/components/ui/sidebar"
+import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar"
+import { useSidebar } from "@/components/ui/sidebar"
 import { SessionList } from "./session-list"
 import { useUserSessions, useCreateSession } from "@/hooks/useChatSession"
 import { getSessionMessages } from "@/api/session"
@@ -22,7 +23,7 @@ export interface YuanChuangSidebarProps {
 
 export function YuanChuangSidebarContent({ selectedSessionId, onSessionSelect }: YuanChuangSidebarProps) {
   const [isCreating, setIsCreating] = useState(false)
-  const { open, setOpen, toggleSidebar } = useSidebar()
+  const { toggleSidebar } = useSidebar()
   const { data: sessions = [] } = useUserSessions()
   const createSession = useCreateSession()
 

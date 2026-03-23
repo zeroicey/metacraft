@@ -21,9 +21,9 @@ export function AppPreviewCard({
     : previewUrl;
 
   // 提取 UUID 用于预览页面
-  const uuid = resolvedUrl.includes("/preview/")
-    ? resolvedUrl.split("/preview/")[1]?.split("?")[0]
-    : "";
+  // const uuid = resolvedUrl.includes("/preview/")
+  //   ? resolvedUrl.split("/preview/")[1]?.split("?")[0]
+  //   : "";
 
   const handleOpenNewWindow = () => {
     // 跳转到全屏预览页面

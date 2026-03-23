@@ -14,11 +14,13 @@
       "mcp__context7__resolve-library-id",
       "mcp__context7__query-docs",
       "mcp__web-search-prime__web_search_prime",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(bunx tsc:*)",
+      "Bash(tsc:*)"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "shadcn"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

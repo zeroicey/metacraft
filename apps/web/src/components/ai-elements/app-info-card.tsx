@@ -1,5 +1,3 @@
-import { ExternalLinkIcon } from "lucide-react";
-
 interface AppInfoCardProps {
   appName?: string;
   appDescription?: string;

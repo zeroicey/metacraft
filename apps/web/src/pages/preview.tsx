@@ -8,10 +8,10 @@ export default function PreviewPage() {
   const navigate = useNavigate();
   const url = searchParams.get("url") || "";
   const appName = searchParams.get("appName") || "App Preview";
-  const logoUrl = searchParams.get("logoUrl") || "";
+  // const logoUrl = searchParams.get("logoUrl") || "";
 
   const [isLoading, setIsLoading] = useState(true);
-  const [logoLoadFailed, setLogoLoadFailed] = useState(false);
+  // const [logoLoadFailed, setLogoLoadFailed] = useState(false);
 
   const resolvedUrl = url.startsWith("/")
     ? `${API_BASE_URL}${url}`
