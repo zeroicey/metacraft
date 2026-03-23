@@ -59,7 +59,7 @@ public class AppGenPipelineService {
         AtomicReference<Long> relatedVersionIdRef = new AtomicReference<>();
         AtomicReference<String> matchedTemplateRef = new AtomicReference<>();
 
-        // Template matching - runs in parallel
+        // Template matching - 先执行模板匹配，等待结果
         Mono<String> templateMatchMono = templateMatcherService.matchTemplate(message)
                 .subscribeOn(Schedulers.boundedElastic())
                 .doOnNext(matchedTemplateRef::set)
@@ -89,33 +89,37 @@ public class AppGenPipelineService {
                 .data(sseUtils.toAppInfoJson(app.getName(), app.getDescription()))
                 .build()).flux();
 
-        Flux<ServerSentEvent<String>> postAppInfoStream = appInfoMono.flatMapMany(app -> {
-            Flux<ServerSentEvent<String>> logoStream = Mono.fromCallable(() -> generateLogoEvent(app))
-                    .subscribeOn(Schedulers.boundedElastic())
-                    .flux();
+        // 修改：让 codeStream 等待 templateMatchMono 完成后再执行
+        Flux<ServerSentEvent<String>> postAppInfoStream = templateMatchMono
+                .thenMany(appInfoMono.flatMapMany(app -> {
+                    Flux<ServerSentEvent<String>> logoStream = Mono.fromCallable(() -> generateLogoEvent(app))
+                            .subscribeOn(Schedulers.boundedElastic())
+                            .flux();
 
-            Mono<ServerSentEvent<String>> codeStream = Mono.fromCallable(() -> {
-                // Check if template matched
-                String matchedTemplate = matchedTemplateRef.get();
-                AppVersionEntity createdVersion;
+                    Mono<ServerSentEvent<String>> codeStream = Mono.fromCallable(() -> {
+                        // Check if template matched
+                        String matchedTemplate = matchedTemplateRef.get();
+                        AppVersionEntity createdVersion;
 
-                if (matchedTemplate != null) {
-                    // Use template - copy files
-                    createdVersion = createVersionFromTemplate(app, matchedTemplate);
-                } else {
-                    // Fallback to OpenCode
-                    createdVersion = generateInitialVersionWithOpenCode(app, history, message);
-                }
+                        if (matchedTemplate != null) {
+                            // Use template - copy files
+                            log.info("Using template: {}", matchedTemplate);
+                            createdVersion = createVersionFromTemplate(app, matchedTemplate);
+                        } else {
+                            // Fallback to OpenCode
+                            log.info("No template matched, using OpenCode");
+                            createdVersion = generateInitialVersionWithOpenCode(app, history, message);
+                        }
 
-                relatedVersionIdRef.set(createdVersion.getId());
-                return ServerSentEvent.<String>builder()
-                        .event("app_generated")
-                        .data(sseUtils.toAppGeneratedJson(app.getUuid(), createdVersion.getVersionNumber()))
-                        .build();
-            }).subscribeOn(Schedulers.boundedElastic());
+                        relatedVersionIdRef.set(createdVersion.getId());
+                        return ServerSentEvent.<String>builder()
+                                .event("app_generated")
+                                .data(sseUtils.toAppGeneratedJson(app.getUuid(), createdVersion.getVersionNumber()))
+                                .build();
+                    }).subscribeOn(Schedulers.boundedElastic());
 
-            return Flux.merge(logoStream, codeStream);
-        });
+                    return Flux.merge(logoStream, codeStream);
+                }));
 
         return Flux.merge(chatStream, planStream, appInfoStream, postAppInfoStream)
                 .doOnComplete(() -> saveAssistantGenMessage(
