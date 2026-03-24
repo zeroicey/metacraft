@@ -18,7 +18,7 @@ const formatTime = (timestamp: number) => {
 };
 
 // 消息气泡
-const MessageBubble = ({ message }: { message: YuanMengMessage }) => {
+const MessageBubble = ({ message, avatarUrl, userName }: { message: YuanMengMessage; avatarUrl: string; userName: string }) => {
     const isUser = message.type === "user_message";
 
     if (isUser) {
@@ -26,7 +26,7 @@ const MessageBubble = ({ message }: { message: YuanMengMessage }) => {
             <div key={message.id} className="flex gap-3 flex-row-reverse">
                 <img
                     src={avatarUrl}
-                    alt={user?.name || "用户"}
+                    alt={userName || "用户"}
                     className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                 />
                 <div className="max-w-[80%]">
@@ -109,7 +109,7 @@ export default function YuanMengPage() {
                 ) : (
                     <div className="space-y-3">
                         {messages.map((msg) => (
-                            <MessageBubble key={msg.id} message={msg} />
+                            <MessageBubble key={msg.id} message={msg} avatarUrl={avatarUrl} userName={user?.name || "用户"} />
                         ))}
                         <div ref={messagesEndRef} />
                     </div>
