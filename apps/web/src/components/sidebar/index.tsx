@@ -21,7 +21,9 @@ export function AppSidebar() {
   // Get avatar URL - handle empty string case
   const getAvatarUrl = () => {
     if (!user?.avatarBase64 || user.avatarBase64 === "") {
-      return null
+      // Use DiceBear pixel-art avatar with user's name as seed
+      const seed = encodeURIComponent(user?.name || "user")
+      return `https://api.dicebear.com/7.x/pixel-art/svg?seed=${seed}`
     }
     // If it's already a data URL, use it directly
     if (user.avatarBase64.startsWith("data:")) {
@@ -71,19 +73,11 @@ export function AppSidebar() {
         ) : (
           <div className="flex items-center justify-between px-3">
             <div className="flex items-center gap-2 min-w-0">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt={user?.name || "用户头像"}
-                  className="h-8 w-8 rounded-full object-cover flex-shrink-0"
-                />
-              ) : (
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#667eea] to-[#764ba2] flex-shrink-0">
-                  <span className="text-sm font-bold text-white">
-                    {user?.name?.charAt(0)?.toUpperCase() || "U"}
-                  </span>
-                </div>
-              )}
+              <img
+                src={avatarUrl}
+                alt={user?.name || "用户头像"}
+                className="h-8 w-8 rounded-full object-cover flex-shrink-0"
+              />
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-medium text-gray-900 truncate">
                   {user?.name || "用户"}

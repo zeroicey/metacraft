@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useYuanMengChat, type YuanMengMessage } from "@/hooks/useYuanMengChat";
-import { SendIcon, UserIcon, Loader2Icon } from "lucide-react";
+import { useCurrentUser } from "@/hooks/useUser";
+import { SendIcon, Loader2Icon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Streamdown } from "streamdown";
@@ -23,9 +24,11 @@ const MessageBubble = ({ message }: { message: YuanMengMessage }) => {
     if (isUser) {
         return (
             <div key={message.id} className="flex gap-3 flex-row-reverse">
-                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                    <UserIcon className="h-4 w-4 text-white" />
-                </div>
+                <img
+                    src={avatarUrl}
+                    alt={user?.name || "用户"}
+                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                />
                 <div className="max-w-[80%]">
                     <div className="rounded-lg px-4 py-2 bg-blue-500 text-white text-sm whitespace-pre-wrap">
                         {message.content}
@@ -58,6 +61,21 @@ export default function YuanMengPage() {
     const [inputText, setInputText] = useState("");
     const { messages, connectionStatus, sendMessage } = useYuanMengChat();
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const { data: user } = useCurrentUser();
+
+    // 获取用户头像 URL
+    const getAvatarUrl = () => {
+        if (!user?.avatarBase64 || user.avatarBase64 === "") {
+            const seed = encodeURIComponent(user?.name || "user")
+            return `https://api.dicebear.com/7.x/pixel-art/svg?seed=${seed}`
+        }
+        if (user.avatarBase64.startsWith("data:")) {
+            return user.avatarBase64
+        }
+        return `data:image/png;base64,${user.avatarBase64}`
+    }
+
+    const avatarUrl = getAvatarUrl()
 
     // 自动滚动到底部
     useEffect(() => {

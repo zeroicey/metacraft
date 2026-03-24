@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useAppStore } from "@/stores/app-store";
 import { useChat, type ChatMessage } from "@/hooks/useChat";
+import { useCurrentUser } from "@/hooks/useUser";
 import { GenMessageCard } from "@/components/ai-elements";
-import { SendIcon, UserIcon, Loader2Icon } from "lucide-react";
+import { SendIcon, Loader2Icon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Streamdown } from "streamdown";
@@ -16,8 +17,23 @@ export default function YuanChuangPage() {
   const selectedSessionId = useAppStore((state) => state.selectedSessionId);
   const [inputText, setInputText] = useState("");
 
+  const { data: user } = useCurrentUser();
   const { messages, isLoading, isStreaming, sendMessage } = useChat(selectedSessionId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // 获取用户头像 URL
+  const getAvatarUrl = () => {
+    if (!user?.avatarBase64 || user.avatarBase64 === "") {
+      const seed = encodeURIComponent(user?.name || "user")
+      return `https://api.dicebear.com/7.x/pixel-art/svg?seed=${seed}`
+    }
+    if (user.avatarBase64.startsWith("data:")) {
+      return user.avatarBase64
+    }
+    return `data:image/png;base64,${user.avatarBase64}`
+  }
+
+  const avatarUrl = getAvatarUrl()
 
   // 自动滚动到底部
   useEffect(() => {
@@ -65,9 +81,11 @@ export default function YuanChuangPage() {
     if (msg.role === "user") {
       return (
         <div key={msg.id} className="flex gap-3 flex-row-reverse">
-          <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-            <UserIcon className="h-4 w-4 text-white" />
-          </div>
+          <img
+            src={avatarUrl}
+            alt={user?.name || "用户"}
+            className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+          />
           <div className="max-w-[80%] rounded-lg px-4 py-2 bg-blue-500 text-white text-sm whitespace-pre-wrap">
             {msg.content}
           </div>
