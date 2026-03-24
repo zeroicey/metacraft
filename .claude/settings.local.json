@@ -16,7 +16,8 @@
       "mcp__web-search-prime__web_search_prime",
       "WebFetch(domain:github.com)",
       "Bash(bunx tsc:*)",
-      "Bash(tsc:*)"
+      "Bash(tsc:*)",
+      "mcp__zread__get_repo_structure"
     ]
   },
   "enableAllProjectMcpServers": true,
