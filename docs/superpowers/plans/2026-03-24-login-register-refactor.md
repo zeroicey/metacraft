@@ -460,6 +460,11 @@ export default function RegisterPage() {
 
 查看 `apps/web/src/components/ui/textarea.tsx` 是否存在，如不存在需要创建
 
+如果不存在，运行:
+```bash
+cd apps/web && bunx shadcn@latest add textarea --yes
+```
+
 - [ ] **Step 3: 提交**
 
 ```bash
@@ -474,32 +479,89 @@ git commit -m "feat(web): create register page"
 ### Task 5: 更新路由配置
 
 **Files:**
-- Modify: 路由配置文件（需要先找到路由文件位置）
+- Modify: `apps/web/src/router.ts`
 
-- [ ] **Step 1: 找到路由配置文件**
+- [ ] **Step 1: 添加登录和注册页面导入**
 
-```bash
-find apps/web/src -name "*.tsx" -exec grep -l "Route\|Routes\|Router" {} \; | head -5
+在文件顶部添加:
+```typescript
+const LoginPage = lazy(() => import("@/pages/login"));
+const RegisterPage = lazy(() => import("@/pages/register"));
 ```
 
-常见位置: `router.tsx`, `App.tsx`, `main.tsx`
+- [ ] **Step 2: 添加路由**
 
-- [ ] **Step 2: 添加登录和注册路由**
+在 router 数组中添加新的路由配置:
+```typescript
+{
+    path: "/login",
+    Component: StandaloneLayout,
+    children: [
+        { index: true, Component: LoginPage },
+    ],
+},
+{
+    path: "/register",
+    Component: StandaloneLayout,
+    children: [
+        { index: true, Component: RegisterPage },
+    ],
+},
+```
 
-添加:
-```tsx
-import LoginPage from "./pages/login";
-import RegisterPage from "./pages/register";
-
-// 在 Routes 中添加
-<Route path="/login" element={<LoginPage />} />
-<Route path="/register" element={<RegisterPage />} />
+完整 router 配置如下:
+```typescript
+const router = createHashRouter([
+    {
+        path: "/",
+        Component: RootLayout,
+        ErrorBoundary: ErrorPage,
+        children: [
+            { index: true, Component: YuanChuangPage },
+            { path: "yuanchuang", Component: YuanChuangPage },
+            { path: "yuanmeng", Component: YuanMengPage },
+            { path: "*", Component: NotFoundPage },
+        ],
+    },
+    {
+        path: "/preview",
+        Component: StandaloneLayout,
+        ErrorBoundary: ErrorPage,
+        children: [
+            { index: true, Component: PreviewPage },
+        ],
+    },
+    {
+        path: "/myapps",
+        Component: StandaloneLayout,
+        ErrorBoundary: ErrorPage,
+        children: [
+            { index: true, Component: MyAppsPage },
+        ],
+    },
+    {
+        path: "/login",
+        Component: StandaloneLayout,
+        ErrorBoundary: ErrorPage,
+        children: [
+            { index: true, Component: LoginPage },
+        ],
+    },
+    {
+        path: "/register",
+        Component: StandaloneLayout,
+        ErrorBoundary: ErrorPage,
+        children: [
+            { index: true, Component: RegisterPage },
+        ],
+    },
+]);
 ```
 
 - [ ] **Step 3: 提交**
 
 ```bash
-git add <router-file>
+git add apps/web/src/router.ts
 git commit -m "feat(web): add /login and /register routes"
 ```
 

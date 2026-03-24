@@ -10,6 +10,8 @@ const MyAppsPage = lazy(() => import("@/pages/myapps"));
 const PreviewPage = lazy(() => import("@/pages/preview"));
 const NotFoundPage = lazy(() => import("@/pages/404"));
 const ErrorPage = lazy(() => import("@/pages/error"));
+const LoginPage = lazy(() => import("@/pages/login"));
+const RegisterPage = lazy(() => import("@/pages/register"));
 
 const router = createHashRouter([
     {
@@ -37,6 +39,22 @@ const router = createHashRouter([
         ErrorBoundary: ErrorPage,
         children: [
             { index: true, Component: MyAppsPage },
+        ],
+    },
+    {
+        path: "/login",
+        Component: StandaloneLayout,
+        ErrorBoundary: ErrorPage,
+        children: [
+            { index: true, Component: LoginPage },
+        ],
+    },
+    {
+        path: "/register",
+        Component: StandaloneLayout,
+        ErrorBoundary: ErrorPage,
+        children: [
+            { index: true, Component: RegisterPage },
         ],
     },
 ]);

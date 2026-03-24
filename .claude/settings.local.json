@@ -17,7 +17,9 @@
       "WebFetch(domain:github.com)",
       "Bash(bunx tsc:*)",
       "Bash(tsc:*)",
-      "mcp__zread__get_repo_structure"
+      "mcp__zread__get_repo_structure",
+      "Bash(python3:*)",
+      "Bash(bun vite:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

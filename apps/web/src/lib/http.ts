@@ -1,5 +1,4 @@
 import ky from "ky";
-import { useAuthStore } from "@/stores/auth-store";
 import { API_PREFIX_URL } from "./config";
 
 /**
@@ -27,9 +26,10 @@ const http = ky.extend({
         afterResponse: [
             (_request, _options, response) => {
                 if (response.status === 401 || response.status === 403) {
-                    // 打开登录弹窗而不是跳转页面
-                    const openLoginDrawer = useAuthStore.getState().openLoginDrawer;
-                    openLoginDrawer();
+                    // 清除本地存储的 token
+                    localStorage.removeItem('token');
+                    // 跳转到登录页
+                    window.location.href = '/login';
                 }
             },
         ],

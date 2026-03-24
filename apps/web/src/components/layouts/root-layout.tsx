@@ -4,7 +4,6 @@ import { Toaster } from "sonner";
 import { SidebarProvider } from "../ui/sidebar";
 import { AppSidebar } from "@/components/sidebar";
 import Navbar from "@/components/navbar";
-import { LoginDrawer } from "@/components/auth/login-drawer";
 
 export default function RootLayout() {
   return (
@@ -21,7 +20,6 @@ export default function RootLayout() {
           </div>
         </div>
       </SidebarProvider>
-      <LoginDrawer />
     </QueryProvider>
   );
 }
