@@ -1,5 +1,6 @@
 import { SettingsIcon, ChevronRightIcon } from "lucide-react"
 import { useCurrentUser } from "@/hooks/useUser"
+import { useNavigate } from "react-router"
 
 import {
   Sidebar,
@@ -12,6 +13,7 @@ import { useAppStore } from "@/stores/app-store"
 import { YuanChuangSidebarContent, YuanMengSidebarContent } from "@/components/sidebar/sidebar-content"
 
 export function AppSidebar() {
+  const navigate = useNavigate()
   const currentPage = useAppStore((state) => state.currentPage)
   const selectedSessionId = useAppStore((state) => state.selectedSessionId)
   const setSelectedSessionId = useAppStore((state) => state.setSelectedSessionId)
@@ -89,7 +91,7 @@ export function AppSidebar() {
                 )}
               </div>
             </div>
-            <button className="h-8 w-8 p-0 flex items-center justify-center flex-shrink-0">
+            <button className="h-8 w-8 p-0 flex items-center justify-center flex-shrink-0" onClick={() => navigate("/profile")}>
               <SettingsIcon className="h-5 w-5 text-gray-600" />
             </button>
           </div>

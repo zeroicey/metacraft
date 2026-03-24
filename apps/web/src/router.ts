@@ -12,6 +12,7 @@ const NotFoundPage = lazy(() => import("@/pages/404"));
 const ErrorPage = lazy(() => import("@/pages/error"));
 const LoginPage = lazy(() => import("@/pages/login"));
 const RegisterPage = lazy(() => import("@/pages/register"));
+const ProfilePage = lazy(() => import("@/pages/profile"));
 
 const router = createHashRouter([
     {
@@ -55,6 +56,14 @@ const router = createHashRouter([
         ErrorBoundary: ErrorPage,
         children: [
             { index: true, Component: RegisterPage },
+        ],
+    },
+    {
+        path: "/profile",
+        Component: StandaloneLayout,
+        ErrorBoundary: ErrorPage,
+        children: [
+            { index: true, Component: ProfilePage },
         ],
     },
 ]);
