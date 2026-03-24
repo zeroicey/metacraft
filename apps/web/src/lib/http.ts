@@ -28,8 +28,13 @@ const http = ky.extend({
                 if (response.status === 401 || response.status === 403) {
                     // 清除本地存储的 token
                     localStorage.removeItem('token');
-                    // 跳转到登录页
-                    window.location.href = '/login';
+                    // 检查当前是否在登录/注册页面，避免无限循环
+                    // hash 模式下 URL 格式是 #/login
+                    const hash = window.location.hash.replace('#', '');
+                    const isAuthPage = hash === '/login' || hash === '/register';
+                    if (!isAuthPage) {
+                        window.location.hash = '#/login';
+                    }
                 }
             },
         ],

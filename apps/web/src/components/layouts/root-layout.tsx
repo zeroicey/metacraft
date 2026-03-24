@@ -4,8 +4,16 @@ import { Toaster } from "sonner";
 import { SidebarProvider } from "../ui/sidebar";
 import { AppSidebar } from "@/components/sidebar";
 import Navbar from "@/components/navbar";
+import { useEffect } from "react";
+import { useAuthStore } from "@/stores/auth-store";
 
 export default function RootLayout() {
+  const initialize = useAuthStore((state) => state.initialize);
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
   return (
     <QueryProvider>
       <Toaster position={"top-center"} />
