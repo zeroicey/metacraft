@@ -83,7 +83,7 @@ export function YuanChuangSidebarContent({ selectedSessionId, onSessionSelect }:
 
   const navItems = [
     { icon: AppWindowIcon, label: "我的元应用", onClick: () => navigate("/myapps") },
-    { icon: SearchIcon, label: "元应用商店" },
+    { icon: SearchIcon, label: "元应用商店", onClick: () => navigate("/store") },
     { icon: FolderIcon, label: "元数据中心" },
   ]
 
