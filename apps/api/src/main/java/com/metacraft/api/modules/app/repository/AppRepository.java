@@ -13,4 +13,5 @@ public interface AppRepository extends JpaRepository<AppEntity, Long> {
     Optional<AppEntity> findByUuid(String uuid);
     Optional<AppEntity> findTopByUserIdOrderByIdDesc(Long userId);
     Optional<AppEntity> findTopByUserIdAndLogoStartingWithOrderByIdDesc(Long userId, String logoPrefix);
+    List<AppEntity> findByIsPublicTrueOrderByCreatedAtDesc();
 }
