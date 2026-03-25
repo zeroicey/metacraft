@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<Void>> handleRuntimeException(RuntimeException ex) {
-        return Response.error(ex.getMessage()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).build();
+        return Response.error(ex.getMessage()).status(HttpStatus.BAD_REQUEST.value()).build();
     }
 
     @ExceptionHandler(Exception.class)
