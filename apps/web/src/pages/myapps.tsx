@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { ArrowLeftIcon, PlusIcon, Loader2Icon } from "lucide-react";
 import { useUserApps, useCreateApp } from "@/hooks/useApps";
+import { useAppStore } from "@/stores/app-store";
+import { useUserSessions, useCreateSession } from "@/hooks/useChatSession";
+import { getSessionMessages } from "@/api/session";
 import { AppItem } from "@/components/app/AppItem";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,12 +19,63 @@ import { toast } from "sonner";
 
 export default function MyAppsPage() {
     const navigate = useNavigate();
+    const setSelectedSessionId = useAppStore((state) => state.setSelectedSessionId);
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [appName, setAppName] = useState("");
     const [appDescription, setAppDescription] = useState("");
+    const [isCreating, setIsCreating] = useState(false);
 
     const { data: apps, isLoading, error } = useUserApps();
     const createApp = useCreateApp();
+    const createSession = useCreateSession();
+    const { data: sessions = [] } = useUserSessions();
+
+    // 获取会话消息的辅助函数
+    const getSessionMessagesById = async (sessionId: string) => {
+        try {
+            return await getSessionMessages(sessionId);
+        } catch {
+            return [];
+        }
+    };
+
+    const DEFAULT_TITLE = "未命名会话";
+
+    const handleGoToChat = async () => {
+        if (isCreating) return;
+        setIsCreating(true);
+
+        try {
+            // 查找是否有已存在的空会话
+            let targetSessionId = "";
+
+            for (const session of sessions) {
+                if (session.title === DEFAULT_TITLE) {
+                    // 获取该会话的消息
+                    const messages = await getSessionMessagesById(session.sessionId);
+                    if (messages.length === 0) {
+                        targetSessionId = session.sessionId;
+                        break;
+                    }
+                }
+            }
+
+            if (targetSessionId) {
+                // 使用已存在的空会话
+                setSelectedSessionId(targetSessionId);
+            } else {
+                // 创建新会话
+                const newSession = await createSession.mutateAsync({ title: DEFAULT_TITLE });
+                setSelectedSessionId(newSession.sessionId);
+            }
+
+            navigate("/yuanchuang");
+        } catch (error) {
+            console.error("Failed to create session:", error);
+        } finally {
+            setIsCreating(false);
+        }
+    };
 
     const handleCreateApp = async () => {
         if (!appName.trim()) {
@@ -40,10 +94,6 @@ export default function MyAppsPage() {
         } catch (error) {
             console.error("Failed to create app:", error);
         }
-    };
-
-    const handleGoToCreate = () => {
-        navigate("/yuanmeng");
     };
 
     const handleOpenCreateDialog = () => {
@@ -73,7 +123,7 @@ export default function MyAppsPage() {
 
                 {/* Add Button */}
                 <button
-                    onClick={handleOpenCreateDialog}
+                    onClick={handleGoToChat}
                     className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-gray-100"
                 >
                     <PlusIcon className="h-5 w-5 text-[#007AFF]" />
@@ -117,7 +167,7 @@ export default function MyAppsPage() {
                             </p>
                         </div>
                         <Button
-                            onClick={handleGoToCreate}
+                            onClick={handleGoToChat}
                             className="mt-2 bg-[#007AFF] text-white hover:bg-[#007AFF]/90"
                         >
                             去创建
