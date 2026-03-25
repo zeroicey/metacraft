@@ -36,8 +36,8 @@ public class AppRatingEntity {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(nullable = false)
-    private Integer rating;
+    @Column(nullable = false, columnDefinition = "SMALLINT")
+    private Short rating;
 
     @Generated(event = EventType.INSERT)
     @Column(name = "created_at", nullable = false, updatable = false)
