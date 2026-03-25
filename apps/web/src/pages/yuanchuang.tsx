@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useAppStore } from "@/stores/app-store";
 import { useChat, type ChatMessage } from "@/hooks/useChat";
 import { useCurrentUser } from "@/hooks/useUser";
+import { useUserSessions } from "@/hooks/useChatSession";
 import { GenMessageCard } from "@/components/ai-elements";
 import { SendIcon, Loader2Icon } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -15,11 +16,24 @@ import "streamdown/styles.css";
 
 export default function YuanChuangPage() {
   const selectedSessionId = useAppStore((state) => state.selectedSessionId);
+  const setSelectedSessionId = useAppStore((state) => state.setSelectedSessionId);
   const [inputText, setInputText] = useState("");
 
   const { data: user } = useCurrentUser();
+  const { data: sessions = [] } = useUserSessions();
   const { messages, isLoading, isStreaming, sendMessage } = useChat(selectedSessionId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // 自动选择最新的会话（如果当前没有选中会话）
+  useEffect(() => {
+    if (!selectedSessionId && sessions.length > 0) {
+      // 按 updatedAt 排序，取最新的
+      const sorted = [...sessions].sort(
+        (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      );
+      setSelectedSessionId(sorted[0].sessionId);
+    }
+  }, [sessions, selectedSessionId, setSelectedSessionId]);
 
   // 获取用户头像 URL
   const getAvatarUrl = () => {
