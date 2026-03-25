@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/store/apps")
+@RequestMapping("/store/apps")
 @Tag(name = "应用商店", description = "应用商店相关接口")
 @RequiredArgsConstructor
 public class StoreController {
