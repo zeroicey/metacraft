@@ -136,12 +136,12 @@ public class StoreService {
         AppRatingEntity rating;
         if (existingRating.isPresent()) {
             rating = existingRating.get();
-            rating.setRating(request.getRating());
+            rating.setRating(request.getRating().shortValue());
         } else {
             rating = AppRatingEntity.builder()
                     .appId(appId)
                     .userId(userId)
-                    .rating(request.getRating())
+                    .rating(request.getRating().shortValue())
                     .build();
         }
 
