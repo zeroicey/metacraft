@@ -1,6 +1,6 @@
 import { useSearchParams, useNavigate } from "react-router";
 import { ArrowLeftIcon } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { API_BASE_URL } from "@/lib/config";
 
 export default function PreviewPage() {
@@ -17,7 +17,7 @@ export default function PreviewPage() {
   const [position, setPosition] = useState({ x: 16, y: 16 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 }); // 记录拖动开始时的指针位置
 
   const resolvedUrl = url.startsWith("/")
     ? `${API_BASE_URL}${url}`
@@ -33,6 +33,7 @@ export default function PreviewPage() {
       x: e.clientX - button.left,
       y: e.clientY - button.top,
     });
+    setDragStartPos({ x: e.clientX, y: e.clientY });
     setIsDragging(true);
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
@@ -57,16 +58,26 @@ export default function PreviewPage() {
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const wasDragging = isDragging;
+
+    // 计算拖动距离
+    const dx = Math.abs(e.clientX - dragStartPos.x);
+    const dy = Math.abs(e.clientY - dragStartPos.y);
+    const isClick = dx < 5 && dy < 5; // 移动小于 5px 视为点击
+
     setIsDragging(false);
     (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+
+    // 如果不是拖动，则触发点击
+    if (!wasDragging || isClick) {
+      handleBack();
+    }
   };
 
   return (
     <div className="flex flex-col h-screen bg-white">
       {/* Floating Back Button */}
       <button
-        ref={buttonRef}
-        onClick={handleBack}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
