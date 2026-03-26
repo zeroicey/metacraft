@@ -81,26 +81,35 @@ export const rateApp = async (appId: number, rating: number): Promise<RatingResu
     const response = await http
         .post(`store/apps/${appId}/ratings`, { json: { rating } })
         .json<ApiResponse<RatingResult>>();
-    if (!response.data) {
+    if (response.error) {
         throw new Error(response.message || "Failed to submit rating");
     }
-    return response.data;
+    // Return mock data since backend returns void
+    return { averageRating: rating, ratingCount: 1 };
 };
 
 /**
  * Submit comment for an app
  * @param appId App ID
  * @param content Comment content
- * @returns Created comment
+ * @returns Created comment (mock since backend returns void)
  */
 export const commentApp = async (appId: number, content: string): Promise<StoreComment> => {
     const response = await http
         .post(`store/apps/${appId}/comments`, { json: { content } })
         .json<ApiResponse<StoreComment>>();
-    if (!response.data) {
+    if (response.error) {
         throw new Error(response.message || "Failed to submit comment");
     }
-    return response.data;
+    // Return mock comment since backend returns void
+    return {
+        id: Date.now(),
+        userId: 0,
+        userName: "",
+        userAvatar: null,
+        content,
+        createdAt: new Date().toISOString()
+    };
 };
 
 /**
@@ -112,8 +121,8 @@ export const deleteComment = async (appId: number, commentId: number): Promise<v
     const response = await http
         .delete(`store/apps/${appId}/comments/${commentId}`)
         .json<ApiResponse<void>>();
-    if (response.message && !response.data) {
-        throw new Error(response.message);
+    if (response.error) {
+        throw new Error(response.message || "Failed to delete comment");
     }
 };
 
@@ -125,8 +134,8 @@ export const publishApp = async (appId: number): Promise<void> => {
     const response = await http
         .post(`store/apps/${appId}/publish`)
         .json<ApiResponse<void>>();
-    if (response.message && !response.data) {
-        throw new Error(response.message);
+    if (response.error) {
+        throw new Error(response.message || "Failed to publish app");
     }
 };
 
@@ -138,7 +147,7 @@ export const unpublishApp = async (appId: number): Promise<void> => {
     const response = await http
         .delete(`store/apps/${appId}/publish`)
         .json<ApiResponse<void>>();
-    if (response.message && !response.data) {
-        throw new Error(response.message);
+    if (response.error) {
+        throw new Error(response.message || "Failed to unpublish app");
     }
 };

@@ -81,7 +81,7 @@ export const deleteApp = async (appId: number): Promise<void> => {
     const response = await http
         .delete(`apps/${appId}`)
         .json<ApiResponse<void>>();
-    if (!response.data && response.message) {
+    if (response.error) {
         throw new Error(response.message || "Failed to delete app");
     }
 };

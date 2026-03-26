@@ -9,9 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import StarRating from "@/components/store/StarRating";
 import CommentList from "@/components/store/CommentList";
 import { toast } from "sonner";
+import { API_BASE_URL } from "@/lib/config";
 
 // 获取头像 URL
-const getAvatarUrl = (avatarBase64?: string, name?: string) => {
+const getAvatarUrl = (avatarBase64?: string | null, name?: string) => {
     if (!avatarBase64 || avatarBase64 === "") {
         const seed = encodeURIComponent(name || "user");
         return `https://api.dicebear.com/7.x/pixel-art/svg?seed=${seed}`;
@@ -22,6 +23,19 @@ const getAvatarUrl = (avatarBase64?: string, name?: string) => {
     return `data:image/png;base64,${avatarBase64}`;
 };
 
+// 获取 Logo URL
+const getLogoUrl = (logo: string | null) => {
+    if (!logo || logo.length === 0) {
+        return "";
+    }
+    if (logo.startsWith("http://") || logo.startsWith("https://")) {
+        return logo;
+    }
+    const dotIndex = logo.lastIndexOf(".");
+    const logoUuid = dotIndex > 0 ? logo.substring(0, dotIndex) : logo;
+    return `${API_BASE_URL}/api/logo/${logoUuid}`;
+};
+
 export default function StoreDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -29,6 +43,7 @@ export default function StoreDetailPage() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const { data: app, isLoading, error, refetch } = useStoreAppDetail(appId);
+  const logoUrl = app ? getLogoUrl(app.logo) : "";
   const rateApp = useRateApp(appId);
   const commentApp = useCommentApp(appId);
   const deleteComment = useDeleteComment(appId);
@@ -160,9 +175,9 @@ export default function StoreDetailPage() {
           <div className="flex gap-4">
             {/* Logo */}
             <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg bg-muted">
-              {app.logo ? (
+              {logoUrl ? (
                 <img
-                  src={app.logo}
+                  src={logoUrl}
                   alt={app.name}
                   className="h-full w-full rounded-lg object-cover"
                 />
@@ -213,7 +228,7 @@ export default function StoreDetailPage() {
           <h3 className="mb-3 text-base font-medium text-gray-900">预览</h3>
           <div className="h-[400px] w-full overflow-hidden rounded-lg border">
             <iframe
-              src={`/api/preview/${app.uuid}`}
+              src={`${API_BASE_URL}/api/preview/${app.uuid}`}
               className="h-full w-full border-0"
               title={`${app.name} Preview`}
               sandbox="allow-scripts allow-same-origin"
