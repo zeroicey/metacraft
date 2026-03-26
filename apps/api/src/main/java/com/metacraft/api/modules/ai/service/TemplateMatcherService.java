@@ -36,7 +36,7 @@ public class TemplateMatcherService {
 
         if (templateNames.isEmpty()) {
             log.info("No templates found, fallback to OpenCode");
-            return Mono.just(null);
+            return Mono.empty();
         }
 
         String templatesList = String.join("\n", templateNames);
@@ -46,9 +46,10 @@ public class TemplateMatcherService {
                 .timeout(java.time.Duration.ofSeconds(10))
                 .onErrorResume(e -> {
                     log.warn("Template matching error, fallback to OpenCode: {}", e.getMessage());
-                    return Mono.just("NONE");
+                    return Mono.empty();
                 })
-                .map(response -> parseTemplateMatchResponse(response, templateNames));
+                .map(response -> parseTemplateMatchResponse(response, templateNames))
+                .filter(template -> template != null);
     }
 
     private String parseTemplateMatchResponse(String response, List<String> templateNames) {
