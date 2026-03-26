@@ -1,6 +1,6 @@
 import { useSearchParams, useNavigate } from "react-router";
 import { ArrowLeftIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { API_BASE_URL } from "@/lib/config";
 
 export default function PreviewPage() {
@@ -13,6 +13,12 @@ export default function PreviewPage() {
   const [isLoading, setIsLoading] = useState(true);
   // const [logoLoadFailed, setLogoLoadFailed] = useState(false);
 
+  // 拖动相关状态
+  const [position, setPosition] = useState({ x: 16, y: 16 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
   const resolvedUrl = url.startsWith("/")
     ? `${API_BASE_URL}${url}`
     : url;
@@ -21,12 +27,62 @@ export default function PreviewPage() {
     navigate(-1);
   };
 
+  const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const button = e.currentTarget.getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - button.left,
+      y: e.clientY - button.top,
+    });
+    setIsDragging(true);
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!isDragging) return;
+
+    const buttonWidth = 40; // w-10 = 2.5rem = 40px
+    const buttonHeight = 40; // h-10 = 2.5rem = 40px
+
+    const newX = e.clientX - dragOffset.x;
+    const newY = e.clientY - dragOffset.y;
+
+    // 边界限制
+    const maxX = window.innerWidth - buttonWidth;
+    const maxY = window.innerHeight - buttonHeight;
+
+    setPosition({
+      x: Math.max(0, Math.min(newX, maxX)),
+      y: Math.max(0, Math.min(newY, maxY)),
+    });
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+    setIsDragging(false);
+    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-white">
       {/* Floating Back Button */}
       <button
+        ref={buttonRef}
         onClick={handleBack}
-        className="absolute left-4 top-4 z-50 flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-md hover:bg-gray-100"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+        style={{
+          position: 'fixed',
+          left: position.x,
+          top: position.y,
+          touchAction: 'none',
+          transition: isDragging ? 'none' : 'all 0.2s ease',
+          opacity: isDragging ? 0.8 : 1,
+          zIndex: 50,
+        }}
+        className={`flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-md hover:bg-gray-100 ${
+          isDragging ? 'shadow-lg' : ''
+        }`}
       >
         <ArrowLeftIcon className="w-5 h-5" />
       </button>
