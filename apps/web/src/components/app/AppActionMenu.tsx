@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { EyeIcon, Trash2Icon, SendIcon, UnplugIcon } from "lucide-react";
+import { EyeIcon, Trash2Icon, SendIcon, UnplugIcon, Loader2Icon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +19,7 @@ import {
 import { useDeleteApp } from "@/hooks/useApps";
 import { usePublishApp, useUnpublishApp } from "@/hooks/useStore";
 import { API_BASE_URL } from "@/lib/config";
+import { toast } from "sonner";
 import type { App } from "@/types/app";
 
 interface AppActionMenuProps {
@@ -50,12 +51,30 @@ export function AppActionMenu({ app, children }: AppActionMenuProps) {
   };
 
   const handlePublish = () => {
-    publishApp.mutate(app.id);
+    publishApp.mutate(app.id, {
+      onSuccess: () => {
+        toast.success("应用已发布到商店");
+      },
+      onError: (error) => {
+        toast.error(`发布失败: ${error.message}`);
+      },
+    });
   };
 
   const handleUnpublish = () => {
-    unpublishApp.mutate(app.id);
+    unpublishApp.mutate(app.id, {
+      onSuccess: () => {
+        toast.success("应用已下架");
+      },
+      onError: (error) => {
+        toast.error(`下架失败: ${error.message}`);
+      },
+    });
   };
+
+  const isPublishing = publishApp.isPending;
+  const isUnpublishing = unpublishApp.isPending;
+  const isProcessing = isPublishing || isUnpublishing;
 
   return (
     <>
@@ -67,13 +86,21 @@ export function AppActionMenu({ app, children }: AppActionMenuProps) {
             预览
           </DropdownMenuItem>
           {app.isPublic ? (
-            <DropdownMenuItem onClick={handleUnpublish}>
-              <UnplugIcon className="mr-2 h-4 w-4" />
+            <DropdownMenuItem onClick={handleUnpublish} disabled={isProcessing}>
+              {isUnpublishing ? (
+                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <UnplugIcon className="mr-2 h-4 w-4" />
+              )}
               下架
             </DropdownMenuItem>
           ) : (
-            <DropdownMenuItem onClick={handlePublish}>
-              <SendIcon className="mr-2 h-4 w-4" />
+            <DropdownMenuItem onClick={handlePublish} disabled={isProcessing}>
+              {isPublishing ? (
+                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <SendIcon className="mr-2 h-4 w-4" />
+              )}
               发布到商店
             </DropdownMenuItem>
           )}
