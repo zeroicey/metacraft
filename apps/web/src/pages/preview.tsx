@@ -17,7 +17,8 @@ export default function PreviewPage() {
   const [position, setPosition] = useState({ x: 16, y: 16 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 }); // 记录拖动开始时的指针位置
+  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
+  const [hasDragged, setHasDragged] = useState(false); // 是否发生过拖动
 
   const resolvedUrl = url.startsWith("/")
     ? `${API_BASE_URL}${url}`
@@ -34,12 +35,20 @@ export default function PreviewPage() {
       y: e.clientY - button.top,
     });
     setDragStartPos({ x: e.clientX, y: e.clientY });
+    setHasDragged(false); // 重置拖动标志
     setIsDragging(true);
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (!isDragging) return;
+
+    // 检测是否发生拖动（移动超过 3px）
+    const dx = Math.abs(e.clientX - dragStartPos.x);
+    const dy = Math.abs(e.clientY - dragStartPos.y);
+    if (dx > 3 || dy > 3) {
+      setHasDragged(true);
+    }
 
     const buttonWidth = 40; // w-10 = 2.5rem = 40px
     const buttonHeight = 40; // h-10 = 2.5rem = 40px
@@ -58,18 +67,11 @@ export default function PreviewPage() {
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
-    const wasDragging = isDragging;
-
-    // 计算拖动距离
-    const dx = Math.abs(e.clientX - dragStartPos.x);
-    const dy = Math.abs(e.clientY - dragStartPos.y);
-    const isClick = dx < 5 && dy < 5; // 移动小于 5px 视为点击
-
     setIsDragging(false);
     (e.target as HTMLElement).releasePointerCapture(e.pointerId);
 
-    // 如果不是拖动，则触发点击
-    if (!wasDragging || isClick) {
+    // 如果没有发生过拖动，则视为点击，执行返回
+    if (!hasDragged) {
       handleBack();
     }
   };
@@ -81,7 +83,6 @@ export default function PreviewPage() {
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
         style={{
           position: 'fixed',
           left: position.x,
