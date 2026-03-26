@@ -116,3 +116,29 @@ export const deleteComment = async (appId: number, commentId: number): Promise<v
         throw new Error(response.message);
     }
 };
+
+/**
+ * Publish an app to the store
+ * @param appId App ID
+ */
+export const publishApp = async (appId: number): Promise<void> => {
+    const response = await http
+        .post(`store/apps/${appId}/publish`)
+        .json<ApiResponse<void>>();
+    if (response.message && !response.data) {
+        throw new Error(response.message);
+    }
+};
+
+/**
+ * Unpublish an app from the store
+ * @param appId App ID
+ */
+export const unpublishApp = async (appId: number): Promise<void> => {
+    const response = await http
+        .delete(`store/apps/${appId}/publish`)
+        .json<ApiResponse<void>>();
+    if (response.message && !response.data) {
+        throw new Error(response.message);
+    }
+};

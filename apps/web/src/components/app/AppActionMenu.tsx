@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { EyeIcon, Trash2Icon } from "lucide-react";
+import { EyeIcon, Trash2Icon, SendIcon, UnplugIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useDeleteApp } from "@/hooks/useApps";
+import { usePublishApp, useUnpublishApp } from "@/hooks/useStore";
 import { API_BASE_URL } from "@/lib/config";
 import type { App } from "@/types/app";
 
@@ -28,6 +29,8 @@ interface AppActionMenuProps {
 export function AppActionMenu({ app, children }: AppActionMenuProps) {
   const navigate = useNavigate();
   const deleteApp = useDeleteApp();
+  const publishApp = usePublishApp();
+  const unpublishApp = useUnpublishApp();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handlePreview = () => {
@@ -46,6 +49,14 @@ export function AppActionMenu({ app, children }: AppActionMenuProps) {
     setShowDeleteDialog(false);
   };
 
+  const handlePublish = () => {
+    publishApp.mutate(app.id);
+  };
+
+  const handleUnpublish = () => {
+    unpublishApp.mutate(app.id);
+  };
+
   return (
     <>
       <DropdownMenu>
@@ -55,6 +66,17 @@ export function AppActionMenu({ app, children }: AppActionMenuProps) {
             <EyeIcon className="mr-2 h-4 w-4" />
             预览
           </DropdownMenuItem>
+          {app.isPublic ? (
+            <DropdownMenuItem onClick={handleUnpublish}>
+              <UnplugIcon className="mr-2 h-4 w-4" />
+              下架
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem onClick={handlePublish}>
+              <SendIcon className="mr-2 h-4 w-4" />
+              发布到商店
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             onClick={() => setShowDeleteDialog(true)}
             className="text-red-600 focus:text-red-600"

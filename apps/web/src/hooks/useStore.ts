@@ -5,6 +5,8 @@ import {
     rateApp,
     commentApp,
     deleteComment,
+    publishApp,
+    unpublishApp,
     type StoreAppItem,
     type StoreAppDetail,
     type RatingResult,
@@ -73,6 +75,40 @@ export function useDeleteComment(appId: number) {
         onSuccess: () => {
             // Refresh app detail
             queryClient.invalidateQueries({ queryKey: ["store", "app", appId] });
+        },
+    });
+}
+
+/**
+ * Publish an app to the store
+ */
+export function usePublishApp() {
+    const queryClient = useQueryClient();
+
+    return useMutation<void, Error, number>({
+        mutationFn: (appId: number) => publishApp(appId),
+        onSuccess: () => {
+            // Refresh user apps list
+            queryClient.invalidateQueries({ queryKey: ["apps"] });
+            // Refresh store apps list
+            queryClient.invalidateQueries({ queryKey: ["store", "apps"] });
+        },
+    });
+}
+
+/**
+ * Unpublish an app from the store
+ */
+export function useUnpublishApp() {
+    const queryClient = useQueryClient();
+
+    return useMutation<void, Error, number>({
+        mutationFn: (appId: number) => unpublishApp(appId),
+        onSuccess: () => {
+            // Refresh user apps list
+            queryClient.invalidateQueries({ queryKey: ["apps"] });
+            // Refresh store apps list
+            queryClient.invalidateQueries({ queryKey: ["store", "apps"] });
         },
     });
 }
