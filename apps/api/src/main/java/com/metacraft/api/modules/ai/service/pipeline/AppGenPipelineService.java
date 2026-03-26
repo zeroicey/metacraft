@@ -1,8 +1,10 @@
 package com.metacraft.api.modules.ai.service.pipeline;
 
+import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +38,9 @@ import reactor.core.scheduler.Schedulers;
 @Service
 @RequiredArgsConstructor
 public class AppGenPipelineService {
+
+    @Value("${app.templates.matched-response-delay-ms:3000}")
+    private long templateMatchedResponseDelayMs;
 
     private final ChatAgent chatAgent;
     private final PlanGenerator planGenerator;
@@ -116,7 +121,8 @@ public class AppGenPipelineService {
                                 .event("app_generated")
                                 .data(sseUtils.toAppGeneratedJson(app.getUuid(), createdVersion.getVersionNumber()))
                                 .build();
-                    }).subscribeOn(Schedulers.boundedElastic());
+                    }).subscribeOn(Schedulers.boundedElastic())
+                            .delayElement(resolveTemplateResponseDelay(matchedTemplateRef.get()));
 
                     return Flux.merge(logoStream, codeStream);
                 }));
@@ -261,5 +267,15 @@ public class AppGenPipelineService {
             return first;
         }
         return first + "\n\n" + second;
+    }
+
+    private Duration resolveTemplateResponseDelay(String matchedTemplate) {
+        if (matchedTemplate == null || matchedTemplate.isBlank()) {
+            return Duration.ZERO;
+        }
+        if (templateMatchedResponseDelayMs <= 0) {
+            return Duration.ZERO;
+        }
+        return Duration.ofMillis(templateMatchedResponseDelayMs);
     }
 }

@@ -1,8 +1,6 @@
 package com.metacraft.api.modules.ai.service;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,11 +46,15 @@ public class TemplateMatcherService {
                     log.warn("Template matching error, fallback to OpenCode: {}", e.getMessage());
                     return Mono.empty();
                 })
-                .map(response -> parseTemplateMatchResponse(response, templateNames))
-                .filter(template -> template != null);
+                .flatMap(response -> Mono.justOrEmpty(parseTemplateMatchResponse(response, templateNames)));
     }
 
     private String parseTemplateMatchResponse(String response, List<String> templateNames) {
+        if (response == null || response.isBlank()) {
+            log.warn("Template matching response is empty");
+            return null;
+        }
+
         String trimmed = response.trim();
         log.info("Template matching response: {}", trimmed);
 

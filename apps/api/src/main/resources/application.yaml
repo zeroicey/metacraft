@@ -3,6 +3,7 @@ app:
     path: ${APP_STORAGE_PATH:data}
   templates:
     path: ${APP_TEMPLATES_PATH:data/templates}
+    matched-response-delay-ms: ${APP_TEMPLATES_MATCHED_RESPONSE_DELAY_MS:5000}
 opencode:
   enabled: ${OPENCODE_ENABLED:true}
   command: ${OPENCODE_COMMAND:opencode}
@@ -42,7 +43,7 @@ spring:
       ddl-auto: validate
     show-sql: false
   main:
-    banner-mode: 'off'
+    banner-mode: "off"
 springdoc:
   api-docs:
     enabled: true
