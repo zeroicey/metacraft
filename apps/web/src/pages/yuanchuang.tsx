@@ -98,9 +98,9 @@ export default function YuanChuangPage() {
           <img
             src={avatarUrl}
             alt={user?.name || "用户"}
-            className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+            className="w-9 h-9 rounded-full object-cover flex-shrink-0 shadow-md"
           />
-          <div className="max-w-[80%] rounded-lg px-4 py-2 bg-[#007AFF] text-white text-sm whitespace-pre-wrap">
+          <div className="max-w-[80%] px-4 py-3 bg-gradient-to-br from-[#007AFF] to-[#0056CC] text-white text-sm whitespace-pre-wrap rounded-[14px_14px_4px_14px] shadow-md">
             {msg.content}
           </div>
         </div>
@@ -125,14 +125,15 @@ export default function YuanChuangPage() {
 
     // 普通对话
     return (
-      <Streamdown
-        key={msg.id}
-        plugins={{ code, mermaid, math, cjk }}
-        animated
-        isAnimating={msg.isStreaming}
-      >
-        {msg.content}
-      </Streamdown>
+      <div key={msg.id} className="max-w-[80%] border border-[#E5E7EB] rounded-[14px_14px_14px_4px] p-4 bg-white shadow-sm ml-11">
+        <Streamdown
+          plugins={{ code, mermaid, math, cjk }}
+          animated
+          isAnimating={msg.isStreaming}
+        >
+          {msg.content}
+        </Streamdown>
+      </div>
     );
   };
 
@@ -145,7 +146,7 @@ export default function YuanChuangPage() {
             开始你的对话
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {messages.map((msg) => renderMessage(msg))}
             <div ref={messagesEndRef} />
           </div>
@@ -153,10 +154,10 @@ export default function YuanChuangPage() {
       </div>
 
       {/* 输入框 */}
-      <div className="px-4 py-3">
-        <div className="flex gap-2">
+      <div className="px-4 py-4 bg-white rounded-2xl shadow-lg mx-4 mb-4">
+        <div className="flex gap-3">
           <Input
-            className="p-4"
+            className="p-4 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 focus:bg-white transition-all"
             placeholder="输入你的想法..."
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
@@ -165,13 +166,14 @@ export default function YuanChuangPage() {
           />
           <Button
             size="icon"
+            className="h-11 w-11 bg-gradient-to-br from-[#007AFF] to-[#0056CC] hover:from-[#0056CC] hover:to-[#0044AA] text-white rounded-xl shadow-md transition-all hover:scale-105 active:scale-95"
             onClick={handleSendMessage}
             disabled={isStreaming || !inputText.trim()}
           >
             {isStreaming ? (
-              <Loader2Icon className="h-8 w-8 animate-spin" />
+              <Loader2Icon className="h-5 w-5 animate-spin" />
             ) : (
-              <SendIcon className="h-8 w-8" />
+              <SendIcon className="h-5 w-5" />
             )}
           </Button>
         </div>

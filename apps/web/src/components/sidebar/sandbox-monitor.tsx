@@ -63,11 +63,16 @@ function ResourceBar({
   return (
     <div className="px-3 py-2">
       <div className="flex items-center gap-2 mb-1">
-        <Icon className="h-4 w-4 text-gray-500" />
+        <Icon className="h-4 w-4 text-[#EC4899]" />
         <span className="text-sm text-gray-600">{label}</span>
-        {showValue && <span className="ml-auto text-sm font-medium">{value.toFixed(1)}%</span>}
+        {showValue && <span className="ml-auto text-sm font-medium text-[#EC4899]">{value.toFixed(1)}%</span>}
       </div>
-      <Progress value={value} className="h-2" />
+      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-[#EC4899] to-[#F472B6] rounded-full transition-all duration-500"
+          style={{ width: `${value}%` }}
+        />
+      </div>
     </div>
   )
 }

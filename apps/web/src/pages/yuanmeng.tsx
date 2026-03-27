@@ -27,10 +27,10 @@ const MessageBubble = ({ message, avatarUrl, userName }: { message: YuanMengMess
                 <img
                     src={avatarUrl}
                     alt={userName || "用户"}
-                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                    className="w-9 h-9 rounded-full object-cover flex-shrink-0 shadow-md"
                 />
                 <div className="max-w-[80%]">
-                    <div className="rounded-lg px-4 py-2 bg-[#EC4899] text-white text-sm whitespace-pre-wrap">
+                    <div className="rounded-[14px_14px_4px_14px] px-4 py-3 bg-gradient-to-br from-[#EC4899] to-[#F472B6] text-white text-sm whitespace-pre-wrap shadow-md">
                         {message.content}
                     </div>
                     <div className="text-xs text-gray-400 mt-1 text-right">
@@ -42,14 +42,14 @@ const MessageBubble = ({ message, avatarUrl, userName }: { message: YuanMengMess
     }
 
     return (
-        <div key={message.id} className="max-w-[80%] border border-[#FCE7F3] rounded-lg p-3 bg-white">
+        <div key={message.id} className="max-w-[80%] border border-[#FCE7F3] rounded-[14px_14px_14px_4px] p-4 bg-white shadow-sm ml-11">
             <Streamdown
                 plugins={{ code, mermaid, math, cjk }}
                 animated={false}
             >
                 {message.content}
             </Streamdown>
-            <div className="flex gap-3 text-xs text-gray-400 mt-1">
+            <div className="flex gap-3 text-xs text-gray-400 mt-2 pt-2 border-t border-[#FCE7F3]">
                 <span>{formatTime(message.timestamp)}</span>
                 {message.tokenCount && <span>消耗 {message.tokenCount} tokens</span>}
             </div>
@@ -107,7 +107,7 @@ export default function YuanMengPage() {
                         {isConnected ? "开始你的对话" : "等待连接..."}
                     </div>
                 ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         {messages.map((msg) => (
                             <MessageBubble key={msg.id} message={msg} avatarUrl={avatarUrl} userName={user?.name || "用户"} />
                         ))}
@@ -117,10 +117,10 @@ export default function YuanMengPage() {
             </div>
 
             {/* 输入框 */}
-            <div className="px-4 py-2">
-                <div className="flex gap-2">
+            <div className="px-4 py-3 bg-white rounded-2xl shadow-lg mx-4 mb-3">
+                <div className="flex gap-3">
                     <Input
-                        className="p-3 border-[#EC4899] focus:border-[#EC4899] focus:ring-[#EC4899]"
+                        className="p-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl focus:border-[#EC4899] focus:ring-2 focus:ring-[#EC4899]/20 focus:bg-white transition-all"
                         placeholder="输入消息..."
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
@@ -129,14 +129,14 @@ export default function YuanMengPage() {
                     />
                     <Button
                         size="icon"
-                        className="bg-[#EC4899] hover:bg-[#BE185D]"
+                        className="h-10 w-10 bg-gradient-to-br from-[#EC4899] to-[#BE185D] hover:from-[#BE185D] hover:to-[#9D174D] text-white rounded-xl shadow-md transition-all hover:scale-105 active:scale-95"
                         onClick={handleSendMessage}
                         disabled={!isConnected || !inputText.trim()}
                     >
                         {connectionStatus === "connecting" ? (
-                            <Loader2Icon className="h-5 w-5 animate-spin" />
+                            <Loader2Icon className="h-4 w-4 animate-spin" />
                         ) : (
-                            <SendIcon className="h-5 w-5" />
+                            <SendIcon className="h-4 w-4" />
                         )}
                     </Button>
                 </div>

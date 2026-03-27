@@ -37,17 +37,31 @@ export function AppSidebar() {
 
   const avatarUrl = getAvatarUrl()
 
+  // 主题颜色
+  const isYuanMengPage = currentPage === "yuanmeng"
+  const themeStyle = isYuanMengPage
+    ? {
+        logoGradient: "from-[#EC4899] to-[#BE185D]",
+        textColor: "text-gray-800",
+        activeText: "text-[#EC4899]",
+      }
+    : {
+        logoGradient: "from-[#007AFF] to-[#0056CC]",
+        textColor: "text-gray-800",
+        activeText: "text-[#007AFF]",
+      }
+
   return (
     <Sidebar>
       <SidebarHeader className="pt-12 pb-2">
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#222222]">
+            <div className={`flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br ${themeStyle.logoGradient} shadow-md`}>
               <span className="text-xs font-bold text-white">元</span>
             </div>
-            <span className="text-lg font-bold text-gray-800">元创</span>
+            <span className={`text-lg font-bold ${themeStyle.textColor}`}>元创</span>
           </div>
-          <button className="h-6 w-6 p-0 flex items-center justify-center">
+          <button className="h-6 w-6 p-0 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors">
             <ChevronRightIcon className="h-4 w-4 text-gray-400" />
           </button>
         </div>

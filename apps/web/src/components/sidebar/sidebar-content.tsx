@@ -93,12 +93,12 @@ export function YuanChuangSidebarContent({ selectedSessionId, onSessionSelect }:
       <div className="px-3 py-2">
         <SidebarMenuButton asChild>
           <button
-            className="w-full h-10 bg-[#007AFF] hover:bg-[#0056CC] text-white rounded-lg flex items-center justify-center gap-2"
+            className="w-full h-10 bg-gradient-to-br from-[#007AFF] to-[#0056CC] hover:from-[#0056CC] hover:to-[#0044AA] text-white rounded-xl flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all"
             onClick={checkAndCreateSession}
             disabled={isCreating}
           >
             <PlusIcon className="h-4 w-4" />
-            <span className="text-sm">创建新应用</span>
+            <span className="text-sm font-medium">创建新应用</span>
           </button>
         </SidebarMenuButton>
       </div>
@@ -110,11 +110,11 @@ export function YuanChuangSidebarContent({ selectedSessionId, onSessionSelect }:
             <SidebarMenuItem key={item.label}>
               <SidebarMenuButton asChild>
                 <button
-                  className="flex items-center gap-2 w-full"
+                  className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg hover:bg-[#F3F4F6] transition-all"
                   onClick={item.onClick}
                 >
                   <item.icon className="h-4 w-4 text-[#007AFF]" />
-                  <span className="flex-1 text-sm text-gray-700">{item.label}</span>
+                  <span className="flex-1 text-sm text-gray-700 font-medium">{item.label}</span>
                   <ChevronRightIcon className="h-4 w-4 text-gray-400" />
                 </button>
               </SidebarMenuButton>

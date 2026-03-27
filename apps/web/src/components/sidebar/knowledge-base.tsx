@@ -29,28 +29,28 @@ export function KnowledgeBaseSidebar() {
           <button
             key={kb.id}
             onClick={() => setSelectedId(kb.id)}
-            className={`w-full flex items-center gap-2 px-2 py-2 rounded-lg transition-colors ${
+            className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all ${
               selectedId === kb.id
-                ? "bg-[#FDF2F8] border border-[#EC4899]"
-                : "hover:bg-gray-50"
+                ? "bg-gradient-to-r from-[#FDF2F8] to-[#FCE7F3] border border-[#EC4899] shadow-sm"
+                : "hover:bg-[#F9FAFB] border border-transparent"
             }`}
           >
             <div
-              className={`w-7 h-7 rounded-md flex items-center justify-center ${
+              className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                 selectedId === kb.id
-                  ? "bg-gradient-to-br from-[#EC4899] to-[#8B5CF6]"
+                  ? "bg-gradient-to-br from-[#EC4899] to-[#8B5CF6] shadow-md"
                   : "bg-gray-200"
               }`}
             >
               <BookIcon
-                className={`w-3.5 h-3.5 ${
+                className={`w-4 h-4 ${
                   selectedId === kb.id ? "text-white" : "text-gray-500"
                 }`}
               />
             </div>
             <div className="flex-1 text-left">
               <div
-                className={`text-xs ${
+                className={`text-sm ${
                   selectedId === kb.id ? "font-medium text-gray-900" : "text-gray-700"
                 }`}
               >
@@ -58,16 +58,9 @@ export function KnowledgeBaseSidebar() {
               </div>
               <div className="text-[10px] text-gray-400">{kb.articleCount} 篇文章</div>
             </div>
-            <ChevronRightIcon className="w-3 h-3 text-gray-400" />
+            <ChevronRightIcon className="w-4 h-4 text-gray-400" />
           </button>
         ))}
-      </div>
-
-      <div className="px-3 pb-3">
-        <button className="w-full py-2 bg-[#EC4899] hover:bg-[#BE185D] text-white text-xs font-medium rounded-lg flex items-center justify-center gap-1 transition-colors">
-          <PlusIcon className="w-3.5 h-3.5" />
-          新建知识库
-        </button>
       </div>
     </div>
   );

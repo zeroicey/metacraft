@@ -1,29 +1,143 @@
+/* ========================================
+   元创前端 UI 主题系统
+   精致拟物化风格
+======================================== */
+
+/* 基础阴影变量 */
+:root {
+  /* 源创阴影 */
+  --shadow-card-yuanchuang: 0 2px 8px rgba(0,122,255,0.08), 0 8px 24px rgba(0,0,0,0.06);
+  --shadow-bubble-yuanchuang: 0 2px 6px rgba(0,122,255,0.3);
+  --shadow-button-yuanchuang: 0 2px 4px rgba(0,122,255,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+
+  /* 元梦阴影 */
+  --shadow-card-yuanmeng: 0 2px 8px rgba(236,72,153,0.08), 0 8px 24px rgba(0,0,0,0.06);
+  --shadow-bubble-yuanmeng: 0 2px 6px rgba(236,72,153,0.3);
+  --shadow-button-yuanmeng: 0 2px 4px rgba(236,72,153,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+
+  /* 圆角变量 */
+  --radius-card: 16px;
+  --radius-button: 12px;
+  --radius-bubble-user: 14px 14px 4px 14px;
+  --radius-bubble-ai: 14px 14px 14px 4px;
+  --radius-input: 12px;
+}
+
 /* 元创（YuanChuang）蓝色主题 */
 .theme-yuanchuang {
   --color-primary: #007AFF;
-  --color-primary-light: #E6F2FF;
+  --color-primary-light: #E8F0FE;
+  --color-primary-light-end: #F0F4F8;
   --color-primary-dark: #0056CC;
-  --color-bg: #F5F7FA;
+  --color-primary-gradient-start: #007AFF;
+  --color-primary-gradient-end: #0056CC;
+  --color-bg: #F0F4F8;
+  --color-bg-gradient-start: #F0F4F8;
+  --color-bg-gradient-end: #FFFFFF;
   --color-card: #FFFFFF;
   --color-text: #1F2937;
   --color-text-muted: #6B7280;
-  --color-border: #E5E7EB;
+  --color-border: rgba(0,122,255,0.1);
+  --color-border-solid: #E5E7EB;
   --color-success: #22C55E;
   --color-warning: #F59E0B;
   --color-error: #EF4444;
+
+  /* 组件专用阴影 */
+  --shadow-card: var(--shadow-card-yuanchuang);
+  --shadow-bubble: var(--shadow-bubble-yuanchuang);
+  --shadow-button: var(--shadow-button-yuanchuang);
 }
 
 /* 元梦（YuanMeng）粉色主题 */
 .theme-yuanmeng {
   --color-primary: #EC4899;
   --color-primary-light: #FDF2F8;
+  --color-primary-light-end: #FEF1F7;
   --color-primary-dark: #BE185D;
-  --color-bg: #FDF4FF;
+  --color-primary-gradient-start: #EC4899;
+  --color-primary-gradient-end: #BE185D;
+  --color-bg: #FDF2F8;
+  --color-bg-gradient-start: #FDF2F8;
+  --color-bg-gradient-end: #FFFFFF;
   --color-card: #FFFFFF;
   --color-text: #1F2937;
   --color-text-muted: #6B7280;
-  --color-border: #FCE7F3;
+  --color-border: rgba(236,72,153,0.15);
+  --color-border-solid: #FCE7F3;
   --color-success: #10B981;
   --color-warning: #F59E0B;
   --color-error: #EF4444;
+
+  /* 组件专用阴影 */
+  --shadow-card: var(--shadow-card-yuanmeng);
+  --shadow-bubble: var(--shadow-bubble-yuanmeng);
+  --shadow-button: var(--shadow-button-yuanmeng);
+}
+
+/* 共享工具类 */
+@layer utilities {
+  /* 渐变背景 */
+  .bg-gradient-theme {
+    @apply bg-gradient-to-br from-[var(--color-primary-light)] to-[var(--color-bg-gradient-end)];
+  }
+
+  .bg-gradient-primary {
+    @apply bg-gradient-to-br from-[var(--color-primary-gradient-start)] to-[var(--color-primary-gradient-end)];
+  }
+
+  /* 卡片阴影 */
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  /* 按钮阴影 */
+  .shadow-button {
+    box-shadow: var(--shadow-button);
+  }
+
+  /* 消息气泡阴影 */
+  .shadow-bubble {
+    box-shadow: var(--shadow-bubble);
+  }
+
+  /* 圆角 */
+  .rounded-card {
+    border-radius: var(--radius-card);
+  }
+
+  .rounded-button {
+    border-radius: var(--radius-button);
+  }
+
+  .rounded-bubble-user {
+    border-radius: var(--radius-bubble-user);
+  }
+
+  .rounded-bubble-ai {
+    border-radius: var(--radius-bubble-ai);
+  }
+
+  .rounded-input {
+    border-radius: var(--radius-input);
+  }
+
+  /* 边框颜色 */
+  .border-theme {
+    border-color: var(--color-border);
+  }
+
+  .border-theme-solid {
+    border-color: var(--color-border-solid);
+  }
+
+  /* 悬停效果 */
+  .hover-lift {
+    @apply transition-all duration-200;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  }
 }
