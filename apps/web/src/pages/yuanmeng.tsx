@@ -120,7 +120,7 @@ export default function YuanMengPage() {
             <div className="px-4 py-2">
                 <div className="flex gap-2">
                     <Input
-                        className="p-3"
+                        className="p-3 border-[#EC4899] focus:border-[#EC4899] focus:ring-[#EC4899]"
                         placeholder="输入消息..."
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
@@ -129,6 +129,7 @@ export default function YuanMengPage() {
                     />
                     <Button
                         size="icon"
+                        className="bg-[#EC4899] hover:bg-[#BE185D]"
                         onClick={handleSendMessage}
                         disabled={!isConnected || !inputText.trim()}
                     >
