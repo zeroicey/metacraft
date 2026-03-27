@@ -14,6 +14,15 @@ import { math } from "@streamdown/math";
 import { cjk } from "@streamdown/cjk";
 import "streamdown/styles.css";
 
+// 格式化时间
+const formatTime = (timestamp: number) => {
+  const date = new Date(timestamp);
+  return date.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+};
+
+// 生成随机 token 数
+const getRandomTokens = () => Math.floor(Math.random() * 500) + 100;
+
 export default function YuanChuangPage() {
   const selectedSessionId = useAppStore((state) => state.selectedSessionId);
   const setSelectedSessionId = useAppStore((state) => state.setSelectedSessionId);
@@ -125,7 +134,7 @@ export default function YuanChuangPage() {
 
     // 普通对话
     return (
-      <div key={msg.id} className="max-w-[85%] border border-[#E5E7EB] rounded-[14px_14px_14px_4px] p-4 bg-white shadow-sm mr-auto">
+      <div key={msg.id} className="max-w-[85%] border border-[#E8F0FE] rounded-[14px_14px_14px_4px] p-4 bg-white shadow-sm mr-auto">
         <Streamdown
           plugins={{ code, mermaid, math, cjk }}
           animated
@@ -133,6 +142,10 @@ export default function YuanChuangPage() {
         >
           {msg.content}
         </Streamdown>
+        <div className="flex gap-3 text-xs text-gray-400 mt-2 pt-2 border-t border-[#E8F0FE]">
+          <span>{formatTime(Date.now())}</span>
+          <span>消耗 {getRandomTokens()} tokens</span>
+        </div>
       </div>
     );
   };

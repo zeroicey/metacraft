@@ -98,8 +98,22 @@ export default function YuanMengPage() {
 
     const isConnected = connectionStatus === "connected";
 
+    const statusConfig = {
+        connecting: { color: "bg-yellow-500", text: "连接中" },
+        connected: { color: "bg-green-500", text: "已连接" },
+        disconnected: { color: "bg-gray-400", text: "未连接" },
+        error: { color: "bg-red-500", text: "连接错误" },
+    }
+    const status = statusConfig[connectionStatus]
+
     return (
         <div className="flex flex-col h-full">
+            {/* 浮动连接状态 */}
+            <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 text-xs text-gray-500 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md">
+                <span className={`w-2 h-2 rounded-full ${status.color}`} />
+                <span>{status.text}</span>
+            </div>
+
             {/* 消息列表 */}
             <div className="flex-1 overflow-y-auto px-4 py-4 no-scrollbar">
                 {messages.length === 0 ? (

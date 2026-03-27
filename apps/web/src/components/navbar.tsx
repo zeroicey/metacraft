@@ -1,16 +1,14 @@
 import { useNavigate, useLocation } from "react-router"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { NetworkIcon, SettingsIcon } from "lucide-react"
+import { SettingsIcon } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import { useAppStore } from "@/stores/app-store"
-import { useYuanMengStore } from "@/stores/yuanmeng-store"
 
 export default function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
   const currentPage = useAppStore((state) => state.currentPage)
   const setCurrentPage = useAppStore((state) => state.setCurrentPage)
-  const connectionStatus = useYuanMengStore((state) => state.connectionStatus)
   const [slidePos, setSlidePos] = useState(0)
   const yuanChuangRef = useRef<HTMLButtonElement>(null)
   const yuanMengRef = useRef<HTMLButtonElement>(null)
@@ -43,15 +41,6 @@ export default function Navbar() {
       setCurrentPage("yuanmeng")
     }
   }, [isYuanChuang, isYuanMeng, setCurrentPage])
-
-  // 连接状态配置
-  const statusConfig = {
-    connecting: { color: "bg-yellow-500", text: "连接中" },
-    connected: { color: "bg-green-500", text: "已连接" },
-    disconnected: { color: "bg-gray-400", text: "未连接" },
-    error: { color: "bg-red-500", text: "连接错误" },
-  }
-  const status = statusConfig[connectionStatus]
 
   return (
     <header className="flex items-center justify-between border-b border-[#E5E7EB] bg-white px-4 h-16">
@@ -104,15 +93,8 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* 右侧：连接状态 + 详情按钮 */}
+      {/* 右侧：设置按钮 */}
       <div className="flex items-center gap-3">
-        {/* 元梦连接状态 */}
-        {isYuanMeng && (
-          <div className="flex items-center gap-1.5 text-xs text-gray-500">
-            <span className={`w-2 h-2 rounded-full ${status.color}`} />
-            <span>{status.text}</span>
-          </div>
-        )}
         <button className="h-9 w-9 p-0 flex items-center justify-center hover:bg-gray-100 rounded-xl transition-colors">
           <SettingsIcon className="h-5 w-5 text-gray-600" />
         </button>
