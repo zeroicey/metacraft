@@ -93,7 +93,7 @@ export function YuanChuangSidebarContent({ selectedSessionId, onSessionSelect }:
       <div className="px-3 py-2">
         <SidebarMenuButton asChild>
           <button
-            className="w-full h-10 bg-[#F2F2F2] hover:bg-[#E5E5E5] text-gray-800 rounded-lg flex items-center justify-center gap-2"
+            className="w-full h-10 bg-[#007AFF] hover:bg-[#0056CC] text-white rounded-lg flex items-center justify-center gap-2"
             onClick={checkAndCreateSession}
             disabled={isCreating}
           >
@@ -113,7 +113,7 @@ export function YuanChuangSidebarContent({ selectedSessionId, onSessionSelect }:
                   className="flex items-center gap-2 w-full"
                   onClick={item.onClick}
                 >
-                  <item.icon className="h-4 w-4 text-gray-500" />
+                  <item.icon className="h-4 w-4 text-[#007AFF]" />
                   <span className="flex-1 text-sm text-gray-700">{item.label}</span>
                   <ChevronRightIcon className="h-4 w-4 text-gray-400" />
                 </button>
