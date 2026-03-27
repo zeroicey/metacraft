@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { Progress } from "@/components/ui/progress"
 import { HardDriveIcon, CpuIcon, MemoryStickIcon, NetworkIcon } from "lucide-react"
+import { KnowledgeBaseSidebar } from "./knowledge-base"
 
 // ============ 元梦侧边栏沙盒监控 ============
 
@@ -205,6 +206,7 @@ export function YuanMengSidebarContent() {
       <div>
         <NetworkChart data={sandbox.networkHistory} />
       </div>
+      <KnowledgeBaseSidebar />
     </div>
   )
 }
