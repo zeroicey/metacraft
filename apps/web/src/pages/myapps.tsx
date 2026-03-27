@@ -103,26 +103,26 @@ export default function MyAppsPage() {
   };
 
   return (
-    <div className="flex h-full flex-col bg-[#F5F7FA]">
+    <div className="flex h-full flex-col bg-gradient-to-b from-[#F0F4F8] to-white">
       {/* Header */}
-      <div className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4">
+      <div className="flex h-14 shrink-0 items-center justify-between border-b border-[#E5E7EB] bg-white px-4 shadow-sm">
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-gray-100"
+          className="flex h-9 w-9 items-center justify-center rounded-xl transition-colors hover:bg-gray-100"
         >
           <ArrowLeftIcon className="h-5 w-5 text-gray-900" />
         </button>
 
         {/* Title */}
-        <h1 className="text-base font-medium text-gray-900">我的元应用</h1>
+        <h1 className="text-base font-semibold text-gray-900">我的元应用</h1>
 
         {/* Add Button */}
         <button
           onClick={handleGoToChat}
-          className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-gray-100"
+          className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#007AFF] hover:bg-[#0056CC] transition-colors"
         >
-          <PlusIcon className="h-5 w-5 text-[#007AFF]" />
+          <PlusIcon className="h-5 w-5 text-white" />
         </button>
       </div>
 
