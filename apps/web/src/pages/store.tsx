@@ -9,22 +9,22 @@ export default function StorePage() {
   const { data: apps, isLoading, error, refetch } = useStoreApps();
 
   return (
-    <div className="flex h-full flex-col bg-[#F5F7FA]">
+    <div className="flex h-full flex-col bg-gradient-to-b from-[#F0F4F8] to-white">
       {/* Header */}
-      <div className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4">
+      <div className="flex h-14 shrink-0 items-center justify-between border-b border-[#E5E7EB] bg-white px-4 shadow-sm">
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-gray-100"
+          className="flex h-9 w-9 items-center justify-center rounded-xl transition-colors hover:bg-gray-100"
         >
           <ArrowLeftIcon className="h-5 w-5 text-gray-900" />
         </button>
 
         {/* Title */}
-        <h1 className="text-base font-medium text-gray-900">元应用商店</h1>
+        <h1 className="text-base font-semibold text-gray-900">元应用商店</h1>
 
         {/* Placeholder for balance */}
-        <div className="h-8 w-8" />
+        <div className="h-9 w-9" />
       </div>
 
       {/* Content */}
@@ -68,7 +68,7 @@ export default function StorePage() {
 
         {/* Normal State - Grid of Apps */}
         {!isLoading && !error && apps && apps.length > 0 && (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             {apps.map((app) => (
               <StoreAppCard key={app.id} app={app} />
             ))}
