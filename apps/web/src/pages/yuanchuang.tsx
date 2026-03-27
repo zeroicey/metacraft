@@ -125,7 +125,7 @@ export default function YuanChuangPage() {
 
     // 普通对话
     return (
-      <div key={msg.id} className="max-w-[80%] border border-[#E5E7EB] rounded-[14px_14px_14px_4px] p-4 bg-white shadow-sm ml-11">
+      <div key={msg.id} className="max-w-[85%] border border-[#E5E7EB] rounded-[14px_14px_14px_4px] p-4 bg-white shadow-sm mr-auto">
         <Streamdown
           plugins={{ code, mermaid, math, cjk }}
           animated

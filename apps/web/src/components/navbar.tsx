@@ -39,7 +39,7 @@ export default function Navbar() {
       setSlidePos(0)
       setCurrentPage("yuanchuang")
     } else if (isYuanMeng && yuanMengRef.current) {
-      setSlidePos(100)
+      setSlidePos(1)
       setCurrentPage("yuanmeng")
     }
   }, [isYuanChuang, isYuanMeng, setCurrentPage])
@@ -68,7 +68,7 @@ export default function Navbar() {
           style={{
             left: "4px",
             width: "calc(50% - 4px)",
-            transform: `translateX(${slidePos}%)`,
+            transform: `translateX(${slidePos * 100}%)`,
           }}
         />
 
@@ -77,10 +77,11 @@ export default function Navbar() {
           onClick={() => {
             navigate("/yuanchuang")
             setCurrentPage("yuanchuang")
+            setSlidePos(0)
           }}
           className={`relative z-10 px-5 py-2 text-sm font-medium rounded-lg transition-all ${
             currentPage === "yuanchuang" || (!currentPage && isYuanChuang)
-              ? "text-[#007AFF] bg-white shadow-sm"
+              ? "text-[#007AFF]"
               : "text-gray-600 hover:text-gray-900"
           }`}
         >
@@ -91,10 +92,11 @@ export default function Navbar() {
           onClick={() => {
             navigate("/yuanmeng")
             setCurrentPage("yuanmeng")
+            setSlidePos(1)
           }}
           className={`relative z-10 px-5 py-2 text-sm font-medium rounded-lg transition-all ${
             currentPage === "yuanmeng" || isYuanMeng
-              ? "text-[#EC4899] bg-white shadow-sm"
+              ? "text-[#EC4899]"
               : "text-gray-600 hover:text-gray-900"
           }`}
         >

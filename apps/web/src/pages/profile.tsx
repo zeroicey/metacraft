@@ -113,10 +113,10 @@ export default function ProfilePage() {
                 <h1 className="text-lg font-semibold">个人中心</h1>
             </div>
 
-            <div className="max-w-md mx-auto p-4 space-y-4">
+            <div className="max-w-md mx-auto p-4 space-y-6">
                 <div className="bg-white rounded-2xl shadow-lg p-4">
                 {/* 头像区域 */}
-                <div className="flex flex-col items-center py-6">
+                <div className="flex flex-col items-center py-8">
                     <div className="relative">
                         <Avatar className="h-24 w-24 cursor-pointer shadow-lg" onClick={handleAvatarClick}>
                             <AvatarImage src={avatarPreview} alt={user?.name} />
@@ -143,31 +143,33 @@ export default function ProfilePage() {
                     <CardHeader>
                         <CardTitle className="text-base">账户信息</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-6">
                         <div>
-                            <p className="text-sm text-gray-500 mb-1">用户名</p>
+                            <p className="text-sm text-gray-500 mb-2">用户名</p>
                             <Input
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 placeholder="请输入用户名"
+                                className="rounded-xl"
                             />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500 mb-1">邮箱</p>
-                            <Input value={user?.email || ""} disabled className="bg-gray-50" />
+                            <p className="text-sm text-gray-500 mb-2">邮箱</p>
+                            <Input value={user?.email || ""} disabled className="bg-gray-50 rounded-xl" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500 mb-1">简介</p>
+                            <p className="text-sm text-gray-500 mb-2">简介</p>
                             <Textarea
                                 value={bio}
                                 onChange={(e) => setBio(e.target.value)}
                                 placeholder="请输入简介"
                                 rows={3}
+                                className="rounded-xl resize-none"
                             />
                         </div>
 
                         <Button
-                            className="w-full bg-[#007AFF] hover:bg-[#0056CC]"
+                            className="w-full bg-[#007AFF] hover:bg-[#0056CC] rounded-xl mt-4"
                             onClick={handleSave}
                             disabled={updateUser.isPending}
                         >
@@ -186,7 +188,7 @@ export default function ProfilePage() {
                 {/* 退出登录 */}
                 <Button
                     variant="outline"
-                    className="w-full text-red-600 hover:text-red-600 hover:bg-red-50"
+                    className="w-full text-red-600 hover:text-red-600 hover:bg-red-50 mt-6"
                     onClick={handleLogout}
                 >
                     退出登录

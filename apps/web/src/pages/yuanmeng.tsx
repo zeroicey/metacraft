@@ -42,7 +42,7 @@ const MessageBubble = ({ message, avatarUrl, userName }: { message: YuanMengMess
     }
 
     return (
-        <div key={message.id} className="max-w-[80%] border border-[#FCE7F3] rounded-[14px_14px_14px_4px] p-4 bg-white shadow-sm ml-11">
+        <div key={message.id} className="max-w-[85%] border border-[#FCE7F3] rounded-[14px_14px_14px_4px] p-4 bg-white shadow-sm mr-auto">
             <Streamdown
                 plugins={{ code, mermaid, math, cjk }}
                 animated={false}

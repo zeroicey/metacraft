@@ -1,4 +1,4 @@
-import { SettingsIcon, ChevronRightIcon } from "lucide-react"
+import { ChevronRightIcon } from "lucide-react"
 import { useCurrentUser } from "@/hooks/useUser"
 import { useNavigate } from "react-router"
 
@@ -87,7 +87,10 @@ export function AppSidebar() {
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-between px-3">
+          <button
+            className="flex items-center justify-between px-3 w-full hover:bg-gray-50 rounded-xl transition-colors py-1"
+            onClick={() => navigate("/profile")}
+          >
             <div className="flex items-center gap-2 min-w-0">
               <img
                 src={avatarUrl}
@@ -105,10 +108,8 @@ export function AppSidebar() {
                 )}
               </div>
             </div>
-            <button className="h-8 w-8 p-0 flex items-center justify-center flex-shrink-0" onClick={() => navigate("/profile")}>
-              <SettingsIcon className="h-5 w-5 text-gray-600" />
-            </button>
-          </div>
+            <ChevronRightIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+          </button>
         )}
       </SidebarFooter>
 
