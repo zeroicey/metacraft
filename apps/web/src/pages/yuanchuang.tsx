@@ -100,7 +100,7 @@ export default function YuanChuangPage() {
             alt={user?.name || "用户"}
             className="w-8 h-8 rounded-full object-cover flex-shrink-0"
           />
-          <div className="max-w-[80%] rounded-lg px-4 py-2 bg-blue-500 text-white text-sm whitespace-pre-wrap">
+          <div className="max-w-[80%] rounded-lg px-4 py-2 bg-[#007AFF] text-white text-sm whitespace-pre-wrap">
             {msg.content}
           </div>
         </div>
