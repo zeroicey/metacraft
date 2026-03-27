@@ -1,0 +1,29 @@
+/* 元创（YuanChuang）蓝色主题 */
+.theme-yuanchuang {
+  --color-primary: #007AFF;
+  --color-primary-light: #E6F2FF;
+  --color-primary-dark: #0056CC;
+  --color-bg: #F5F7FA;
+  --color-card: #FFFFFF;
+  --color-text: #1F2937;
+  --color-text-muted: #6B7280;
+  --color-border: #E5E7EB;
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+}
+
+/* 元梦（YuanMeng）粉色主题 */
+.theme-yuanmeng {
+  --color-primary: #EC4899;
+  --color-primary-light: #FDF2F8;
+  --color-primary-dark: #BE185D;
+  --color-bg: #FDF4FF;
+  --color-card: #FFFFFF;
+  --color-text: #1F2937;
+  --color-text-muted: #6B7280;
+  --color-border: #FCE7F3;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+}
