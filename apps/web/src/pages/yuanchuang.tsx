@@ -167,10 +167,10 @@ export default function YuanChuangPage() {
       </div>
 
       {/* 输入框 */}
-      <div className="px-4 py-4 bg-white rounded-2xl shadow-lg mx-4 mb-4">
+      <div className="px-4 bg-white rounded-2xl mx-4">
         <div className="flex gap-3">
           <Input
-            className="p-4 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 focus:bg-white transition-all"
+            className="p-3 border border-[#E5E7EB] rounded-xl focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all"
             placeholder="输入你的想法..."
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
@@ -179,7 +179,7 @@ export default function YuanChuangPage() {
           />
           <Button
             size="icon"
-            className="h-11 w-11 bg-gradient-to-br from-[#007AFF] to-[#0056CC] hover:from-[#0056CC] hover:to-[#0044AA] text-white rounded-xl shadow-md transition-all hover:scale-105 active:scale-95"
+            className="bg-gradient-to-br from-[#007AFF] to-[#0056CC] hover:from-[#0056CC] hover:to-[#0044AA] text-white rounded-xl shadow-md transition-all hover:scale-105 active:scale-95"
             onClick={handleSendMessage}
             disabled={isStreaming || !inputText.trim()}
           >
