@@ -77,8 +77,7 @@ export default function PreviewPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-b from-[#F0F4F8] to-white p-4">
-      <div className="flex-1 bg-white rounded-2xl shadow-lg overflow-hidden">
+    <div className="flex flex-col h-screen bg-white">
       {/* Floating Back Button */}
       <button
         onPointerDown={handlePointerDown}

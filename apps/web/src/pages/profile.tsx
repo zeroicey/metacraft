@@ -104,9 +104,9 @@ export default function ProfilePage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gradient-to-b from-[#F0F4F8] to-white">
             {/* 头部 */}
-            <div className="bg-white border-b px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
+            <div className="bg-white/80 backdrop-blur-sm border-b border-[#E5E7EB] px-4 py-3 flex items-center gap-3 sticky top-0 z-10 shadow-sm">
                 <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
                     <ArrowLeftIcon className="h-5 w-5" />
                 </Button>
@@ -114,16 +114,17 @@ export default function ProfilePage() {
             </div>
 
             <div className="max-w-md mx-auto p-4 space-y-4">
+                <div className="bg-white rounded-2xl shadow-lg p-4">
                 {/* 头像区域 */}
                 <div className="flex flex-col items-center py-6">
                     <div className="relative">
-                        <Avatar className="h-24 w-24 cursor-pointer" onClick={handleAvatarClick}>
+                        <Avatar className="h-24 w-24 cursor-pointer shadow-lg" onClick={handleAvatarClick}>
                             <AvatarImage src={avatarPreview} alt={user?.name} />
                             <AvatarFallback className="text-2xl">
                                 {user?.name?.charAt(0)?.toUpperCase() || "U"}
                             </AvatarFallback>
                         </Avatar>
-                        <div className="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full">
+                        <div className="absolute bottom-0 right-0 bg-[#007AFF] text-white p-1.5 rounded-full shadow-md">
                             <CameraIcon className="h-4 w-4" />
                         </div>
                     </div>
@@ -138,7 +139,7 @@ export default function ProfilePage() {
                 </div>
 
                 {/* 用户信息 */}
-                <Card>
+                <Card className="rounded-2xl shadow-md border-[#E5E7EB]">
                     <CardHeader>
                         <CardTitle className="text-base">账户信息</CardTitle>
                     </CardHeader>
@@ -166,7 +167,7 @@ export default function ProfilePage() {
                         </div>
 
                         <Button
-                            className="w-full"
+                            className="w-full bg-[#007AFF] hover:bg-[#0056CC]"
                             onClick={handleSave}
                             disabled={updateUser.isPending}
                         >
@@ -190,6 +191,7 @@ export default function ProfilePage() {
                 >
                     退出登录
                 </Button>
+                </div>
             </div>
         </div>
     );

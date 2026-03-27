@@ -38,11 +38,16 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
-            <Card className="w-full max-w-sm">
-                <CardHeader className="text-center">
-                    <CardTitle className="text-2xl">注册</CardTitle>
-                    <CardDescription>创建您的账号</CardDescription>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#F0F4F8] via-white to-[#F0F4F8] px-4 py-8">
+            <Card className="w-full max-w-sm rounded-2xl shadow-lg border-[#E5E7EB]">
+                <CardHeader className="text-center pb-2">
+                    <div className="flex justify-center mb-2">
+                        <div className="w-16 h-16 bg-gradient-to-br from-[#007AFF] to-[#0056CC] rounded-2xl flex items-center justify-center shadow-md">
+                            <span className="text-3xl text-white font-bold">M</span>
+                        </div>
+                    </div>
+                    <CardTitle className="text-2xl">注册元创账号</CardTitle>
+                    <CardDescription>创建账号开始创建应用</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-3">
@@ -54,6 +59,7 @@ export default function RegisterPage() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
                                 disabled={isLoading}
+                                className="rounded-xl"
                             />
                         </div>
                         <div className="space-y-2">
@@ -64,6 +70,7 @@ export default function RegisterPage() {
                                 onChange={(e) => setName(e.target.value)}
                                 required
                                 disabled={isLoading}
+                                className="rounded-xl"
                             />
                         </div>
                         <div className="space-y-2 relative">
@@ -74,6 +81,7 @@ export default function RegisterPage() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                                 disabled={isLoading}
+                                className="rounded-xl"
                             />
                             <button
                                 type="button"
@@ -95,6 +103,7 @@ export default function RegisterPage() {
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
                                 disabled={isLoading}
+                                className="rounded-xl"
                             />
                         </div>
                         <div className="space-y-2">
@@ -105,6 +114,7 @@ export default function RegisterPage() {
                                 required
                                 disabled={isLoading}
                                 rows={3}
+                                className="rounded-xl resize-none"
                             />
                         </div>
 
@@ -112,7 +122,7 @@ export default function RegisterPage() {
                             <p className="text-sm text-red-500 text-center">{error || passwordError}</p>
                         )}
 
-                        <Button type="submit" className="w-full" disabled={isLoading}>
+                        <Button type="submit" className="w-full bg-[#007AFF] hover:bg-[#0056CC] rounded-xl" disabled={isLoading}>
                             {isLoading ? (
                                 <>
                                     <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
@@ -126,7 +136,7 @@ export default function RegisterPage() {
 
                     <p className="mt-4 text-center text-sm text-gray-600">
                         已有账号？{" "}
-                        <Link to="/login" className="text-primary hover:underline font-medium">
+                        <Link to="/login" className="text-[#007AFF] hover:underline font-medium">
                             去登录
                         </Link>
                     </p>

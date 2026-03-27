@@ -25,11 +25,16 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-            <Card className="w-full max-w-sm">
-                <CardHeader className="text-center">
-                    <CardTitle className="text-2xl">登录</CardTitle>
-                    <CardDescription>欢迎回来！请登录您的账号</CardDescription>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#F0F4F8] via-white to-[#F0F4F8] px-4">
+            <Card className="w-full max-w-sm rounded-2xl shadow-lg border-[#E5E7EB]">
+                <CardHeader className="text-center pb-2">
+                    <div className="flex justify-center mb-2">
+                        <div className="w-16 h-16 bg-gradient-to-br from-[#007AFF] to-[#0056CC] rounded-2xl flex items-center justify-center shadow-md">
+                            <span className="text-3xl text-white font-bold">M</span>
+                        </div>
+                    </div>
+                    <CardTitle className="text-2xl">欢迎来到元创</CardTitle>
+                    <CardDescription>登录您的账号开始创建应用</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -41,6 +46,7 @@ export default function LoginPage() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
                                 disabled={isLoading}
+                                className="rounded-xl"
                             />
                         </div>
                         <div className="space-y-2">
@@ -51,6 +57,7 @@ export default function LoginPage() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                                 disabled={isLoading}
+                                className="rounded-xl"
                             />
                         </div>
 
@@ -58,7 +65,7 @@ export default function LoginPage() {
                             <p className="text-sm text-red-500 text-center">{error}</p>
                         )}
 
-                        <Button type="submit" className="w-full" disabled={isLoading}>
+                        <Button type="submit" className="w-full bg-[#007AFF] hover:bg-[#0056CC] rounded-xl" disabled={isLoading}>
                             {isLoading ? (
                                 <>
                                     <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
@@ -72,7 +79,7 @@ export default function LoginPage() {
 
                     <p className="mt-4 text-center text-sm text-gray-600">
                         还没有账号？{" "}
-                        <Link to="/register" className="text-primary hover:underline font-medium">
+                        <Link to="/register" className="text-[#007AFF] hover:underline font-medium">
                             去注册
                         </Link>
                     </p>
