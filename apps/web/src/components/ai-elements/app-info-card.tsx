@@ -19,16 +19,16 @@ export function AppInfoCard({
   }
 
   return (
-    <div className="mt-2 max-w-lg rounded-xl border border-[#E5E5E5] bg-white p-4">
+    <div className="mt-2 max-w-lg rounded-2xl border border-[#E8F0FE] bg-white p-4 shadow-sm">
       <div className="flex items-start gap-3">
         {logoUrl ? (
           <img
             src={logoUrl}
             alt={appName || "App Logo"}
-            className="h-12 w-12 rounded-lg object-cover"
+            className="h-12 w-12 rounded-xl object-cover shadow-sm"
           />
         ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-[#667eea] to-[#764ba2]">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#007AFF] to-[#0056CC] shadow-md">
             <span className="text-xl font-bold text-white">
               {appName?.charAt(0) || "A"}
             </span>

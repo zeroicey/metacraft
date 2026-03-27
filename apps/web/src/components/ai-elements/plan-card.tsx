@@ -22,10 +22,10 @@ export function PlanCard({ plan, isAnimating }: PlanCardProps) {
   }, [plan, isAnimating]);
 
   return (
-    <div className="mt-2 max-w-lg rounded-xl border border-[#D9E5FF] bg-[#F6F9FF] p-3">
-      <div className="mb-2 flex items-center justify-between">
-        <span className="text-sm font-bold text-[#2F5DFF]">应用计划</span>
-        <span className="text-xs text-[#7C8AA5]">PLAN</span>
+    <div className="mt-2 max-w-lg rounded-2xl border border-[#E8F0FE] bg-white p-4 shadow-sm">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-sm font-bold text-[#007AFF]">应用计划</span>
+        <span className="text-xs text-[#007AFF]/60 bg-[#E8F0FE] px-2 py-0.5 rounded-full">PLAN</span>
       </div>
       {plan ? (
         <div ref={scrollRef} className="max-h-[220px] overflow-y-auto">
@@ -43,7 +43,7 @@ export function PlanCard({ plan, isAnimating }: PlanCardProps) {
           </Streamdown>
         </div>
       ) : (
-        <span className="text-xs text-[#8E8E93]">计划生成中...</span>
+        <span className="text-xs text-gray-400">计划生成中...</span>
       )}
     </div>
   );
