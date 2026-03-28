@@ -144,4 +144,24 @@ public class SseUtils {
             return "{\"uuid\":\"\",\"ext\":\"\"}";
         }
     }
+
+    /**
+     * Create progress event data as a JSON object.
+     * Format: {"type":"...", "message":"..."}
+     *
+     * @param type OpenCode event type (e.g., "tool_use_start", "content_delta")
+     * @param message Human-readable progress message
+     * @return JSON object string representation
+     */
+    public String toProgressJson(String type, String message) {
+        try {
+            Map<String, String> data = new HashMap<>();
+            data.put("type", type != null ? type : "");
+            data.put("message", message != null ? message : "");
+            return objectMapper.writeValueAsString(data);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to serialize progress data", e);
+            return "{\"type\":\"\",\"message\":\"\"}";
+        }
+    }
 }

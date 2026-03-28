@@ -11,15 +11,22 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.metacraft.api.modules.ai.config.OpenCodeProperties;
 import com.metacraft.api.modules.ai.dto.opencode.OpenCodeDtos;
 
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Service
@@ -30,12 +37,18 @@ public class OpenCodeClient {
     private final ObjectMapper objectMapper;
     private final OpenCodeProperties properties;
     private final HttpClient httpClient;
+    private final RestClient restClient;
 
-    public OpenCodeClient(ObjectMapper objectMapper, OpenCodeProperties properties) {
+    public OpenCodeClient(ObjectMapper objectMapper, OpenCodeProperties properties,
+                          RestTemplateBuilder restTemplateBuilder) {
         this.objectMapper = objectMapper;
         this.properties = properties;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))
+                .build();
+        this.restClient = RestClient.builder()
+                .baseUrl(properties.getBaseUrl())
+                .defaultHeader(HttpHeaders.AUTHORIZATION, basicAuthHeader())
                 .build();
     }
 
@@ -89,6 +102,93 @@ public class OpenCodeClient {
                     "OpenCode request interrupted: POST /session/" + encodePath(sessionId) + "/message",
                     exception);
         }
+    }
+
+    /**
+     * Subscribe to SSE events from OpenCode server.
+     * This provides real-time updates on AI progress (tool execution, content generation, etc.)
+     *
+     * @return Flux of OpenCode events
+     */
+    public Flux<OpenCodeDtos.Event> subscribeEvents() {
+        return Flux.<OpenCodeDtos.Event>create(emitter -> {
+            Thread.startVirtualThread(() -> {
+                try {
+                    HttpRequest request = HttpRequest.newBuilder()
+                            .uri(URI.create(properties.getBaseUrl() + "/event"))
+                            .timeout(REQUEST_TIMEOUT)
+                            .header("Accept", "text/event-stream")
+                            .header("Authorization", basicAuthHeader())
+                            .GET()
+                            .build();
+
+                    HttpClient client = HttpClient.newBuilder()
+                            .connectTimeout(Duration.ofSeconds(10))
+                            .build();
+
+                    client.sendAsync(request, HttpResponse.BodyHandlers.ofLines())
+                            .thenAccept(response -> {
+                                if (response.statusCode() != 200) {
+                                    emitter.error(new OpenCodeClientException(
+                                            "Failed to subscribe to events: " + response.statusCode()));
+                                    return;
+                                }
+
+                                try {
+                                    response.body().forEach(line -> {
+                                        if (emitter.isCancelled()) {
+                                            return;
+                                        }
+
+                                        if (line != null && !line.isBlank() && line.startsWith("data:")) {
+                                            try {
+                                                String json = line.substring(5).trim();
+                                                JsonNode node = objectMapper.readTree(json);
+                                                String type = node.has("type") ? node.get("type").asText() : "unknown";
+                                                JsonNode props = node.has("properties") ? node.get("properties") : null;
+                                                OpenCodeDtos.Event event = new OpenCodeDtos.Event(type, props);
+                                                emitter.next(event);
+                                            } catch (JsonProcessingException e) {
+                                                log.warn("Failed to parse SSE event: {}", line);
+                                            }
+                                        }
+                                    });
+                                    emitter.complete();
+                                } catch (Exception e) {
+                                    emitter.error(e);
+                                }
+                            });
+                } catch (Exception e) {
+                    emitter.error(e);
+                }
+            });
+        }).subscribeOn(reactor.core.scheduler.Schedulers.boundedElastic())
+                .doOnNext(event -> log.debug("OpenCode event: {}", event.type()))
+                .doOnComplete(() -> log.info("Event stream completed"))
+                .doOnError(e -> log.error("Event stream error", e));
+    }
+
+    /**
+     * Subscribe to SSE events and filter for specific session.
+     * Note: OpenCode /event endpoint returns global events. For session-specific events,
+     * you may need to filter by session ID in the event properties.
+     *
+     * @param sessionId Optional session ID to filter events (can be null for all events)
+     * @return Flux of filtered OpenCode events
+     */
+    public Flux<OpenCodeDtos.Event> subscribeEventsForSession(String sessionId) {
+        return subscribeEvents()
+                .filter(event -> {
+                    if (sessionId == null || sessionId.isBlank()) {
+                        return true;
+                    }
+                    // Filter events that belong to the specified session
+                    if (event.properties() != null && event.properties().has("sessionId")) {
+                        return sessionId.equals(event.properties().get("sessionId").asText());
+                    }
+                    // Include events without session ID (global events)
+                    return true;
+                });
     }
 
     private <T> T sendRequest(String method, String path, Object body, Class<T> responseType) {

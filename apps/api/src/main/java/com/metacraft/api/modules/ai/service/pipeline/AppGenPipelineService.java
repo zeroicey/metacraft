@@ -1,6 +1,7 @@
 package com.metacraft.api.modules.ai.service.pipeline;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -101,28 +102,24 @@ public class AppGenPipelineService {
                             .subscribeOn(Schedulers.boundedElastic())
                             .flux();
 
-                    Mono<ServerSentEvent<String>> codeStream = Mono.fromCallable(() -> {
-                        // Check if template matched
-                        String matchedTemplate = matchedTemplateRef.get();
-                        AppVersionEntity createdVersion;
+                    // Check if template matched
+                    String matchedTemplate = matchedTemplateRef.get();
+                    Flux<ServerSentEvent<String>> codeStream;
 
-                        if (matchedTemplate != null) {
-                            // Use template - copy files
-                            log.info("Using template: {}", matchedTemplate);
-                            createdVersion = createVersionFromTemplate(app, matchedTemplate);
-                        } else {
-                            // Fallback to OpenCode
-                            log.info("No template matched, using OpenCode");
-                            createdVersion = generateInitialVersionWithOpenCode(app, history, message);
-                        }
-
+                    if (matchedTemplate != null) {
+                        // Use template - copy files synchronously (fast)
+                        log.info("Using template: {}", matchedTemplate);
+                        AppVersionEntity createdVersion = createVersionFromTemplate(app, matchedTemplate);
                         relatedVersionIdRef.set(createdVersion.getId());
-                        return ServerSentEvent.<String>builder()
+                        codeStream = Mono.just(ServerSentEvent.<String>builder()
                                 .event("app_generated")
                                 .data(sseUtils.toAppGeneratedJson(app.getUuid(), createdVersion.getVersionNumber()))
-                                .build();
-                    }).subscribeOn(Schedulers.boundedElastic())
-                            .delayElement(resolveTemplateResponseDelay(matchedTemplateRef.get()));
+                                .build()).flux();
+                    } else {
+                        // Fallback to OpenCode with SSE events
+                        log.info("No template matched, using OpenCode with SSE events");
+                        codeStream = generateInitialVersionWithOpenCodeWithEvents(app, history, message, relatedVersionIdRef);
+                    }
 
                     return Flux.merge(logoStream, codeStream);
                 }));
@@ -163,6 +160,63 @@ public class AppGenPipelineService {
                 .build();
     }
 
+    /**
+     * Generate initial version with OpenCode and stream SSE events for progress tracking.
+     * Returns a Flux that emits both the app_generated event and progress events.
+     */
+    private Flux<ServerSentEvent<String>> generateInitialVersionWithOpenCodeWithEvents(
+            AppEntity app, String history, String message, AtomicReference<Long> relatedVersionIdRef) {
+
+        // First create the version and session
+        AppVersionEntity version = appService.createVersion(
+                app.getId(),
+                openCodeTemplateService.loadIndexHtmlTemplate(),
+                openCodeTemplateService.loadAppJsTemplate(),
+                "Initialize template for new app");
+
+        // Set the version ID immediately after creation
+        relatedVersionIdRef.set(version.getId());
+
+        String targetDir = openCodeWorkspaceService.getWorkspaceRelativeAppVersionDirectory(app.getId(),
+                version.getVersionNumber());
+        OpenCodeDtos.Session openCodeSession = openCodeClient.createSession(app.getUuid());
+        appService.bindOpenCodeSessionId(app.getId(), openCodeSession.id());
+
+        // Send message to OpenCode (fire and forget - processing happens asynchronously)
+        openCodeClient.sendMessage(openCodeSession.id(), OpenCodeDtos.MessageRequest.text(
+                buildOpenCodePrompt(targetDir, history, message)));
+
+        log.info("Started app generation for {} version {} in OpenCode session {}",
+                app.getId(), version.getVersionNumber(), openCodeSession.id());
+
+        // Subscribe to events and map them to SSE events
+        Flux<ServerSentEvent<String>> eventStream = openCodeClient.subscribeEventsForSession(openCodeSession.id())
+                .takeUntil(OpenCodeDtos.Event::isComplete)
+                .map(event -> ServerSentEvent.<String>builder()
+                        .event("progress")
+                        .data(sseUtils.toProgressJson(event.type(), event.getDescription()))
+                        .build())
+                .doOnComplete(() -> log.info("Event stream completed for session {}", openCodeSession.id()))
+                .doOnError(e -> log.error("Event stream error for session {}", openCodeSession.id(), e));
+
+        // Create the final app_generated event
+        Mono<ServerSentEvent<String>> appGeneratedEvent = Mono.just(
+                ServerSentEvent.<String>builder()
+                        .event("app_generated")
+                        .data(sseUtils.toAppGeneratedJson(app.getUuid(), version.getVersionNumber()))
+                        .build());
+
+        // Return both the event stream and the final event
+        return Flux.merge(
+                eventStream,
+                appGeneratedEvent
+        );
+    }
+
+    /**
+     * @deprecated Use {@link #generateInitialVersionWithOpenCodeWithEvents(AppEntity, String, String)} instead
+     */
+    @Deprecated
     private AppVersionEntity generateInitialVersionWithOpenCode(AppEntity app, String history, String message) {
         AppVersionEntity version = appService.createVersion(
                 app.getId(),
