@@ -1,0 +1,99 @@
+<h2>元梦 (YuanMeng) 侧边栏设计</h2>
+<p class="subtitle">保留沙盒监控 + 新增知识库</p>
+
+<div class="mockup" style="max-width: 600px; margin: 0 auto;">
+  <div class="mockup-header">元梦侧边栏 - 完整布局</div>
+  <div class="mockup-body" style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); padding: 20px; min-height: 350px;">
+    <div style="background: white; border-radius: 12px; overflow: hidden;">
+
+      <!-- 沙盒监控 (保留原内容) -->
+      <div style="border-bottom: 1px solid #eee; padding: 12px;">
+        <div style="display: flex; align-items: center; justify-between; margin-bottom: 8px;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></div>
+            <span style="font-size: 13px; font-weight: 500; color: #333;">运行中</span>
+          </div>
+          <span style="font-size: 12px; color: #888; font-family: monospace;">00:05:32</span>
+        </div>
+        <!-- 资源条 -->
+        <div style="display: flex; gap: 12px;">
+          <div style="flex: 1;">
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #666; margin-bottom: 4px;">
+              <span>CPU</span><span>32%</span>
+            </div>
+            <div style="height: 4px; background: #eee; border-radius: 2px;">
+              <div style="width: 32%; height: 100%; background: #EC4899; border-radius: 2px;"></div>
+            </div>
+          </div>
+          <div style="flex: 1;">
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #666; margin-bottom: 4px;">
+              <span>内存</span><span>45%</span>
+            </div>
+            <div style="height: 4px; background: #eee; border-radius: 2px;">
+              <div style="width: 45%; height: 100%; background: #8B5CF6; border-radius: 2px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 新增：知识库 -->
+      <div style="padding: 12px;">
+        <div style="font-size: 12px; color: #888; margin-bottom: 10px; font-weight: 500;">知识库</div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <!-- 选中状态 -->
+          <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #fdf2f8; border-radius: 8px; border: 1.5px solid #EC4899;">
+            <div style="width: 28px; height: 28px; background: #EC4899; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </div>
+            <div style="flex: 1;">
+              <div style="font-size: 12px; font-weight: 500; color: #333;">我的知识库</div>
+            </div>
+          </div>
+
+          <!-- 普通状态 -->
+          <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #f9f9f9; border-radius: 8px;">
+            <div style="width: 28px; height: 28px; background: #e0e0e0; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+              </svg>
+            </div>
+            <div style="flex: 1;">
+              <div style="font-size: 12px; color: #333;">技术文档</div>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #f9f9f9; border-radius: 8px;">
+            <div style="width: 28px; height: 28px; background: #e0e0e0; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+              </svg>
+            </div>
+            <div style="flex: 1;">
+              <div style="font-size: 12px; color: #333;">产品FAQ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 24px;">
+  <h3>最终确认</h3>
+  <div class="options">
+    <div class="option" data-choice="confirmed" onclick="toggleSelect(this)">
+      <div class="letter">✓</div>
+      <div class="content">
+        <h3>确认设计方案</h3>
+        <p>元创：蓝色系 #007AFF | 元梦：粉色系 #EC4899 + 知识库（叠加在沙盒监控上）</p>
+      </div>
+    </div>
+  </div>
+</div>

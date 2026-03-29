@@ -19,7 +19,12 @@
       "Bash(tsc:*)",
       "mcp__zread__get_repo_structure",
       "Bash(python3:*)",
-      "Bash(bun vite:*)"
+      "Bash(bun vite:*)",
+      "Bash(export:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(bun install:*)",
+      "WebFetch(domain:opencode.ai)"
     ]
   },
   "enableAllProjectMcpServers": true,

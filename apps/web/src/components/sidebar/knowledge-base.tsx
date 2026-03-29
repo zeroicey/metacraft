@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookIcon, PlusIcon, ChevronRightIcon } from "lucide-react";
+import { BookIcon, ChevronRightIcon } from "lucide-react";
 
 interface KnowledgeBase {
   id: string;
@@ -29,30 +29,26 @@ export function KnowledgeBaseSidebar() {
           <button
             key={kb.id}
             onClick={() => setSelectedId(kb.id)}
-            className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all ${
-              selectedId === kb.id
-                ? "bg-gradient-to-r from-[#FDF2F8] to-[#FCE7F3] border border-[#EC4899] shadow-sm"
-                : "hover:bg-[#F9FAFB] border border-transparent"
-            }`}
+            className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all ${selectedId === kb.id
+              ? "bg-gradient-to-r from-[#FDF2F8] to-[#FCE7F3] border border-[#EC4899] shadow-sm"
+              : "hover:bg-[#F9FAFB] border border-transparent"
+              }`}
           >
             <div
-              className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                selectedId === kb.id
-                  ? "bg-gradient-to-br from-[#EC4899] to-[#8B5CF6] shadow-md"
-                  : "bg-gray-200"
-              }`}
+              className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedId === kb.id
+                ? "bg-gradient-to-br from-[#EC4899] to-[#8B5CF6] shadow-md"
+                : "bg-gray-200"
+                }`}
             >
               <BookIcon
-                className={`w-4 h-4 ${
-                  selectedId === kb.id ? "text-white" : "text-gray-500"
-                }`}
+                className={`w-4 h-4 ${selectedId === kb.id ? "text-white" : "text-gray-500"
+                  }`}
               />
             </div>
             <div className="flex-1 text-left">
               <div
-                className={`text-sm ${
-                  selectedId === kb.id ? "font-medium text-gray-900" : "text-gray-700"
-                }`}
+                className={`text-sm ${selectedId === kb.id ? "font-medium text-gray-900" : "text-gray-700"
+                  }`}
               >
                 {kb.name}
               </div>

@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react"
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts"
-import { Progress } from "@/components/ui/progress"
 import { HardDriveIcon, CpuIcon, MemoryStickIcon, NetworkIcon } from "lucide-react"
 import { KnowledgeBaseSidebar } from "./knowledge-base"
 

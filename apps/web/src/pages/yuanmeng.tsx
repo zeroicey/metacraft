@@ -131,7 +131,7 @@ export default function YuanMengPage() {
       </div>
 
       {/* 输入框 */}
-      <div className="px-4 bg-white rounded-2xl mx-4">
+      <div className="px-4 py-2 bg-white rounded-2xl mx-4">
         <div className="flex gap-3">
           <Input
             className="p-3 border border-[#E5E7EB] rounded-xl focus:border-[#EC4899] focus:ring-2 focus:ring-[#EC4899]/20 transition-all"

@@ -1,0 +1,87 @@
+<h2>UI 风格选择 - 完整页面重建</h2>
+<p class="subtitle">选择你喜欢的整体风格</p>
+
+<div class="cards">
+  <!-- Option A: 现代简洁 -->
+  <div class="card" data-choice="modern-minimal" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); padding: 30px; min-height: 180px;">
+      <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+          <div style="width: 40px; height: 40px; background: #007AFF; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">元</div>
+          <div style="flex: 1;">
+            <div style="height: 10px; background: #E5E7EB; border-radius: 5px; width: 60%; margin-bottom: 6px;"></div>
+            <div style="height: 8px; background: #F3F4F6; border-radius: 4px; width: 40%;"></div>
+          </div>
+        </div>
+        <div style="background: #F9FAFB; border-radius: 12px; padding: 16px;">
+          <div style="height: 8px; background: linear-gradient(90deg, #007AFF, #5856D6); border-radius: 4px; width: 70%; margin-bottom: 12px;"></div>
+          <div style="height: 8px; background: #E5E7EB; border-radius: 4px; width: 90%; margin-bottom: 8px;"></div>
+          <div style="height: 8px; background: #E5E7EB; border-radius: 4px; width: 60%;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>现代简洁 Modern Minimal</h3>
+      <p>大面积留白、简洁卡片、轻盈阴影、圆角柔和</p>
+    </div>
+  </div>
+
+  <!-- Option B: 拟物化 -->
+  <div class="card" data-choice="skeuomorphic" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); padding: 30px; min-height: 180px;">
+      <div style="background: white; border-radius: 20px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.5);">
+        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+          <div style="width: 44px; height: 44px; background: linear-gradient(145deg, #EC4899, #BE185D); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; box-shadow: 0 4px 8px rgba(236,72,153,0.4);">梦</div>
+          <div style="flex: 1;">
+            <div style="height: 12px; background: linear-gradient(90deg, #EC4899, #8B5CF6); border-radius: 6px; width: 50%; margin-bottom: 8px;"></div>
+            <div style="height: 8px; background: #E5E7EB; border-radius: 4px; width: 70%;"></div>
+          </div>
+        </div>
+        <div style="background: linear-gradient(180deg, #FFFFFF 0%, #FDF2F8 100%); border-radius: 16px; padding: 16px; border: 1px solid #FCE7F3;">
+          <div style="display: flex; gap: 8px;">
+            <div style="flex: 1; height: 60px; background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); border-radius: 10px;"></div>
+            <div style="flex: 1; height: 60px; background: #F3F4F6; border-radius: 10px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>拟物化 Skeuomorphic</h3>
+      <p>质感纹理、渐变光影、3D 按钮、层次感强</p>
+    </div>
+  </div>
+
+  <!-- Option C: 极简主义 -->
+  <div class="card" data-choice="minimalist" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #1a1a1a; padding: 30px; min-height: 180px;">
+      <div style="background: white; border-radius: 4px; padding: 20px; border: 1px solid #000;">
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+          <div style="width: 24px; height: 24px; background: #000; border-radius: 0;"></div>
+          <div style="flex: 1; height: 8px; background: #000; width: 40%;"></div>
+        </div>
+        <div style="border-left: 2px solid #000; padding-left: 16px; margin-left: 8px;">
+          <div style="height: 6px; background: #000; width: 80%; margin-bottom: 12px;"></div>
+          <div style="height: 6px; background: #999; width: 70%; margin-bottom: 8px;"></div>
+          <div style="height: 6px; background: #999; width: 60%;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>极简主义 Minimalist</h3>
+      <p>极致简约、黑白灰为主、强烈几何感、无圆角</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 32px;">
+  <h3>颜色方案（已确认）</h3>
+  <div class="options">
+    <div class="option" data-choice="blue-pink" onclick="toggleSelect(this)">
+      <div class="letter" style="background: linear-gradient(135deg, #007AFF, #EC4899);">✓</div>
+      <div class="content">
+        <h3>双主题系统</h3>
+        <p>元创：蓝色 #007AFF | 元梦：粉色 #EC4899</p>
+      </div>
+    </div>
+  </div>
+</div>

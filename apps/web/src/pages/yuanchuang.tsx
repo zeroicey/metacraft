@@ -167,7 +167,7 @@ export default function YuanChuangPage() {
       </div>
 
       {/* 输入框 */}
-      <div className="px-4 bg-white rounded-2xl mx-4">
+      <div className="px-4 py-2 bg-white rounded-2xl mx-4">
         <div className="flex gap-3">
           <Input
             className="p-3 border border-[#E5E7EB] rounded-xl focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all"

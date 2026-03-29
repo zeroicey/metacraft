@@ -1,0 +1,73 @@
+<h2>元梦 (YuanMeng) 侧边栏设计</h2>
+<p class="subtitle">确认侧边栏内容：知识库</p>
+
+<div class="mockup" style="max-width: 600px; margin: 0 auto;">
+  <div class="mockup-header">元梦侧边栏 - 知识库</div>
+  <div class="mockup-body" style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); padding: 20px; min-height: 300px;">
+    <div style="background: white; border-radius: 12px; padding: 16px;">
+      <div style="font-size: 14px; color: #666; margin-bottom: 12px;">侧边栏内容</div>
+
+      <!-- 知识库列表 -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <!-- 选中状态 -->
+        <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #fdf2f8; border-radius: 10px; border: 2px solid #EC4899;">
+          <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #EC4899, #8B5CF6); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+          </div>
+          <div style="flex: 1;">
+            <div style="font-size: 13px; font-weight: 500; color: #333;">我的知识库</div>
+            <div style="font-size: 11px; color: #EC4899;">12 篇文章</div>
+          </div>
+        </div>
+
+        <!-- 普通状态 -->
+        <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #f5f5f5; border-radius: 10px;">
+          <div style="width: 36px; height: 36px; background: #e0e0e0; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+            </svg>
+          </div>
+          <div style="flex: 1;">
+            <div style="font-size: 13px; color: #333;">技术文档</div>
+            <div style="font-size: 11px; color: #888;">8 篇文章</div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #f5f5f5; border-radius: 10px;">
+          <div style="width: 36px; height: 36px; background: #e0e0e0; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+            </svg>
+          </div>
+          <div style="flex: 1;">
+            <div style="font-size: 13px; color: #333;">产品FAQ</div>
+            <div style="font-size: 11px; color: #888;">24 篇文章</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 添加按钮 -->
+      <button style="width: 100%; margin-top: 12px; padding: 10px; background: #EC4899; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 500;">
+        + 新建知识库
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 24px;">
+  <h3>最终确认</h3>
+  <div class="options">
+    <div class="option" data-choice="confirmed" onclick="toggleSelect(this)">
+      <div class="letter">✓</div>
+      <div class="content">
+        <h3>确认设计方案</h3>
+        <p>元创：蓝色系 #007AFF | 元梦：粉色系 #EC4899 + 知识库侧边栏</p>
+      </div>
+    </div>
+  </div>
+</div>

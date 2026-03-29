@@ -68,7 +68,7 @@ export default function StorePage() {
 
         {/* Normal State - Grid of Apps */}
         {!isLoading && !error && apps && apps.length > 0 && (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {apps.map((app) => (
               <StoreAppCard key={app.id} app={app} />
             ))}
