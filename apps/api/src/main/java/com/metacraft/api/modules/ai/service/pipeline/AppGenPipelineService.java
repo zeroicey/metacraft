@@ -223,8 +223,10 @@ public class AppGenPipelineService {
                         // Step 4: Generate code files in parallel and save
                         List<CodeFileDTO> codeFiles;
                         try {
-                                codeFiles = blueprint.projectBlueprint().fileList().stream()
-                                        .map(fileInfo -> {
+                                // 并行生成所有代码文件
+                                @SuppressWarnings("unchecked")
+                                Mono<CodeFileDTO>[] monoArray = blueprint.projectBlueprint().fileList().stream()
+                                        .map(fileInfo -> Mono.fromCallable(() -> {
                                                 String fileInfoJson;
                                                 try {
                                                         fileInfoJson = String.format(
@@ -238,8 +240,15 @@ public class AppGenPipelineService {
                                                 }
                                                 String code = codeFileAgent.generateCodeFile(fileInfoJson, contract);
                                                 return new CodeFileDTO(fileInfo.fileId(), fileInfo.filePath(), code);
-                                        })
-                                        .toList();
+                                        }).subscribeOn(Schedulers.boundedElastic()))
+                                        .toArray(Mono[]::new);
+
+                                // 合并所有并行任务并收集结果
+                                codeFiles = Flux.merge(Flux.just(monoArray))
+                                        .collectList()
+                                        .block();
+
+                                log.info("Generated {} code files in parallel", codeFiles.size());
                         } catch (RuntimeException e) {
                                 log.error("Failed to generate code files", e);
                                 throw e;
