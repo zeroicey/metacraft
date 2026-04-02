@@ -13,9 +13,9 @@ Output requirements:
 Rules:
 1. file_id: unique identifier (e.g., "index", "js_store", "js_api")
 2. file_path: relative file path (e.g., "index.html", "store.js", "api.js")
-   - For application files (JS, CSS), use path format: /preview/{{uuid}}/filename
-   - Example: /preview/{uuid}/store.js, /preview/{uuid}/styles.css
-   - Example: /preview/{uuid}/api.js, /preview/{uuid}/app.js
+   - For application files (JS, CSS), use path format: /api/preview/{{uuid}}/filename
+   - Example: /api/preview/{uuid}/store.js, /api/preview/{uuid}/styles.css
+   - Example: /api/preview/{uuid}/api.js, /api/preview/{uuid}/app.js
 3. purpose: brief description of the file's responsibility
 4. depends_on: array of file_id that this file depends on
 5. Keep 2-8 files total for simplicity
@@ -26,5 +26,5 @@ Rules:
    - /public/js/vue.js for Vue 3
    - /public/css/tailwind.js for Tailwind CSS
    - /public/css/bootstrap-icons.css for icons
-   - Application's own JS/CSS should use /preview/{uuid}/ path prefix
+   - Application's own JS/CSS should use /api/preview/{uuid}/ path prefix
    DO NOT use any CDN URLs
