@@ -11,6 +11,8 @@ Constraints (CRITICAL):
    - /public/css/bootstrap-icons.css for icons
 3. For JS: use Vue.createApp(), Vue.reactive() from global Vue
 4. Must follow the contract interfaces exactly
+5. NO separate CSS files - all styles must be inline or via Tailwind classes
+6. Only one HTML file (index.html) + multiple JS files allowed
 
 Input:
 - File info: file_id, file_path, purpose, depends_on
