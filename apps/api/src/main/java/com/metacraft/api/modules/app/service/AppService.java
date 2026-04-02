@@ -71,13 +71,10 @@ public class AppService {
                 .map(v -> v.getVersionNumber() + 1)
                 .orElse(1);
 
-        // 3. 保存文件
-        String formattedHtmlContent = prettyPrintHtml(htmlContent);
-        String formattedJsContent = prettyPrintJavaScript(jsContent);
+        // 3. 注意：代码文件现在由 AppGenPipelineService 全量生成
+        //    此处不再自动创建 index.html 和 app.js
+        //    htmlContent 和 jsContent 参数保留用于兼容，但不再使用
         String relativePath = String.format("apps/%d/v%d/index.html", appId, nextVersion);
-        String jsRelativePath = String.format("apps/%d/v%d/app.js", appId, nextVersion);
-        storageService.saveTextFile(relativePath, formattedHtmlContent);
-        storageService.saveTextFile(jsRelativePath, formattedJsContent);
 
         // 4. 创建版本记录
         AppVersionEntity version = AppVersionEntity.builder()
