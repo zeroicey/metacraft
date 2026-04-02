@@ -60,7 +60,7 @@ public class UnifiedOrchestrator {
                                 case CHAT -> chatPipelineService.execute(context.message(), context.history(), userId,
                                         context.sessionId());
                                 case GEN -> appGenPipelineService.execute(context.message(), context.history(), userId,
-                                        context.sessionId());
+                                        context.sessionId(), context.generateLogo());
                                 case EDIT -> appEditPipelineService.execute(context.message(), context.history(), userId,
                                     context.sessionId());
                             };
@@ -90,7 +90,9 @@ public class UnifiedOrchestrator {
         chatMessageService.saveMessage(userId, userMessageDto);
         log.info("Saved user message for session {}", sessionId);
 
-        return new RequestContext(request.getMessage(), sessionId, history);
+        // 默认生成 logo
+        boolean generateLogo = request.getGenerateLogo() == null || request.getGenerateLogo();
+        return new RequestContext(request.getMessage(), sessionId, history, generateLogo);
     }
 
     private void updateSessionTitleIfNeeded(Long userId, String sessionId, String firstMessage) {
@@ -145,6 +147,6 @@ public class UnifiedOrchestrator {
         return message.length() > 50 ? message.substring(0, 47) + "..." : message;
     }
 
-    private record RequestContext(String message, String sessionId, String history) {
+    private record RequestContext(String message, String sessionId, String history, boolean generateLogo) {
     }
 }

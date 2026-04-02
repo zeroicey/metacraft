@@ -16,4 +16,7 @@ public class AgentRequestDTO {
     @Size(max = 2000, message = "消息内容不能超过2000个字符")
     @Schema(description = "用户消息内容", example = "请作为智能体规划任务")
     private String message;
+
+    @Schema(description = "是否生成应用Logo，默认true（生成）", example = "true")
+    private Boolean generateLogo = true;
 }

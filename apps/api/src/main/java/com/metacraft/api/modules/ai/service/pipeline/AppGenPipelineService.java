@@ -51,7 +51,7 @@ public class AppGenPipelineService {
         private final TemplateMatcherService templateMatcherService;
         private final TemplateFileService templateFileService;
 
-        public Flux<ServerSentEvent<String>> execute(String message, String history, Long userId, String sessionId) {
+        public Flux<ServerSentEvent<String>> execute(String message, String history, Long userId, String sessionId, boolean generateLogo) {
                 StringBuffer chatBeforeGenBuffer = new StringBuffer();
                 StringBuffer planBuffer = new StringBuffer();
                 AtomicReference<Long> relatedAppIdRef = new AtomicReference<>();
@@ -96,15 +96,22 @@ public class AppGenPipelineService {
                 // 修改：让 codeStream 等待 templateMatchMono 完成后再执行
                 Flux<ServerSentEvent<String>> postAppInfoStream = templateMatchMono
                                 .thenMany(appInfoMono.flatMapMany(app -> {
-                                        Flux<ServerSentEvent<String>> logoMono = Mono.fromCallable(() -> {
-                                                String logoUuid = UUID.randomUUID().toString();
-                                                String ext = imageService.generateLogoAndSave(app, logoUuid);
-                                                appService.updateAppLogo(app.getId(), logoUuid + "." + ext);
-                                                return ServerSentEvent.<String>builder()
-                                                                .event("logo_generated")
-                                                                .data(sseUtils.toLogoGerneratedJson(logoUuid, ext))
-                                                                .build();
-                                        }).subscribeOn(Schedulers.boundedElastic()).flux();
+                                        // Logo 生成：根据 generateLogo 参数决定是否生成
+                                        Flux<ServerSentEvent<String>> logoMono;
+                                        if (generateLogo) {
+                                                logoMono = Mono.fromCallable(() -> {
+                                                        String logoUuid = UUID.randomUUID().toString();
+                                                        String ext = imageService.generateLogoAndSave(app, logoUuid);
+                                                        appService.updateAppLogo(app.getId(), logoUuid + "." + ext);
+                                                        return ServerSentEvent.<String>builder()
+                                                                        .event("logo_generated")
+                                                                        .data(sseUtils.toLogoGerneratedJson(logoUuid, ext))
+                                                                        .build();
+                                                }).subscribeOn(Schedulers.boundedElastic()).flux();
+                                        } else {
+                                                log.info("Skipping logo generation as requested");
+                                                logoMono = Flux.empty();
+                                        }
 
                                         Mono<ServerSentEvent<String>> codeStream = Mono.fromCallable(() -> {
                                                 // Check if template matched
