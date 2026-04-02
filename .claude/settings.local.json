@@ -3,7 +3,11 @@
     "allow": [
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(./mvnw compile:*)",
+      "Bash(chmod +x apps/api/mvnw)",
+      "Bash(chmod +x mvnw)",
+      "Bash(git diff:*)"
     ]
   }
 }

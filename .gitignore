@@ -10,3 +10,5 @@ langchain4j-docs/
 data/
 .VSCodeCounter/
 apps/nanobot/
+apps/web/dist/
+apps/web/node_modules/
