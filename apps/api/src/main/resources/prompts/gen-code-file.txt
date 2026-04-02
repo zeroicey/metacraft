@@ -5,7 +5,11 @@ Task:
 
 Constraints (CRITICAL):
 1. NO import/export - use global Vue object
-2. For HTML: use Tailwind CSS CDN
+2. For HTML: use local static resources:
+   - /js/vue.js for Vue 3 global build
+   - /css/tailwind.js for Tailwind CSS (do NOT use CDN)
+   - /css/daisyui.css for DaisyUI components
+   - /css/bootstrap-icons.css for icons
 3. For JS: use Vue.createApp(), Vue.reactive() from global Vue
 4. Must follow the contract interfaces exactly
 
