@@ -251,7 +251,7 @@ public class AppGenPipelineService {
                                                 } catch (JsonProcessingException e) {
                                                         throw new RuntimeException("Failed to serialize fileInfo", e);
                                                 }
-                                                String code = codeFileAgent.generateCodeFile(fileInfoJson, contract);
+                                                String code = codeFileAgent.generateCodeFile(fileInfoJson, contract, app.getUuid());
                                                 return new CodeFileDTO(fileInfo.fileId(), fileInfo.filePath(), code);
                                         }).subscribeOn(Schedulers.boundedElastic()))
                                         .toArray(Mono[]::new);

@@ -8,9 +8,10 @@ import dev.langchain4j.service.spring.AiService;
 @AiService
 public interface CodeFileAgent {
     @SystemMessage(fromResource = "prompts/gen-code-file.txt")
-    @UserMessage("File: {{fileInfoJson}}\n\nContract:\n{{contract}}")
+    @UserMessage("File: {{fileInfoJson}}\n\nContract:\n{{contract}}\n\nApp UUID: {{uuid}}")
     String generateCodeFile(
         @V("fileInfoJson") String fileInfoJson,
-        @V("contract") String contract
+        @V("contract") String contract,
+        @V("uuid") String uuid
     );
 }

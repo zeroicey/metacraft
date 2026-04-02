@@ -15,6 +15,9 @@ Constraints (CRITICAL):
 6. NO separate CSS files - all styles must be inline or via Tailwind classes
 7. Only one HTML file (index.html) + multiple JS files allowed
 8. Ensure proper script loading order in HTML (dependent scripts load first)
+9. IMPORTANT: When generating index.html, reference app's JS/CSS files using /api/preview/{{uuid}}/filename format
+   - Example: <script src="/api/preview/{{uuid}}/store.js"></script>
+   - Example: <link rel="stylesheet" href="/api/preview/{{uuid}}/styles.css">
 
 Input:
 - File info: file_id, file_path, purpose, depends_on
