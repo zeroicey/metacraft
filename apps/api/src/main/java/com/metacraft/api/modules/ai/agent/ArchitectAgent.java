@@ -8,10 +8,11 @@ import dev.langchain4j.service.spring.AiService;
 @AiService
 public interface ArchitectAgent {
     @SystemMessage(fromResource = "prompts/gen-architect.txt")
-    @UserMessage("User requirement: {{message}}. App name: {{name}}. App description: {{description}}")
+    @UserMessage("User requirement: {{message}}. App name: {{name}}. App description: {{description}}. App UUID: {{uuid}}")
     String generateBlueprint(
         @V("message") String message,
         @V("name") String name,
-        @V("description") String description
+        @V("description") String description,
+        @V("uuid") String uuid
     );
 }

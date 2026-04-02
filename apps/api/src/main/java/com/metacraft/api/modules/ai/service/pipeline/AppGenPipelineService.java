@@ -206,7 +206,8 @@ public class AppGenPipelineService {
                         String blueprintJsonResponse = architectAgent.generateBlueprint(
                                 message,
                                 app.getName(),
-                                app.getDescription());
+                                app.getDescription(),
+                                app.getUuid());
 
                         // Parse JSON with our ObjectMapper (has proper snake_case support)
                         Blueprint blueprint = objectMapper.readValue(blueprintJsonResponse, Blueprint.class);
