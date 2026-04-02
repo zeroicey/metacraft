@@ -342,8 +342,14 @@ public class AppGenPipelineService {
                         .replace("\t", "\\t");
         }
 
+        /**
+         * 保存代码文件到存储
+         * 路径格式: apps/{appId}/V{version}/
+         * 例如: apps/21/V1/index.html
+         */
         private void saveCodeFiles(Long appId, int versionNumber, List<CodeFileDTO> files) {
-                String basePath = appId + "/v" + versionNumber;
+                // 新路径格式: apps/{appId}/V{version}/
+                String basePath = String.format("apps/%d/V%d", appId, versionNumber);
                 for (CodeFileDTO file : files) {
                         String fullPath = basePath + "/" + file.filePath();
                         storageService.saveTextFile(fullPath, file.code());
