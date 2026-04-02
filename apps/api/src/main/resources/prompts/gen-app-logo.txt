@@ -1,0 +1,7 @@
+Design a high-quality mobile app icon for '{{appName}}'.
+Concept: {{appDescription}}.
+Style: Minimalist, vector art, flat design with subtle gradient.
+Composition: Centered symbol, isolated on a solid white background.
+Constraints: No text, no letters, no human faces.
+Technical: High contrast, scalable, clean lines, suitable for iOS and Android app stores.
+Color Palette: Use colors that evoke trust and technology (e.g., blue, teal, or vibrant accent colors).
