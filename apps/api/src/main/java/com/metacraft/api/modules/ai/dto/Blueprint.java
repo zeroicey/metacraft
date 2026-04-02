@@ -2,17 +2,19 @@ package com.metacraft.api.modules.ai.dto;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public record Blueprint(
-    ProjectBlueprint projectBlueprint
+    @JsonProperty("project_blueprint") ProjectBlueprint projectBlueprint
 ) {
     public record ProjectBlueprint(
-        List<FileInfo> fileList
+        @JsonProperty("file_list") List<FileInfo> fileList
     ) {}
 
     public record FileInfo(
-        String fileId,
-        String filePath,
+        @JsonProperty("file_id") String fileId,
+        @JsonProperty("file_path") String filePath,
         String purpose,
-        List<String> dependsOn
+        @JsonProperty("depends_on") List<String> dependsOn
     ) {}
 }

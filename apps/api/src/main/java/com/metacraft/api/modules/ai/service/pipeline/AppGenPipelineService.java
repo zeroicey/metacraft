@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.metacraft.api.modules.ai.agent.AppInfoExtractor;
 import com.metacraft.api.modules.ai.agent.ArchitectAgent;
 import com.metacraft.api.modules.ai.agent.ChatAgent;
@@ -49,7 +50,9 @@ public class AppGenPipelineService {
         @Value("${app.storage.path:apps}")
         private String appStoragePath;
 
-        private final ObjectMapper objectMapper = new ObjectMapper();
+        private final ObjectMapper objectMapper = new ObjectMapper()
+        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+        .enable(SerializationFeature.INDENT_OUTPUT);
 
         private final ChatAgent chatAgent;
         private final PlanGenerator planGenerator;
@@ -195,11 +198,14 @@ public class AppGenPipelineService {
 
         private AppVersionEntity generateCodeWithAgentPipeline(AppEntity app, String message) {
                 try {
-                        // Step 1: Architect generates Blueprint
-                        Blueprint blueprint = architectAgent.generateBlueprint(
+                        // Step 1: Architect generates Blueprint (returns JSON string)
+                        String blueprintJsonResponse = architectAgent.generateBlueprint(
                                 message,
                                 app.getName(),
                                 app.getDescription());
+
+                        // Parse JSON with our ObjectMapper (has proper snake_case support)
+                        Blueprint blueprint = objectMapper.readValue(blueprintJsonResponse, Blueprint.class);
                         String blueprintJson = objectMapper.writeValueAsString(blueprint);
                         log.info("Generated blueprint with {} files", blueprint.projectBlueprint().fileList().size());
 
@@ -337,7 +343,7 @@ public class AppGenPipelineService {
         }
 
         private void saveCodeFiles(Long appId, int versionNumber, List<CodeFileDTO> files) {
-                String basePath = appStoragePath + "/" + appId + "/v" + versionNumber;
+                String basePath = appId + "/v" + versionNumber;
                 for (CodeFileDTO file : files) {
                         String fullPath = basePath + "/" + file.filePath();
                         storageService.saveTextFile(fullPath, file.code());
