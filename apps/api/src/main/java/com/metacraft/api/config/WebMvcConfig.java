@@ -26,8 +26,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Serve static resources from public directory
+        // Serve static resources from public directory - high priority
         registry.addResourceHandler("/public/**")
-                .addResourceLocations("classpath:/public/");
+                .addResourceLocations("classpath:/public/")
+                .setOrder(0);
     }
 }
