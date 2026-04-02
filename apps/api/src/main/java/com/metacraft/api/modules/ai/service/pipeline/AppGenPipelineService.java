@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.codec.ServerSentEvent;
@@ -197,8 +198,11 @@ public class AppGenPipelineService {
         }
 
         private AppVersionEntity generateCodeWithAgentPipeline(AppEntity app, String message) {
+                long startTime = System.currentTimeMillis();
+                log.info("=== 开始生成应用: {} ===", app.getName());
                 try {
                         // Step 1: Architect generates Blueprint (returns JSON string)
+                        log.info("[Step 1/4] 正在生成蓝图 (Blueprint)...");
                         String blueprintJsonResponse = architectAgent.generateBlueprint(
                                 message,
                                 app.getName(),
@@ -207,9 +211,15 @@ public class AppGenPipelineService {
                         // Parse JSON with our ObjectMapper (has proper snake_case support)
                         Blueprint blueprint = objectMapper.readValue(blueprintJsonResponse, Blueprint.class);
                         String blueprintJson = objectMapper.writeValueAsString(blueprint);
-                        log.info("Generated blueprint with {} files", blueprint.projectBlueprint().fileList().size());
+                        log.info("=== Generated Blueprint ===");
+                        log.info("App: {} ({})", app.getName(), app.getDescription());
+                        log.info("Files ({}): {}", blueprint.projectBlueprint().fileList().size(),
+                                blueprint.projectBlueprint().fileList().stream()
+                                        .map(Blueprint.FileInfo::filePath)
+                                        .collect(Collectors.joining(", ")));
 
                         // Step 2: Contract generates contract from blueprint
+                        log.info("[Step 2/4] 正在生成契约 (Contract)...");
                         String contract = contractAgent.generateContract(blueprintJson);
                         log.info("Generated contract");
 
@@ -221,6 +231,8 @@ public class AppGenPipelineService {
                                 "Generated via Agent pipeline");
 
                         // Step 4: Generate code files in parallel and save
+                        log.info("[Step 3/4] 正在并行生成 {} 个代码文件...",
+                                blueprint.projectBlueprint().fileList().size());
                         List<CodeFileDTO> codeFiles;
                         try {
                                 // 并行生成所有代码文件
@@ -255,9 +267,13 @@ public class AppGenPipelineService {
                         }
 
                         // Save all code files
+                        log.info("[Step 4/4] 正在保存 {} 个代码文件...", codeFiles.size());
                         saveCodeFiles(app.getId(), version.getVersionNumber(), codeFiles);
                         log.info("Saved {} code files for app {} version {}",
                                 codeFiles.size(), app.getId(), version.getVersionNumber());
+
+                        long duration = System.currentTimeMillis() - startTime;
+                        log.info("=== 应用生成完成! 耗时: {}ms ===", duration);
 
                         return version;
                 } catch (JsonProcessingException e) {
