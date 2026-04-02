@@ -56,8 +56,8 @@ export function AppSidebar() {
       <SidebarHeader className="pt-12 pb-2">
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-2">
-            <div className={`flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br ${themeStyle.logoGradient} shadow-md`}>
-              <span className="text-xs font-bold text-white">元</span>
+            <div className="flex h-7 w-7 items-center justify-center rounded-xl shadow-md overflow-hidden">
+              <img src="/logo.png" alt="logo" className="w-full h-full object-cover" />
             </div>
             <span className={`text-lg font-bold ${themeStyle.textColor}`}>元创</span>
           </div>
