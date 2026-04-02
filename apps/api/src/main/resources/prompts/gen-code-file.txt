@@ -10,9 +10,11 @@ Constraints (CRITICAL):
    - /public/css/tailwind.js for Tailwind CSS (do NOT use CDN)
    - /public/css/bootstrap-icons.css for icons
 3. For JS: use Vue.createApp(), Vue.reactive() from global Vue
-4. Must follow the contract interfaces exactly
-5. NO separate CSS files - all styles must be inline or via Tailwind classes
-6. Only one HTML file (index.html) + multiple JS files allowed
+4. For global state between files: use window object (e.g., window.store = Vue.reactive({...}))
+5. Must follow the contract interfaces exactly
+6. NO separate CSS files - all styles must be inline or via Tailwind classes
+7. Only one HTML file (index.html) + multiple JS files allowed
+8. Ensure proper script loading order in HTML (dependent scripts load first)
 
 Input:
 - File info: file_id, file_path, purpose, depends_on
