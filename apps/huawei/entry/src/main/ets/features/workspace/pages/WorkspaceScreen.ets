@@ -12,6 +12,7 @@ import {
 } from 'aggregated_login';
 import { authService } from '../../auth/service/AuthService';
 import { ChatPanel } from '../../chat/components/ChatPanel';
+import { YuanDreamWorkspacePlaceholder } from '../components/YuanDreamWorkspacePlaceholder';
 import { PromptAction } from '@kit.ArkUI';
 import { sessionService } from '../../session/service/SessionService';
 import { readSafeAreaHeights, resolveInitialSessionId } from '../state/WorkspaceState';
@@ -22,6 +23,7 @@ export struct WorkspaceScreen {
   bottomRectHeight: number = 0;
   @Local showSideBar: boolean = false;
   @Local currentSessionId: string = '';
+  @Local activeTabIndex: number = 0;
 
   private loginController: LoginController = new LoginController();
   private promptAction?: PromptAction;
@@ -155,10 +157,28 @@ export struct WorkspaceScreen {
 
       Blank().layoutWeight(1)
 
-      Text('元创')
-        .fontSize(18)
-        .fontWeight(FontWeight.Medium)
-        .fontStyle(FontStyle.Italic)
+      Row({ space: 8 }) {
+        Text('源创')
+          .fontSize(17)
+          .fontWeight(this.activeTabIndex === 0 ? FontWeight.Medium : FontWeight.Regular)
+          .fontColor(this.activeTabIndex === 0 ? '#111111' : '#999999')
+          .onClick(() => {
+            this.activeTabIndex = 0;
+          })
+
+        Text('|')
+          .fontSize(15)
+          .fontColor('#C7C7CC')
+
+        Text('元梦')
+          .fontSize(17)
+          .fontWeight(this.activeTabIndex === 1 ? FontWeight.Medium : FontWeight.Regular)
+          .fontColor(this.activeTabIndex === 1 ? '#111111' : '#999999')
+          .onClick(() => {
+            this.activeTabIndex = 1;
+          })
+      }
+      .padding({ left: 4, right: 4, top: 6, bottom: 6 })
 
       Blank().layoutWeight(1)
 
@@ -182,12 +202,20 @@ export struct WorkspaceScreen {
     Column() {
       this.buildTopBar();
 
-      ChatPanel({
-        bottomPadding: this.getUIContext().px2vp(this.bottomRectHeight) + 5,
-        sessionId: this.currentSessionId
-      })
-        .width('100%')
-        .layoutWeight(1)
+      if (this.activeTabIndex === 0) {
+        ChatPanel({
+          bottomPadding: this.getUIContext().px2vp(this.bottomRectHeight) + 5,
+          sessionId: this.currentSessionId
+        })
+          .width('100%')
+          .layoutWeight(1)
+      } else {
+        YuanDreamWorkspacePlaceholder({
+          bottomPadding: this.getUIContext().px2vp(this.bottomRectHeight)
+        })
+          .width('100%')
+          .layoutWeight(1)
+      }
     }
     .width('100%')
     .height('100%')
