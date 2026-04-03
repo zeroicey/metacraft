@@ -51,9 +51,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ApiResponse<Void>> handleResponseStatusException(ResponseStatusException ex) {
+    public ResponseEntity<String> handleResponseStatusException(ResponseStatusException ex) {
         String message = ex.getReason() != null ? ex.getReason() : ex.getStatusCode().toString();
-        return Response.error(message).status(ex.getStatusCode().value()).build();
+        return ResponseEntity.status(ex.getStatusCode())
+                .contentType(org.springframework.http.MediaType.TEXT_PLAIN)
+                .body(message);
     }
 
     @ExceptionHandler(RuntimeException.class)
