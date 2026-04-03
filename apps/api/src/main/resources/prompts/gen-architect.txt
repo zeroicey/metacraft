@@ -20,7 +20,6 @@ Rules:
 7. Do not include node_modules, package.json, or backend files
 8. Use Chinese for all descriptions
 9. When generating HTML files, reference local static resources:
-   - /public/js/vue.js for Vue 3
    - /public/css/tailwind.js for Tailwind CSS
    - /public/css/bootstrap-icons.css for icons
    DO NOT use any CDN URLs

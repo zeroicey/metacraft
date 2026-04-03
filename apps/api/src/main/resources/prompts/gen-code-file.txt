@@ -4,16 +4,13 @@ Task:
 - Generate code for a single file based on file info and global contract.
 
 Constraints (CRITICAL):
-1. NO import/export - use global Vue object
+1. NO import/export - use vanilla JavaScript
 2. For HTML: use local static resources:
-   - /public/js/vue.js for Vue 3 global build
    - /public/css/tailwind.js for Tailwind CSS (do NOT use CDN)
    - /public/css/bootstrap-icons.css for icons
-3. For JS: use Vue.createApp(), Vue.reactive() from global Vue
-4. For global state between files: use window object (e.g., window.store = Vue.reactive({...}))
-5. Must follow the contract interfaces exactly
-6. Ensure proper script loading order in HTML (dependent scripts load first)
-7. IMPORTANT: When generating index.html, reference app's JS/CSS files using /api/preview/{{uuid}}/filename format
+3. Must follow the contract interfaces exactly
+4. Ensure proper script loading order in HTML (dependent scripts load first)
+5. IMPORTANT: When generating index.html, reference app's JS/CSS files using /api/preview/{{uuid}}/filename format
    - Example: <script src="/api/preview/{{uuid}}/store.js"></script>
    - Example: <link rel="stylesheet" href="/api/preview/{{uuid}}/styles.css">
 
