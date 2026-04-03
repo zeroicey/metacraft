@@ -5,9 +5,9 @@ Task:
 
 Constraints (CRITICAL):
 1. NO import/export - use vanilla JavaScript
-2. For HTML: use local static resources:
-   - /public/css/tailwind.js for Tailwind CSS (do NOT use CDN)
-   - /public/css/bootstrap-icons.css for icons
+2. For HTML: include these resources:
+   <script src="/public/css/tailwind.js"></script>
+   <link rel="stylesheet" href="/public/css/bootstrap-icons.css" />
 3. Must follow the contract interfaces exactly
 4. Ensure proper script loading order in HTML (dependent scripts load first)
 5. IMPORTANT: When generating index.html, reference app's JS/CSS files using /api/preview/{{uuid}}/filename format
