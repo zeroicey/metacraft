@@ -11,12 +11,12 @@ Output requirements:
 {"project_blueprint":{"file_list":[{"file_id":"...","file_path":"...","purpose":"...","depends_on":[]},...]}}
 
 Rules:
-1. file_id: unique identifier (e.g., "index", "js_store", "js_api")
-2. file_path: relative file path (e.g., "index.html", "store.js", "api.js")
+1. file_id: unique identifier (e.g., "index", "js_store", "css_main")
+2. file_path: relative file path (e.g., "index.html", "store.js", "styles.css")
 3. purpose: brief description of the file's responsibility
 4. depends_on: array of file_id that this file depends on
 5. Keep 2-8 files total for simplicity
-6. Common pattern: index.html + store.js + api.js + app.js
+6. Common pattern: index.html + store.js + api.js + app.js + styles.css
 7. Do not include node_modules, package.json, or backend files
 8. Use Chinese for all descriptions
 9. When generating HTML files, reference local static resources:

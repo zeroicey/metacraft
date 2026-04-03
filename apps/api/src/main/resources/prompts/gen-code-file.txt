@@ -12,10 +12,8 @@ Constraints (CRITICAL):
 3. For JS: use Vue.createApp(), Vue.reactive() from global Vue
 4. For global state between files: use window object (e.g., window.store = Vue.reactive({...}))
 5. Must follow the contract interfaces exactly
-6. NO separate CSS files - all styles must be inline or via Tailwind classes
-7. Only one HTML file (index.html) + multiple JS files allowed
-8. Ensure proper script loading order in HTML (dependent scripts load first)
-9. IMPORTANT: When generating index.html, reference app's JS/CSS files using /api/preview/{{uuid}}/filename format
+6. Ensure proper script loading order in HTML (dependent scripts load first)
+7. IMPORTANT: When generating index.html, reference app's JS/CSS files using /api/preview/{{uuid}}/filename format
    - Example: <script src="/api/preview/{{uuid}}/store.js"></script>
    - Example: <link rel="stylesheet" href="/api/preview/{{uuid}}/styles.css">
 
