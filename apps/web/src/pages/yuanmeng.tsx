@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useYuanMengChat, type YuanMengMessage } from "@/hooks/useYuanMengChat";
 import { useCurrentUser } from "@/hooks/useUser";
-import { SendIcon, Loader2Icon } from "lucide-react";
+import { Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Streamdown } from "streamdown";
 import { code } from "@streamdown/code";

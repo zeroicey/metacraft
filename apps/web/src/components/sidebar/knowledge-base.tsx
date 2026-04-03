@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookIcon, PlusIcon, ChevronRightIcon } from "lucide-react";
+import { BookIcon, ChevronRightIcon } from "lucide-react";
 
 interface KnowledgeBase {
   id: string;

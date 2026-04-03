@@ -20,17 +20,17 @@ export default function Navbar() {
   const isYuanMengPage = currentPage === "yuanmeng"
   const themeColors = isYuanMengPage
     ? {
-        primary: "#EC4899",
-        light: "#FDF2F8",
-        lightEnd: "#FEF1F7",
-        gradient: "from-[#FDF2F8] to-[#FEF1F7]",
-      }
+      primary: "#EC4899",
+      light: "#FDF2F8",
+      lightEnd: "#FEF1F7",
+      gradient: "from-[#FDF2F8] to-[#FEF1F7]",
+    }
     : {
-        primary: "#007AFF",
-        light: "#E8F0FE",
-        lightEnd: "#F0F4F8",
-        gradient: "from-[#E8F0FE] to-[#F0F4F8]",
-      }
+      primary: "#007AFF",
+      light: "#E8F0FE",
+      lightEnd: "#F0F4F8",
+      gradient: "from-[#E8F0FE] to-[#F0F4F8]",
+    }
 
   useEffect(() => {
     if (isYuanChuang && yuanChuangRef.current) {
@@ -43,7 +43,7 @@ export default function Navbar() {
   }, [isYuanChuang, isYuanMeng, setCurrentPage])
 
   return (
-    <header className="flex items-center justify-between border-b border-[#E5E7EB] bg-white px-4 h-16">
+    <header className="flex items-center justify-between border-[#E5E7EB] bg-white px-4 h-16">
       {/* 左侧：Sidebar Trigger */}
       <div className="flex items-center">
         <SidebarTrigger />
@@ -68,11 +68,10 @@ export default function Navbar() {
             setCurrentPage("yuanchuang")
             setSlidePos(0)
           }}
-          className={`relative z-10 px-5 py-2 text-sm font-medium rounded-lg transition-all ${
-            currentPage === "yuanchuang" || (!currentPage && isYuanChuang)
-              ? "text-[#007AFF]"
-              : "text-gray-600 hover:text-gray-900"
-          }`}
+          className={`relative z-10 px-5 py-2 text-sm font-medium rounded-lg transition-all ${currentPage === "yuanchuang" || (!currentPage && isYuanChuang)
+            ? "text-[#007AFF]"
+            : "text-gray-600 hover:text-gray-900"
+            }`}
         >
           源创
         </button>
@@ -83,11 +82,10 @@ export default function Navbar() {
             setCurrentPage("yuanmeng")
             setSlidePos(1)
           }}
-          className={`relative z-10 px-5 py-2 text-sm font-medium rounded-lg transition-all ${
-            currentPage === "yuanmeng" || isYuanMeng
-              ? "text-[#EC4899]"
-              : "text-gray-600 hover:text-gray-900"
-          }`}
+          className={`relative z-10 px-5 py-2 text-sm font-medium rounded-lg transition-all ${currentPage === "yuanmeng" || isYuanMeng
+            ? "text-[#EC4899]"
+            : "text-gray-600 hover:text-gray-900"
+            }`}
         >
           元梦
         </button>
