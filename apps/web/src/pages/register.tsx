@@ -42,9 +42,7 @@ export default function RegisterPage() {
             <Card className="w-full max-w-sm rounded-2xl shadow-lg border-[#E5E7EB]">
                 <CardHeader className="text-center pb-2">
                     <div className="flex justify-center mb-2">
-                        <div className="w-16 h-16 bg-gradient-to-br from-[#007AFF] to-[#0056CC] rounded-2xl flex items-center justify-center shadow-md">
-                            <span className="text-3xl text-white font-bold">M</span>
-                        </div>
+                        <img src="/logo.png" alt="Logo" className="w-16 h-16 p-1" />
                     </div>
                     <CardTitle className="text-2xl">注册元创账号</CardTitle>
                     <CardDescription>创建账号开始创建应用</CardDescription>

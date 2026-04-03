@@ -56,9 +56,7 @@ export function AppSidebar() {
       <SidebarHeader className="pt-12 pb-2">
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-2">
-            <div className={`flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br ${themeStyle.logoGradient} shadow-md`}>
-              <span className="text-xs font-bold text-white">元</span>
-            </div>
+            <img src="/logo.png" alt="Logo" className="h-7 w-7 p-1" />
             <span className={`text-lg font-bold ${themeStyle.textColor}`}>元创</span>
           </div>
           <button className="h-6 w-6 p-0 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors">
