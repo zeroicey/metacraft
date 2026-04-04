@@ -1,5 +1,4 @@
 import { Trash2 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/auth-store";
 import type { StoreComment } from "@/api/store";
@@ -9,6 +8,18 @@ interface CommentListProps {
   onDelete: (commentId: number) => Promise<void>;
   isDeleting: boolean;
 }
+
+// 获取头像 URL - 处理空值情况
+const getAvatarUrl = (avatarBase64: string | null, name?: string) => {
+  if (!avatarBase64 || avatarBase64 === "") {
+    const seed = encodeURIComponent(name || "user");
+    return `https://api.dicebear.com/7.x/pixel-art/svg?seed=${seed}`;
+  }
+  if (avatarBase64.startsWith("data:")) {
+    return avatarBase64;
+  }
+  return `data:image/png;base64,${avatarBase64}`;
+};
 
 function formatTimeAgo(dateString: string): string {
   const date = new Date(dateString);
@@ -51,10 +62,14 @@ export default function CommentList({
             key={comment.id}
             className="flex gap-3 rounded-lg border p-4"
           >
-            <Avatar>
-              <AvatarImage src={comment.userAvatar || undefined} />
-              <AvatarFallback>{comment.userName.charAt(0)}</AvatarFallback>
-            </Avatar>
+            {/* Avatar */}
+            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full">
+              <img
+                src={getAvatarUrl(comment.userAvatar, comment.userName)}
+                alt={comment.userName}
+                className="h-full w-full object-cover"
+              />
+            </div>
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
