@@ -170,6 +170,7 @@ export default function StoreDetailPage() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-2xl">
         {/* App Info Section */}
         <div className="bg-white p-4">
           <div className="flex gap-4">
@@ -289,6 +290,7 @@ export default function StoreDetailPage() {
             onDelete={handleDeleteComment}
             isDeleting={deleteComment.isPending}
           />
+        </div>
         </div>
       </div>
     </div>
