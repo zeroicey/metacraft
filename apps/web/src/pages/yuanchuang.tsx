@@ -211,16 +211,12 @@ export default function YuanChuangPage() {
       {/* 空状态：输入框居中 */}
       {messages.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center px-4 pb-4">
-          {/* 桌面端欢迎语 */}
-          <div className="hidden md:block text-center mb-8">
-            <div className="text-2xl font-bold text-gray-800">
+          {/* 欢迎语 - 所有设备都显示 */}
+          <div className="text-center mb-8">
+            <div className="text-xl md:text-2xl font-bold text-gray-800">
               {displayMessage}
               <span className="animate-pulse">|</span>
             </div>
-          </div>
-          {/* 手机端提示 */}
-          <div className="md:hidden text-gray-400 mb-4">
-            开始你的对话
           </div>
           {/* 输入框 */}
           <div className="w-full max-w-3xl">
