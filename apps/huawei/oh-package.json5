@@ -1,6 +1,7 @@
 {
   "modelVersion": "6.0.1",
   "description": "Please describe the basic information.",
+  "license": "Apache-2.0",
   "dependencies": {
     "aggregated_login": "file:./ohos_agcit/agcit_huawei_common_login/aggregated_login",
     "collect_personal_info": "file:./ohos_agcit/agcit_huawei_common_collect_personal_info/collect_personal_info",

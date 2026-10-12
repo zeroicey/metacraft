@@ -271,4 +271,10 @@ ohpm install
 
 ## License
 
-如需开源发布，请在仓库根目录补充 `LICENSE` 文件并更新本节。
+本项目基于 [Apache License 2.0](./LICENSE) 开源，Copyright 2026 zeroicey。
+
+你可以自由使用、修改、分发本项目（包括商业用途），但需保留版权声明与许可声明，
+并在修改过的文件中标注变更。详见根目录 `LICENSE` 与 `NOTICE`。
+
+`NOTICE` 中列出了随仓库分发的第三方组件（Vue 3、Tailwind CSS、Bootstrap Icons，
+均为 MIT 许可）及其版权归属。

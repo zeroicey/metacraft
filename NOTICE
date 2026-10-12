@@ -1,0 +1,50 @@
+MetaCraft
+Copyright 2026 zeroicey (https://github.com/zeroicey)
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+
+==============================================================================
+Bundled Third-Party Components
+==============================================================================
+
+This product redistributes the following third-party components as static
+assets served by the backend (apps/api/src/main/resources/public/). Their
+license notices are retained in the respective files and reproduced below.
+
+1. Vue.js 3
+   File:   apps/api/src/main/resources/public/js/vue.js
+   Version: 3.5.30 (Global Production Build)
+   Copyright: 2018-present Yuxi (Evan) You and Vue contributors
+   License: MIT
+   Source: https://github.com/vuejs/core
+
+2. Tailwind CSS v4 (Browser Build)
+   File:   apps/api/src/main/resources/public/css/tailwind.js
+   Version: 4.2.1
+   License: MIT
+   Source: https://github.com/tailwindlabs/tailwindcss
+   Note:  The distributed bundle was minified by jsDelivr, which strips the
+          original license header. The upstream project is MIT-licensed.
+
+3. Bootstrap Icons
+   Files:  apps/api/src/main/resources/public/css/bootstrap-icons.css
+           apps/api/src/main/resources/public/css/fonts/bootstrap-icons.woff
+           apps/api/src/main/resources/public/css/fonts/bootstrap-icons.woff2
+   Version: 1.13.1
+   Copyright: 2019-2024 The Bootstrap Authors
+   License: MIT
+   Source: https://github.com/twbs/icons
+
+
+==============================================================================
+Runtime Dependencies (not redistributed)
+==============================================================================
+
+The backend (apps/api) and the frontend (apps/web) declare their dependencies
+in apps/api/pom.xml and apps/web/package.json respectively. Those packages are
+resolved at build time and are not vendored into this repository. Each remains
+under its own license; consult the respective package metadata for details.
+
+The HarmonyOS client (apps/huawei, apps/huaweiweb) declares its dependencies in
+the corresponding oh-package.json5 files.

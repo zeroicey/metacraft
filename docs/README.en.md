@@ -230,4 +230,13 @@ Current constraints:
 
 ## License
 
-If you plan to open-source or distribute this project, add a root `LICENSE` file and update this section accordingly.
+This project is licensed under the [Apache License 2.0](./LICENSE),
+Copyright 2026 zeroicey.
+
+You may use, modify, and distribute this project, including for commercial
+purposes, provided that you retain the copyright and license notices and mark
+any modified files as changed. See `LICENSE` and `NOTICE` in the repository root.
+
+`NOTICE` lists the third-party components redistributed with this repository
+(Vue 3, Tailwind CSS, Bootstrap Icons — all MIT licensed) and their copyright
+holders.
