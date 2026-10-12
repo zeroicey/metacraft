@@ -2,15 +2,15 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "module description"
+      "value": "元创 MetaCraft 鸿蒙客户端主模块"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "description"
+      "value": "元创 MetaCraft 应用入口 Ability"
     },
     {
       "name": "EntryAbility_label",
-      "value": "label"
+      "value": "元创 MetaCraft"
     }
   ]
 }

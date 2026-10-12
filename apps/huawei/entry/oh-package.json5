@@ -1,10 +1,10 @@
 {
   "name": "entry",
   "version": "1.0.0",
-  "description": "Please describe the basic information.",
+  "description": "元创 MetaCraft 鸿蒙客户端主模块",
   "main": "",
-  "author": "",
-  "license": "",
+  "author": "zeroicey",
+  "license": "Apache-2.0",
   "dependencies": {
     "collect_personal_info": "file:../ohos_agcit/agcit_huawei_common_collect_personal_info/collect_personal_info",
     "app_setting": "file:../ohos_agcit/agcit_huawei_common_app_setting/app_setting"

@@ -1,10 +1,10 @@
 {
   "name": "entry",
   "version": "1.0.0",
-  "description": "Please describe the basic information.",
+  "description": "元创 MetaCraft 预览端主模块",
   "main": "",
-  "author": "",
-  "license": "",
+  "author": "zeroicey",
+  "license": "Apache-2.0",
   "dependencies": {}
 }
 

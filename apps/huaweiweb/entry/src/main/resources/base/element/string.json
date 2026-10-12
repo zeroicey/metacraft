@@ -2,15 +2,15 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "module description"
+      "value": "元创 MetaCraft 预览端主模块（ArkWeb 容器）"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "description"
+      "value": "元创 MetaCraft 预览端入口 Ability"
     },
     {
       "name": "EntryAbility_label",
-      "value": "label"
+      "value": "元创 MetaCraft 预览"
     }
   ]
 }

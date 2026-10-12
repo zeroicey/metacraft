@@ -1,6 +1,6 @@
 {
   "modelVersion": "6.0.2",
-  "description": "Please describe the basic information.",
+  "description": "元创 MetaCraft HarmonyOS 预览端工程（ArkWeb 容器）",
   "license": "Apache-2.0",
   "dependencies": {
   },

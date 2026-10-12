@@ -11,8 +11,8 @@
     <groupId>com.metacraft.api</groupId>
     <artifactId>api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>api</name>
-    <description>api</description>
+    <name>MetaCraft API</name>
+    <description>元创 MetaCraft 后端服务：AI 编排、认证、应用与版本管理</description>
     <url>https://github.com/zeroicey/metacraft</url>
     <licenses>
         <license>
