@@ -6,6 +6,8 @@ api1/
 zhipuai.md
 .trae/
 test/
+!apps/api/src/test/
+!apps/api/src/test/**
 langchain4j-docs/
 data/
 .VSCodeCounter/

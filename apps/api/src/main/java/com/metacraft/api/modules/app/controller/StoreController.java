@@ -3,6 +3,8 @@ package com.metacraft.api.modules.app.controller;
 import com.metacraft.api.modules.app.dto.CommentRequestDTO;
 import com.metacraft.api.modules.app.dto.RatingRequestDTO;
 import com.metacraft.api.modules.app.service.StoreService;
+import com.metacraft.api.modules.app.vo.CommentVO;
+import com.metacraft.api.modules.app.vo.RatingResultVO;
 import com.metacraft.api.modules.app.vo.StoreAppDetailVO;
 import com.metacraft.api.modules.app.vo.StoreAppListVO;
 import com.metacraft.api.response.ApiResponse;
@@ -64,22 +66,24 @@ public class StoreController {
 
     @PostMapping("/{id}/ratings")
     @Operation(summary = "评分应用")
-    public ResponseEntity<ApiResponse<Void>> rateApp(
+    public ResponseEntity<ApiResponse<RatingResultVO>> rateApp(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "应用 ID") @PathVariable Long id,
             @Valid @RequestBody RatingRequestDTO request) {
-        storeService.rateApp(id, userDetails.getId(), request);
-        return Response.success("Rating submitted successfully").build();
+        return Response.success("Rating submitted successfully")
+                .data(storeService.rateApp(id, userDetails.getId(), request))
+                .build();
     }
 
     @PostMapping("/{id}/comments")
     @Operation(summary = "添加评论")
-    public ResponseEntity<ApiResponse<Void>> addComment(
+    public ResponseEntity<ApiResponse<CommentVO>> addComment(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "应用 ID") @PathVariable Long id,
             @Valid @RequestBody CommentRequestDTO request) {
-        storeService.addComment(id, userDetails.getId(), request);
-        return Response.success("Comment added successfully").build();
+        return Response.success("Comment added successfully")
+                .data(storeService.addComment(id, userDetails.getId(), request))
+                .build();
     }
 
     @DeleteMapping("/{id}/comments/{commentId}")
@@ -88,7 +92,7 @@ public class StoreController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "应用 ID") @PathVariable Long id,
             @Parameter(description = "评论 ID") @PathVariable Long commentId) {
-        storeService.deleteComment(commentId, userDetails.getId());
+        storeService.deleteComment(id, commentId, userDetails.getId());
         return Response.success("Comment deleted successfully").build();
     }
 }

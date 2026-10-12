@@ -11,6 +11,7 @@ import com.metacraft.api.modules.app.repository.AppRatingRepository;
 import com.metacraft.api.modules.app.repository.AppRepository;
 import com.metacraft.api.modules.app.vo.AuthorVO;
 import com.metacraft.api.modules.app.vo.CommentVO;
+import com.metacraft.api.modules.app.vo.RatingResultVO;
 import com.metacraft.api.modules.app.vo.StoreAppDetailVO;
 import com.metacraft.api.modules.app.vo.StoreAppListVO;
 import com.metacraft.api.modules.user.entity.UserEntity;
@@ -123,7 +124,7 @@ public class StoreService {
     }
 
     @Transactional
-    public void rateApp(Long appId, Long userId, RatingRequestDTO request) {
+    public RatingResultVO rateApp(Long appId, Long userId, RatingRequestDTO request) {
         AppEntity app = appRepository.findById(appId)
                 .orElseThrow(() -> new UnauthorizedException("App not found"));
 
@@ -146,11 +147,11 @@ public class StoreService {
         }
 
         ratingRepository.save(rating);
-        updateAppRatingCache(appId);
+        return refreshRatingCache(appId);
     }
 
     @Transactional
-    public void addComment(Long appId, Long userId, CommentRequestDTO request) {
+    public CommentVO addComment(Long appId, Long userId, CommentRequestDTO request) {
         AppEntity app = appRepository.findById(appId)
                 .orElseThrow(() -> new UnauthorizedException("App not found"));
 
@@ -164,13 +165,17 @@ public class StoreService {
                 .content(request.getContent())
                 .build();
 
-        commentRepository.save(comment);
+        return toCommentVO(commentRepository.save(comment));
     }
 
     @Transactional
-    public void deleteComment(Long commentId, Long userId) {
+    public void deleteComment(Long appId, Long commentId, Long userId) {
         AppCommentEntity comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new UnauthorizedException("Comment not found"));
+
+        if (!comment.getAppId().equals(appId)) {
+            throw new IllegalArgumentException("Comment does not belong to this app");
+        }
 
         if (!comment.getUserId().equals(userId)) {
             throw new UnauthorizedException("You can only delete your own comments");
@@ -227,9 +232,14 @@ public class StoreService {
                 .build();
     }
 
-    private void updateAppRatingCache(Long appId) {
+    private RatingResultVO refreshRatingCache(Long appId) {
         Double avg = ratingRepository.findAverageRatingByAppId(appId);
         long count = ratingRepository.countByAppId(appId);
-        ratingCache.put(appId, new RatingCache(avg != null ? avg : 0.0, count));
+        double averageRating = avg != null ? avg : 0.0;
+        ratingCache.put(appId, new RatingCache(averageRating, count));
+        return RatingResultVO.builder()
+                .averageRating(averageRating)
+                .ratingCount(count)
+                .build();
     }
 }

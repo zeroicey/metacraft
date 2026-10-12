@@ -75,41 +75,32 @@ export const getStoreAppDetail = async (appId: number): Promise<StoreAppDetail> 
  * Submit rating for an app
  * @param appId App ID
  * @param rating Rating value (1-5)
- * @returns Updated rating info
+ * @returns Updated rating info from the server
  */
 export const rateApp = async (appId: number, rating: number): Promise<RatingResult> => {
     const response = await http
         .post(`store/apps/${appId}/ratings`, { json: { rating } })
         .json<ApiResponse<RatingResult>>();
-    if (response.error) {
+    if (!response.data) {
         throw new Error(response.message || "Failed to submit rating");
     }
-    // Return mock data since backend returns void
-    return { averageRating: rating, ratingCount: 1 };
+    return response.data;
 };
 
 /**
  * Submit comment for an app
  * @param appId App ID
  * @param content Comment content
- * @returns Created comment (mock since backend returns void)
+ * @returns Created comment from the server
  */
 export const commentApp = async (appId: number, content: string): Promise<StoreComment> => {
     const response = await http
         .post(`store/apps/${appId}/comments`, { json: { content } })
         .json<ApiResponse<StoreComment>>();
-    if (response.error) {
+    if (!response.data) {
         throw new Error(response.message || "Failed to submit comment");
     }
-    // Return mock comment since backend returns void
-    return {
-        id: Date.now(),
-        userId: 0,
-        userName: "",
-        userAvatar: null,
-        content,
-        createdAt: new Date().toISOString()
-    };
+    return response.data;
 };
 
 /**
